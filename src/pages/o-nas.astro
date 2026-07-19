@@ -1,0 +1,53 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hatch from "../components/Hatch.astro";
+import Pill from "../components/Pill.astro";
+
+const process = [
+  { n: "01", title: "Výběr dřeva", body: "Vybíráme kvalitní český masiv s výrazným charakterem." },
+  { n: "02", title: "Zalití pryskyřicí", body: "Ruční míchání odstínů a pečlivé lití bez bublin." },
+  { n: "03", title: "Broušení", body: "Postupné broušení do hedvábně hladkého povrchu." },
+  { n: "04", title: "Finální olej", body: "Ochranné oleje, které povrch chrání na generace." },
+];
+---
+
+<Layout title="O nás">
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
+      <div>
+        <p class="font-mono text-xs tracking-[0.28em] text-amber">O NÁS</p>
+        <h1 class="mt-4 font-display text-[42px] font-medium leading-[1.04] sm:text-[58px]">
+          Poctivé řemeslo z dílny v Čenkově.
+        </h1>
+        <p class="mt-6 text-[15px] leading-[1.8] text-body">
+          V EpoxArt tvoříme originální designové produkty z masivního dřeva a epoxidové pryskyřice.
+          Každý kus — ať už jde o stůl, prkénko, hodiny nebo dekoraci — je ručně vyrobený a jedinečný.
+        </p>
+        <p class="mt-4 text-[15px] leading-[1.8] text-body">
+          Spojujeme surovou přírodu s moderním designem. Používáme jen české dřevo s jasným
+          původem a prémiové pryskyřice, které vydrží generace.
+        </p>
+      </div>
+      <Hatch label="portrét · dílna / Jakub" class="h-[480px] rounded-[26px]" />
+    </div>
+  </div>
+
+  <section class="mx-auto max-w-content px-[28px] py-16">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+      {process.map((c) => (
+        <div class="rounded-[20px] bg-surface p-[30px_26px]">
+          <div class="font-display text-[38px] text-teal">{c.n}</div>
+          <div class="mt-2 text-[15px] font-bold">{c.title}</div>
+          <p class="mt-1 text-[13px] leading-relaxed text-muted">{c.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-content px-[28px] py-16 text-center">
+    <h2 class="font-display text-[32px] font-medium sm:text-[40px]">
+      Máte nápad? Pojďme ho vyrobit.
+    </h2>
+    <Pill href="/vyroba-na-miru" variant="dark" class="mt-8">VÝROBA NA MÍRU</Pill>
+  </section>
+</Layout>

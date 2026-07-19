@@ -1,0 +1,15 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CartView from "../components/CartView.tsx";
+---
+
+<Layout title="Košík">
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">KOŠÍK</p>
+    <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Váš košík</h1>
+
+    <div class="mt-10">
+      <CartView client:load />
+    </div>
+  </div>
+</Layout>

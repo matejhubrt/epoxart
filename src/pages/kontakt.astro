@@ -1,0 +1,59 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ContactForm from "../components/ContactForm.tsx";
+---
+
+<Layout title="Kontakt">
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">KONTAKT</p>
+    <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Ozvěte se nám</h1>
+
+    <div class="mt-10 grid grid-cols-1 items-start gap-10 md:grid-cols-[0.85fr_1.15fr]">
+      <div class="flex flex-col gap-[22px] rounded-[20px] bg-surface p-[26px]">
+        <div>
+          <div class="text-xs tracking-[0.14em] text-brown-link">TELEFON</div>
+          <div class="mt-1 text-[15px]">
+            <a href="tel:+420732861160" class="hover:text-teal">+420 732 861 160</a>
+            <br />
+            <a href="tel:+420721157990" class="hover:text-teal">+420 721 157 990</a>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs tracking-[0.14em] text-brown-link">E-MAIL</div>
+          <div class="mt-1 text-[15px]">
+            <a href="mailto:info@epoxart.cz" class="hover:text-teal">info@epoxart.cz</a>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs tracking-[0.14em] text-brown-link">SÍDLO</div>
+          <div class="mt-1 text-[15px] leading-relaxed">
+            Jakub Havrlík<br />
+            EpoxArt<br />
+            Čenkov 163, 262 23<br />
+            IČO: 23052431
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <a
+            href="https://www.instagram.com/epoxart19/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 rounded-2xl bg-page px-4 py-3 text-center text-sm hover:text-teal"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://www.facebook.com/profile.php?id=61573065113314"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 rounded-2xl bg-page px-4 py-3 text-center text-sm hover:text-teal"
+          >
+            Facebook
+          </a>
+        </div>
+      </div>
+
+      <ContactForm client:load />
+    </div>
+  </div>
+</Layout>

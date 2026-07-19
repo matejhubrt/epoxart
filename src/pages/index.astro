@@ -1,0 +1,128 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hatch from "../components/Hatch.astro";
+import Pill from "../components/Pill.astro";
+
+const whyCards = [
+  { n: "01", title: "Poctivý masiv", body: "Jen české dřevo s jasným původem." },
+  { n: "02", title: "Unikátnost", body: "Originál, který nikdo jiný nemá." },
+  { n: "03", title: "Odolnost", body: "Oleje a pryskyřice na generace." },
+  { n: "04", title: "Na míru", body: "Barva, tvar i podnoží dle vás." },
+];
+
+const collections = [
+  { label: "Stoly", sub: "Jídelní & konferenční", cat: "stoly" },
+  { label: "Prkénka", sub: "Kuchyňská & servírovací", cat: "prkenka" },
+  { label: "Hodiny", sub: "Nástěnné z masivu", cat: "hodiny" },
+  { label: "Doplňky", sub: "Dekorace & drobnosti", cat: "doplnky" },
+];
+---
+
+<Layout title="Úvod">
+  <div class="mx-auto max-w-content px-[28px] pt-[28px]">
+    <section class="relative flex h-[600px] items-center justify-center overflow-hidden rounded-[26px]">
+      <Hatch glow class="absolute inset-0" />
+      <div class="relative z-10 mx-auto max-w-[820px] px-6 text-center">
+        <p class="font-mono text-xs tracking-[0.28em] text-amber">MASIV · EPOXID · RUČNÍ PRÁCE</p>
+        <h1 class="mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[72px] md:text-[88px]">
+          Řemeslo, které <br />
+          <em class="text-teal not-italic italic">přežije generace.</em>
+        </h1>
+        <p class="mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7] text-body">
+          Originální nábytek z českého masivu a prémiové pryskyřice. Každý kus je jediný svého druhu.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <Pill href="/produkty" variant="dark">PROHLÉDNOUT PRODUKTY</Pill>
+          <Pill href="/vyroba-na-miru" variant="outline">VÝROBA NA MÍRU</Pill>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="mx-auto max-w-content px-[28px] py-16">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+      {whyCards.map((c, i) => (
+        <div
+          data-reveal
+          style={`transition-delay:${i * 0.06}s`}
+          class="rounded-[20px] bg-surface p-[30px_28px]"
+        >
+          <div class="font-display text-[34px] text-teal">{c.n}</div>
+          <div class="mt-2 text-sm font-bold">{c.title}</div>
+          <p class="mt-1 text-[13px] leading-relaxed text-muted">{c.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-content px-[28px] py-16">
+    <div class="mb-6 flex items-end justify-between">
+      <h2 class="font-display text-[44px] font-medium">Kolekce</h2>
+      <a href="/produkty" class="text-sm text-brown-link hover:text-teal">Zobrazit vše →</a>
+    </div>
+    <div class="grid grid-cols-1 gap-[18px] sm:grid-cols-2 md:grid-cols-4">
+      {collections.map((c, i) => (
+        <a
+          href={`/produkty?kat=${c.cat}`}
+          data-reveal
+          style={`transition-delay:${i * 0.06}s`}
+          class="group overflow-hidden rounded-[22px] bg-surface"
+        >
+          <Hatch label={c.label} class="h-[300px] transition-transform duration-500 group-hover:scale-[1.03]" />
+          <div class="px-[22px] py-[18px]">
+            <div class="font-display text-2xl">{c.label}</div>
+            <div class="text-xs text-brown-link">{c.sub}</div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-content px-[28px] py-16">
+    <div data-reveal class="relative overflow-hidden rounded-[26px]">
+      <Hatch class="absolute inset-0" />
+      <div
+        class="pointer-events-none absolute inset-0"
+        style="background: radial-gradient(60% 80% at 70% 30%, rgba(31,110,99,.24), transparent);"
+      />
+      <div class="relative z-10 mx-auto max-w-[640px] px-8 py-20 text-center">
+        <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
+        <h2 class="mt-5 font-display text-[38px] font-medium sm:text-[54px]">
+          Navrhněte si kus, který bude jen váš.
+        </h2>
+        <p class="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-body">
+          Vyberte dřevo, odstín pryskyřice, tvar hrany i podnoží — a my z toho vytvoříme originál.
+        </p>
+        <Pill href="/vyroba-na-miru" variant="teal" class="mt-8">SPUSTIT KONFIGURÁTOR</Pill>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-content px-[28px] py-16">
+    <div class="mb-6 flex items-end justify-between">
+      <h2 class="font-display text-[34px] font-medium">@epoxart19</h2>
+      <a
+        href="https://www.instagram.com/epoxart19/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-brown-link hover:text-teal"
+      >
+        Sledovat na Instagramu →
+      </a>
+    </div>
+    <div class="grid grid-cols-3 gap-3 md:grid-cols-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <a
+          href="https://www.instagram.com/epoxart19/"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-reveal
+          style={`transition-delay:${i * 0.06}s`}
+          class="aspect-square overflow-hidden rounded-2xl"
+        >
+          <Hatch class="h-full w-full" />
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>

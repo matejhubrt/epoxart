@@ -1,0 +1,71 @@
+---
+import CartBadge from "./CartBadge.tsx";
+
+const links = [
+  { href: "/", label: "Úvod" },
+  { href: "/produkty", label: "Produkty" },
+  { href: "/vyroba-na-miru", label: "Výroba na míru" },
+  { href: "/o-nas", label: "O nás" },
+  { href: "/kontakt", label: "Kontakt" },
+];
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+---
+
+<header class="sticky top-0 z-50 border-b border-border bg-[rgba(250,247,241,0.86)] backdrop-blur-md">
+  <div class="mx-auto flex max-w-content items-center justify-between px-6 py-[18px] sm:px-10">
+    <a href="/" class="font-display text-[25px] font-semibold tracking-[0.14em] text-ink">EPOXART</a>
+
+    <nav class="hidden items-center gap-[30px] md:flex">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          class:list={[
+            "relative py-1 text-[13.5px] tracking-[0.03em]",
+            isActive(l.href) ? "text-ink" : "text-muted hover:text-ink",
+          ]}
+        >
+          {l.label}
+          {isActive(l.href) && (
+            <span class="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-teal" />
+          )}
+        </a>
+      ))}
+    </nav>
+
+    <div class="flex items-center gap-4">
+      <CartBadge client:load />
+      <button
+        id="nav-toggle"
+        type="button"
+        aria-label="Otevřít menu"
+        aria-expanded="false"
+        class="flex h-9 w-9 flex-col items-center justify-center gap-[5px] md:hidden"
+      >
+        <span class="h-px w-5 bg-ink"></span>
+        <span class="h-px w-5 bg-ink"></span>
+      </button>
+    </div>
+  </div>
+
+  <nav id="nav-mobile" class="hidden flex-col gap-4 border-t border-border px-6 py-5 md:hidden">
+    {links.map((l) => (
+      <a
+        href={l.href}
+        class:list={["text-[15px]", isActive(l.href) ? "text-ink" : "text-muted"]}
+      >
+        {l.label}
+      </a>
+    ))}
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById("nav-toggle");
+  const panel = document.getElementById("nav-mobile");
+  toggle?.addEventListener("click", () => {
+    const isOpen = panel?.classList.toggle("hidden") === false;
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    panel?.classList.toggle("flex", isOpen);
+  });
+</script>

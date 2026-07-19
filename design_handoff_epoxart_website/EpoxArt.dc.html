@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #f4efe6; color: #2b2420; font-family: 'Space Grotesk', sans-serif; }
+  ::selection { background: #d8c9b0; }
+  a { color: #1f6e63; text-decoration: none; }
+  a:hover { color: #17544c; }
+  input, textarea, select, button { font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: #1f6e63 !important; }
+  @keyframes ea-float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-8px); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#f4efe6;">
+
+  <!-- ===================== NAV ===================== -->
+  <nav style="position:sticky; top:0; z-index:50; background:rgba(250,247,241,0.86); backdrop-filter:blur(12px); border-bottom:1px solid #e6ddcc;">
+    <div style="max-width:1240px; margin:0 auto; padding:18px 40px; display:flex; align-items:center; justify-content:space-between;">
+      <div onClick="{{ goHome }}" style="font-family:'Cormorant Garamond',serif; font-size:25px; font-weight:600; letter-spacing:.14em; cursor:pointer;">EPOXART</div>
+      <div style="display:flex; gap:30px; align-items:center;">
+        <sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">
+          <div onClick="{{ item.onClick }}" style="cursor:pointer; font-size:13.5px; letter-spacing:.03em; color:{{ item.color }}; position:relative; padding:4px 0;">
+            {{ item.label }}
+            <sc-if value="{{ item.active }}" hint-placeholder-val="{{ false }}"><div style="position:absolute; left:0; right:0; bottom:-2px; height:2px; background:#1f6e63; border-radius:2px;"></div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div onClick="{{ goCart }}" style="display:flex; gap:14px; align-items:center; cursor:pointer;">
+        <span style="font-size:13px; color:#6b6155;">{{ cart }} ks</span>
+        <div style="background:#2b2420; color:#f4efe6; padding:9px 20px; border-radius:999px; font-size:13px; letter-spacing:.03em;">Košík</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HOME ===================== -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div>
+    <!-- hero -->
+    <div style="max-width:1240px; margin:0 auto; padding:28px 28px 0;">
+      <div style="position:relative; height:600px; border-radius:26px; overflow:hidden; background:repeating-linear-gradient(45deg,#ece2d0,#ece2d0 13px,#e5dbc7 13px,#e5dbc7 26px); display:flex; align-items:center; justify-content:center;">
+        <div style="position:absolute; inset:0; background:radial-gradient(120% 90% at 78% 26%, rgba(185,138,78,.28), transparent 55%), radial-gradient(90% 80% at 14% 92%, rgba(31,110,99,.24), transparent 55%);"></div>
+        <span style="position:absolute; top:22px; left:26px; color:#a2937c; font-family:'Space Mono',monospace; font-size:11px;">[ hero · river table detail ]</span>
+        <div style="position:relative; text-align:center; padding:0 40px; max-width:820px;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.28em; color:#a06f37; margin-bottom:26px;">MASIV · EPOXID · RUČNÍ PRÁCE</div>
+          <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:88px; line-height:1; margin:0 0 26px; letter-spacing:-0.01em;">Řemeslo, které<br><span style="font-style:italic; color:#1f6e63;">přežije generace.</span></h1>
+          <p style="font-size:17px; line-height:1.7; color:#5a5045; max-width:540px; margin:0 auto 36px;">Originální nábytek z českého masivu a prémiové pryskyřice. Každý kus je jediný svého druhu.</p>
+          <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+            <div onClick="{{ goProducts }}" style="cursor:pointer; background:#2b2420; color:#f4efe6; padding:17px 34px; border-radius:999px; font-size:13px; letter-spacing:.06em; font-weight:600;">PROHLÉDNOUT PRODUKTY</div>
+            <div onClick="{{ goCustom }}" style="cursor:pointer; border:1px solid #2b2420; padding:17px 34px; border-radius:999px; font-size:13px; letter-spacing:.06em;">VÝROBA NA MÍRU</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- why -->
+    <div style="max-width:1240px; margin:0 auto; padding:44px 28px 8px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+      <div data-reveal style="opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s ease; background:#faf7f1; border-radius:20px; padding:30px 28px;"><div style="font-family:'Cormorant Garamond',serif; font-size:34px; color:#1f6e63;">01</div><div style="font-size:14px; font-weight:600; margin:14px 0 6px;">Poctivý masiv</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Jen české dřevo s jasným původem.</div></div>
+      <div data-reveal style="opacity:0; transform:translateY(26px); transition:opacity .8s ease .06s, transform .8s ease .06s; background:#faf7f1; border-radius:20px; padding:30px 28px;"><div style="font-family:'Cormorant Garamond',serif; font-size:34px; color:#1f6e63;">02</div><div style="font-size:14px; font-weight:600; margin:14px 0 6px;">Unikátnost</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Originál, který nikdo jiný nemá.</div></div>
+      <div data-reveal style="opacity:0; transform:translateY(26px); transition:opacity .8s ease .12s, transform .8s ease .12s; background:#faf7f1; border-radius:20px; padding:30px 28px;"><div style="font-family:'Cormorant Garamond',serif; font-size:34px; color:#1f6e63;">03</div><div style="font-size:14px; font-weight:600; margin:14px 0 6px;">Odolnost</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Oleje a pryskyřice na generace.</div></div>
+      <div data-reveal style="opacity:0; transform:translateY(26px); transition:opacity .8s ease .18s, transform .8s ease .18s; background:#faf7f1; border-radius:20px; padding:30px 28px;"><div style="font-family:'Cormorant Garamond',serif; font-size:34px; color:#1f6e63;">04</div><div style="font-size:14px; font-weight:600; margin:14px 0 6px;">Na míru</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Barva, tvar i podnoží dle vás.</div></div>
+    </div>
+
+    <!-- categories -->
+    <div style="max-width:1240px; margin:0 auto; padding:56px 28px 28px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:28px;">
+        <h2 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:44px; margin:0;">Kolekce</h2>
+        <div onClick="{{ goProducts }}" style="cursor:pointer; font-size:14px; color:#8a6a4f;">Zobrazit vše →</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px;">
+        <sc-for list="{{ homeCats }}" as="c" hint-placeholder-count="4">
+          <div data-reveal onClick="{{ c.onClick }}" style="opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s ease; cursor:pointer; background:#faf7f1; border-radius:22px; overflow:hidden;">
+            <div style="height:300px; background:repeating-linear-gradient(45deg,#e6dcc9,#e6dcc9 11px,#ded2bd 11px,#ded2bd 22px); display:flex; align-items:center; justify-content:center; color:#8a7d6a; font-family:'Space Mono',monospace; font-size:11px;">[ {{ c.slug }} ]</div>
+            <div style="padding:18px 22px;"><div style="font-family:'Cormorant Garamond',serif; font-size:24px;">{{ c.label }}</div><div style="font-size:12px; color:#8a6a4f;">{{ c.sub }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- custom teaser -->
+    <div style="max-width:1240px; margin:0 auto; padding:20px 28px 28px;">
+      <div data-reveal style="opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s ease; position:relative; border-radius:26px; overflow:hidden; padding:80px 56px; background:repeating-linear-gradient(45deg,#ece2d0,#ece2d0 13px,#e5dbc7 13px,#e5dbc7 26px); text-align:center;">
+        <div style="position:absolute; inset:0; background:radial-gradient(80% 120% at 50% 0%, rgba(31,110,99,.20), transparent 60%);"></div>
+        <div style="position:relative;">
+          <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#1f6e63; margin-bottom:22px;">VÝROBA NA MÍRU</div>
+          <h2 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:54px; line-height:1.06; margin:0 0 20px;">Navrhněte si kus, který bude jen váš.</h2>
+          <p style="font-size:15px; line-height:1.7; color:#5a5045; max-width:520px; margin:0 auto 30px;">Vyberte dřevo, odstín pryskyřice, tvar hrany i podnoží — a my z toho vytvoříme originál.</p>
+          <div onClick="{{ goCustom }}" style="cursor:pointer; display:inline-block; background:#1f6e63; color:#f4efe6; padding:17px 34px; border-radius:999px; font-size:13px; letter-spacing:.06em; font-weight:600;">SPUSTIT KONFIGURÁTOR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- instagram -->
+    <div style="max-width:1240px; margin:0 auto; padding:20px 28px 60px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px;"><h2 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:34px; margin:0;">@epoxart19</h2><a href="https://www.instagram.com/epoxart19/" target="_blank" style="font-size:13px; color:#8a6a4f;">Sledovat na Instagramu →</a></div>
+      <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:12px;">
+        <sc-for list="{{ insta }}" as="i" hint-placeholder-count="6">
+          <a href="https://www.instagram.com/epoxart19/" target="_blank" style="aspect-ratio:1; border-radius:16px; background:repeating-linear-gradient(45deg,#e6dcc9,#e6dcc9 9px,#ded2bd 9px,#ded2bd 18px); display:block;"></a>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== PRODUCTS ===================== -->
+  <sc-if value="{{ isProducts }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1240px; margin:0 auto; padding:56px 28px 60px;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#a06f37; margin-bottom:14px;">PRODUKTY</div>
+    <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:60px; margin:0 0 30px;">Naše produkty</h1>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:34px;">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+        <div onClick="{{ c.onClick }}" style="cursor:pointer; padding:10px 22px; border-radius:999px; font-size:13.5px; letter-spacing:.02em; border:1px solid {{ c.border }}; background:{{ c.bg }}; color:{{ c.fg }};">{{ c.label }}</div>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:22px;">
+      <sc-for list="{{ products }}" as="p" hint-placeholder-count="9">
+        <div style="background:#faf7f1; border-radius:22px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="position:relative; height:260px; background:repeating-linear-gradient(45deg,#e6dcc9,#e6dcc9 11px,#ded2bd 11px,#ded2bd 22px); display:flex; align-items:center; justify-content:center; color:#8a7d6a; font-family:'Space Mono',monospace; font-size:11px;">
+            [ {{ p.slug }} ]
+            <div style="position:absolute; top:14px; left:14px; background:#faf7f1; color:#5a5045; padding:5px 12px; border-radius:999px; font-size:11px; letter-spacing:.03em;">{{ p.catLabel }}</div>
+          </div>
+          <div style="padding:20px 22px; display:flex; flex-direction:column; flex:1;">
+            <div style="font-family:'Cormorant Garamond',serif; font-size:23px; line-height:1.15; margin-bottom:6px;">{{ p.name }}</div>
+            <div style="font-size:12.5px; color:#8a7d6a; line-height:1.5; margin-bottom:18px;">{{ p.desc }}</div>
+            <div style="margin-top:auto; display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-size:16px; font-weight:600; color:#2b2420;">{{ p.priceLabel }}</div>
+              <sc-if value="{{ p.onRequest }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ goCustom }}" style="cursor:pointer; font-size:12.5px; letter-spacing:.03em; color:#1f6e63; border:1px solid #1f6e63; padding:9px 16px; border-radius:999px;">Poptat</div>
+              </sc-if>
+              <sc-if value="{{ p.buyable }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ p.onAdd }}" style="cursor:pointer; font-size:12.5px; letter-spacing:.03em; color:#f4efe6; background:#2b2420; padding:9px 16px; border-radius:999px;">Do košíku</div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== CUSTOM / CONFIGURATOR ===================== -->
+  <sc-if value="{{ isCustom }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1240px; margin:0 auto; padding:56px 28px 60px;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#a06f37; margin-bottom:14px;">VÝROBA NA MÍRU</div>
+    <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:60px; margin:0 0 12px;">Konfigurátor stolu</h1>
+    <p style="font-size:15px; color:#5a5045; max-width:600px; line-height:1.7; margin:0 0 40px;">Sestavte si vlastní kus. Vyberte dřevo, odstín pryskyřice, tvar a směr řeky — náhled se mění podle vás. Na závěr nám pošlete nezávaznou poptávku.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 0.9fr; gap:36px; align-items:start;">
+      <!-- live preview -->
+      <div style="position:sticky; top:100px; background:#ece2d0; border-radius:26px; padding:56px 40px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:460px;">
+        <div style="{{ sceneStyle }}">
+          <div style="{{ floorShadowStyle }}"></div>
+          <div style="{{ tableGroupStyle }}">
+            <div style="{{ undersideStyle }}"></div>
+            <div style="{{ topSurfaceStyle }}">
+              <sc-if value="{{ showRiver }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ riverStyle }}"></div>
+              </sc-if>
+              <div style="{{ glossStyle }}"></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:28px; font-family:'Space Mono',monospace; font-size:11px; color:#8a7d6a; text-align:center; line-height:1.7;">{{ cfgSummary }}</div>
+      </div>
+
+      <!-- controls -->
+      <div style="display:flex; flex-direction:column; gap:28px;">
+        <div>
+          <div style="font-size:12px; letter-spacing:.18em; color:#8a6a4f; margin-bottom:12px;">DŘEVO</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <sc-for list="{{ woods }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.onClick }}" style="cursor:pointer; display:flex; align-items:center; gap:8px; padding:9px 15px; border-radius:999px; border:1px solid {{ o.border }}; background:{{ o.bg }}; font-size:13px;"><span style="width:16px; height:16px; border-radius:50%; background:{{ o.color }}; border:1px solid rgba(0,0,0,.15);"></span>{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px; letter-spacing:.18em; color:#8a6a4f; margin-bottom:12px;">ODSTÍN PRYSKYŘICE</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <sc-for list="{{ resins }}" as="o" hint-placeholder-count="5">
+              <div onClick="{{ o.onClick }}" style="cursor:pointer; display:flex; align-items:center; gap:8px; padding:9px 15px; border-radius:999px; border:1px solid {{ o.border }}; background:{{ o.bg }}; font-size:13px;"><span style="width:16px; height:16px; border-radius:50%; background:{{ o.color }}; border:1px solid rgba(0,0,0,.15);"></span>{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px; letter-spacing:.18em; color:#8a6a4f; margin-bottom:12px;">TVAR</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <sc-for list="{{ shapes }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.onClick }}" style="cursor:pointer; padding:9px 18px; border-radius:999px; border:1px solid {{ o.border }}; background:{{ o.bg }}; color:{{ o.fg }}; font-size:13px;">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ showRiver }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="font-size:12px; letter-spacing:.18em; color:#8a6a4f; margin-bottom:12px;">SMĚR ŘEKY</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <sc-for list="{{ rivers }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.onClick }}" style="cursor:pointer; padding:9px 18px; border-radius:999px; border:1px solid {{ o.border }}; background:{{ o.bg }}; color:{{ o.fg }}; font-size:13px;">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+        <div>
+          <div style="font-size:12px; letter-spacing:.18em; color:#8a6a4f; margin-bottom:12px;">ROZMĚR NA MÍRU</div>
+          <input onInput="{{ onSize }}" placeholder="např. 200 × 100 × 4 cm" style="width:100%; border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:13px 16px; font-size:14px;">
+          <div style="font-size:12px; color:#8a7d6a; margin-top:8px; line-height:1.5;">Zadejte délku × šířku (případně tloušťku). Rádi vyrobíme přesně na míru.</div>
+        </div>
+
+        <!-- inquiry form -->
+        <div style="background:#faf7f1; border-radius:22px; padding:28px;">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:26px; margin-bottom:6px;">Nezávazná poptávka</div>
+          <div style="font-size:13px; color:#8a7d6a; margin-bottom:20px;">Ozveme se s cenovou nabídkou na míru vaší konfiguraci.</div>
+          <sc-if value="{{ inquirySent }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#e6f0ec; color:#1f6e63; border-radius:14px; padding:20px; font-size:14px; line-height:1.6;">Děkujeme! Vaše poptávka byla odeslána — brzy se vám ozveme.</div>
+          </sc-if>
+          <sc-if value="{{ inquiryOpen }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <input placeholder="Jméno" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:13px 16px; font-size:14px;">
+              <input placeholder="E-mail" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:13px 16px; font-size:14px;">
+              <textarea placeholder="Poznámka (rozměr, termín, inspirace…)" rows="3" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:13px 16px; font-size:14px; resize:vertical;"></textarea>
+              <div onClick="{{ sendInquiry }}" style="cursor:pointer; text-align:center; background:#1f6e63; color:#f4efe6; padding:15px; border-radius:12px; font-size:13px; letter-spacing:.06em; font-weight:600;">ODESLAT POPTÁVKU</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== ABOUT ===================== -->
+  <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1240px; margin:0 auto; padding:56px 28px 60px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-bottom:64px;">
+      <div>
+        <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#a06f37; margin-bottom:14px;">O NÁS</div>
+        <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:58px; line-height:1.04; margin:0 0 24px;">Poctivé řemeslo z dílny v Čenkově.</h1>
+        <p style="font-size:16px; line-height:1.8; color:#5a5045; margin:0 0 18px;">V EpoxArt tvoříme originální designové produkty z masivního dřeva a epoxidové pryskyřice. Každý kus — ať už jde o stůl, prkénko, hodiny nebo dekoraci — je ručně vyrobený a jedinečný.</p>
+        <p style="font-size:16px; line-height:1.8; color:#5a5045; margin:0;">Spojujeme surovou přírodu s moderním designem. Používáme jen české dřevo s jasným původem a prémiové pryskyřice, které vydrží generace.</p>
+      </div>
+      <div style="height:480px; border-radius:26px; background:repeating-linear-gradient(45deg,#e6dcc9,#e6dcc9 12px,#ded2bd 12px,#ded2bd 24px); display:flex; align-items:center; justify-content:center; color:#8a7d6a; font-family:'Space Mono',monospace; font-size:12px;">[ portrét · dílna / Jakub ]</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:20px;">
+      <div style="background:#faf7f1; border-radius:20px; padding:30px 26px;"><div style="font-family:'Cormorant Garamond',serif; font-size:38px; color:#1f6e63;">01</div><div style="font-size:15px; font-weight:600; margin:12px 0 6px;">Výběr dřeva</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Vybíráme kvalitní český masiv s výrazným charakterem.</div></div>
+      <div style="background:#faf7f1; border-radius:20px; padding:30px 26px;"><div style="font-family:'Cormorant Garamond',serif; font-size:38px; color:#1f6e63;">02</div><div style="font-size:15px; font-weight:600; margin:12px 0 6px;">Zalití pryskyřicí</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Ruční míchání odstínů a pečlivé lití bez bublin.</div></div>
+      <div style="background:#faf7f1; border-radius:20px; padding:30px 26px;"><div style="font-family:'Cormorant Garamond',serif; font-size:38px; color:#1f6e63;">03</div><div style="font-size:15px; font-weight:600; margin:12px 0 6px;">Broušení</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Postupné broušení do hedvábně hladkého povrchu.</div></div>
+      <div style="background:#faf7f1; border-radius:20px; padding:30px 26px;"><div style="font-family:'Cormorant Garamond',serif; font-size:38px; color:#1f6e63;">04</div><div style="font-size:15px; font-weight:600; margin:12px 0 6px;">Finální olej</div><div style="font-size:13px; color:#6b6155; line-height:1.6;">Ochranné oleje, které povrch chrání na generace.</div></div>
+    </div>
+
+    <div style="text-align:center; padding:56px 0 20px;">
+      <h2 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:40px; margin:0 0 22px;">Máte nápad? Pojďme ho vyrobit.</h2>
+      <div onClick="{{ goCustom }}" style="cursor:pointer; display:inline-block; background:#2b2420; color:#f4efe6; padding:17px 34px; border-radius:999px; font-size:13px; letter-spacing:.06em; font-weight:600;">VÝROBA NA MÍRU</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== CONTACT ===================== -->
+  <sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1240px; margin:0 auto; padding:56px 28px 60px;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#a06f37; margin-bottom:14px;">KONTAKT</div>
+    <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:60px; margin:0 0 40px;">Ozvěte se nám</h1>
+    <div style="display:grid; grid-template-columns:0.85fr 1.15fr; gap:40px; align-items:start;">
+      <div style="display:flex; flex-direction:column; gap:22px;">
+        <div style="background:#faf7f1; border-radius:20px; padding:26px;"><div style="font-size:12px; letter-spacing:.14em; color:#8a6a4f; margin-bottom:8px;">TELEFON</div><div style="font-size:16px;">+420 732 861 160</div><div style="font-size:16px;">+420 721 157 990</div></div>
+        <div style="background:#faf7f1; border-radius:20px; padding:26px;"><div style="font-size:12px; letter-spacing:.14em; color:#8a6a4f; margin-bottom:8px;">E-MAIL</div><div style="font-size:16px;">info@epoxart.cz</div></div>
+        <div style="background:#faf7f1; border-radius:20px; padding:26px;"><div style="font-size:12px; letter-spacing:.14em; color:#8a6a4f; margin-bottom:8px;">SÍDLO</div><div style="font-size:16px; line-height:1.5;">Jakub Havrlík / EpoxArt<br>Čenkov 163, 262 23<br>IČO: 23052431</div></div>
+        <div style="display:flex; gap:12px;"><a href="https://www.instagram.com/epoxart19/" target="_blank" style="flex:1; text-align:center; background:#faf7f1; border-radius:14px; padding:16px; font-size:13px;">Instagram</a><a href="https://www.facebook.com/profile.php?id=61573065113314" target="_blank" style="flex:1; text-align:center; background:#faf7f1; border-radius:14px; padding:16px; font-size:13px;">Facebook</a></div>
+      </div>
+      <div style="background:#faf7f1; border-radius:22px; padding:34px;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:30px; margin-bottom:20px;">Napište nám</div>
+        <sc-if value="{{ contactSent }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#e6f0ec; color:#1f6e63; border-radius:14px; padding:22px; font-size:14px; line-height:1.6;">Děkujeme za zprávu! Ozveme se vám co nejdříve.</div>
+        </sc-if>
+        <sc-if value="{{ contactOpen }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <input placeholder="Jméno" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:14px 16px; font-size:14px;">
+              <input placeholder="E-mail" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:14px 16px; font-size:14px;">
+            </div>
+            <input placeholder="Předmět" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:14px 16px; font-size:14px;">
+            <textarea placeholder="Vaše zpráva" rows="5" style="border:1px solid #e0d7c6; background:#fff; border-radius:12px; padding:14px 16px; font-size:14px; resize:vertical;"></textarea>
+            <div onClick="{{ sendContact }}" style="cursor:pointer; text-align:center; background:#1f6e63; color:#f4efe6; padding:16px; border-radius:12px; font-size:13px; letter-spacing:.06em; font-weight:600;">ODESLAT ZPRÁVU</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ===================== CART ===================== -->
+  <sc-if value="{{ isCart }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1240px; margin:0 auto; padding:56px 28px 60px;">
+    <div style="font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.24em; color:#a06f37; margin-bottom:14px;">KOŠÍK</div>
+    <h1 style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:60px; margin:0 0 30px;">Váš košík</h1>
+
+    <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#faf7f1; border-radius:22px; padding:64px 40px; text-align:center;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:30px; margin-bottom:10px;">Košík je zatím prázdný</div>
+        <p style="font-size:14px; color:#8a7d6a; margin:0 0 26px;">Prohlédněte si naše produkty nebo si nechte vyrobit kus na míru.</p>
+        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+          <div onClick="{{ goProducts }}" style="cursor:pointer; background:#2b2420; color:#f4efe6; padding:15px 30px; border-radius:999px; font-size:13px; letter-spacing:.06em; font-weight:600;">PROHLÉDNOUT PRODUKTY</div>
+          <div onClick="{{ goCustom }}" style="cursor:pointer; border:1px solid #2b2420; padding:15px 30px; border-radius:999px; font-size:13px; letter-spacing:.06em;">VÝROBA NA MÍRU</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid; grid-template-columns:1.5fr 0.85fr; gap:30px; align-items:start;">
+      <!-- line items -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <sc-for list="{{ cartItems }}" as="it" hint-placeholder-count="2">
+          <div style="display:flex; gap:20px; align-items:center; background:#faf7f1; border-radius:20px; padding:18px;">
+            <div style="width:104px; height:104px; flex:0 0 auto; border-radius:14px; background:repeating-linear-gradient(45deg,#e6dcc9,#e6dcc9 9px,#ded2bd 9px,#ded2bd 18px); display:flex; align-items:center; justify-content:center; color:#8a7d6a; font-family:'Space Mono',monospace; font-size:10px; text-align:center;">[ {{ it.slug }} ]</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-family:'Cormorant Garamond',serif; font-size:22px; line-height:1.2;">{{ it.name }}</div>
+              <div style="font-size:12.5px; color:#8a7d6a; margin-top:4px;">{{ it.unitLabel }} / ks</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #e0d7c6; border-radius:999px; padding:5px;">
+              <div onClick="{{ it.dec }}" style="cursor:pointer; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5a5045;">−</div>
+              <div style="min-width:22px; text-align:center; font-size:14px;">{{ it.qty }}</div>
+              <div onClick="{{ it.inc }}" style="cursor:pointer; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; color:#5a5045;">+</div>
+            </div>
+            <div style="width:110px; text-align:right; font-size:16px; font-weight:600;">{{ it.lineLabel }}</div>
+            <div onClick="{{ it.remove }}" style="cursor:pointer; color:#b08575; font-size:20px; padding:0 4px;">×</div>
+          </div>
+        </sc-for>
+        <div onClick="{{ goProducts }}" style="cursor:pointer; font-size:13.5px; color:#1f6e63; padding:6px 2px;">← Pokračovat v nákupu</div>
+      </div>
+
+      <!-- summary -->
+      <div style="position:sticky; top:100px; background:#faf7f1; border-radius:22px; padding:30px;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:28px; margin-bottom:22px;">Souhrn objednávky</div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; color:#5a5045; margin-bottom:12px;"><span>Mezisoučet</span><span>{{ cartTotal }}</span></div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; color:#5a5045; margin-bottom:12px;"><span>Doprava</span><span>{{ shippingLabel }}</span></div>
+        <sc-if value="{{ freeShipHint }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px; color:#8a6a4f; background:#efe8db; border-radius:10px; padding:10px 12px; line-height:1.5; margin-bottom:16px;">Do dopravy zdarma zbývá {{ freeShipRemaining }}.</div>
+        </sc-if>
+        <div style="height:1px; background:#e0d7c6; margin:8px 0 16px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px;"><span style="font-size:15px; font-weight:600;">Celkem</span><span style="font-size:24px; font-weight:600; font-family:'Cormorant Garamond',serif;">{{ grandTotal }}</span></div>
+        <div style="cursor:pointer; text-align:center; background:#1f6e63; color:#f4efe6; padding:16px; border-radius:12px; font-size:13px; letter-spacing:.06em; font-weight:600;">POKRAČOVAT K OBJEDNÁVCE</div>
+        <div style="text-align:center; font-size:11.5px; color:#a2937c; margin-top:14px; line-height:1.6;">Bezpečná platba · Ruční výroba · Doručení 5–10 dní</div>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ===================== FOOTER ===================== -->
+  <div style="background:#efe8db; border-top:1px solid #e6ddcc;">
+    <div style="max-width:1240px; margin:0 auto; padding:48px 40px; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; font-size:13px; color:#6b6155;">
+      <div><div style="font-family:'Cormorant Garamond',serif; font-size:24px; letter-spacing:.12em; color:#2b2420; margin-bottom:12px;">EPOXART</div><p style="line-height:1.7; max-width:280px; margin:0;">Ruční výroba unikátního nábytku z masivu a epoxidové pryskyřice. Každý kus je originál vytvořený s láskou k řemeslu.</p></div>
+      <div><div style="font-weight:600; color:#2b2420; margin-bottom:12px;">Menu</div><div style="line-height:2.1; display:flex; flex-direction:column;"><span onClick="{{ goProducts }}" style="cursor:pointer;">Produkty</span><span onClick="{{ goCustom }}" style="cursor:pointer;">Výroba na míru</span><span onClick="{{ goAbout }}" style="cursor:pointer;">O nás</span><span onClick="{{ goContact }}" style="cursor:pointer;">Kontakt</span></div></div>
+      <div><div style="font-weight:600; color:#2b2420; margin-bottom:12px;">Kontakt</div><div style="line-height:2;">+420 732 861 160<br>info@epoxart.cz<br>Čenkov 163, 262 23</div></div>
+      <div><div style="font-weight:600; color:#2b2420; margin-bottom:12px;">Sledujte nás</div><div style="line-height:2; display:flex; flex-direction:column;"><a href="https://www.instagram.com/epoxart19/" target="_blank">Instagram</a><a href="https://www.facebook.com/profile.php?id=61573065113314" target="_blank">Facebook</a></div></div>
+    </div>
+    <div style="max-width:1240px; margin:0 auto; padding:0 40px 32px; font-size:12px; color:#a2937c;">© 2026 EpoxArt. Všechna práva vyhrazena.</div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    page: 'home',
+    cat: 'vse',
+    cart: {},
+    cfg: { wood: 'Ořech', resin: 'Oceánská modř', shape: 'Obdélník', size: '', river: 'Podél' },
+    inquirySent: false,
+    contactSent: false,
+  };
+
+  go(p) { this.setState({ page: p }); if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+  addToCart(id) { this.setState((s) => ({ cart: { ...s.cart, [id]: (s.cart[id] || 0) + 1 } })); }
+  setQty(id, q) {
+    this.setState((s) => {
+      const cart = { ...s.cart };
+      if (q <= 0) delete cart[id]; else cart[id] = q;
+      return { cart };
+    });
+  }
+
+  componentDidMount() { this.reveal(); }
+  componentDidUpdate() { this.reveal(); }
+  reveal() {
+    if (typeof document === 'undefined') return;
+    if (!this._seen) this._seen = new WeakSet();
+    if (!this._io) {
+      this._io = new IntersectionObserver((ents) => {
+        ents.forEach((e) => {
+          if (e.isIntersecting) {
+            this._seen.add(e.target);
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'none';
+            this._io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+    }
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      if (this._seen.has(el)) { el.style.opacity = '1'; el.style.transform = 'none'; }
+      else { this._io.observe(el); }
+    });
+  }
+
+  PRODUCTS = [
+    { id: 't1', name: 'Jídelní stůl Vltava', cat: 'stoly', slug: 'stůl · Vltava', desc: 'River stůl z ořechu, epoxidová řeka na míru.', price: null },
+    { id: 't2', name: 'Konferenční stolek Sázava', cat: 'stoly', slug: 'stolek · Sázava', desc: 'Masivní dub s tmavou pryskyřicí.', price: null },
+    { id: 't3', name: 'River stůl Berounka', cat: 'stoly', slug: 'stůl · Berounka', desc: 'Jasan, oceánská modř, ocelové podnoží.', price: null },
+    { id: 'p1', name: 'Prkénko Ořech kulaté', cat: 'prkenka', slug: 'prkénko · ořech', desc: 'Servírovací prkénko z olejovaného ořechu.', price: 890 },
+    { id: 'p2', name: 'Servírovací prkénko Dub', cat: 'prkenka', slug: 'prkénko · dub', desc: 'Masivní dub s úchopem, potravinový olej.', price: 1290 },
+    { id: 'p3', name: 'Prkénko s epoxidovou řekou', cat: 'prkenka', slug: 'prkénko · river', desc: 'Dřevo a modrá pryskyřice, každý kus originál.', price: 1650 },
+    { id: 'h1', name: 'Nástěnné hodiny Kruh', cat: 'hodiny', slug: 'hodiny · kruh', desc: 'Kruhové hodiny z masivu s pryskyřicí.', price: 2490 },
+    { id: 'h2', name: 'Hodiny Měsíc epoxid', cat: 'hodiny', slug: 'hodiny · měsíc', desc: 'Tichý strojek, matný povrch.', price: 3200 },
+    { id: 'd1', name: 'Svícen z masivu', cat: 'doplnky', slug: 'svícen', desc: 'Dřevěný svícen s epoxidovým detailem.', price: 690 },
+    { id: 'd2', name: 'Podtácky (sada 4)', cat: 'doplnky', slug: 'podtácky', desc: 'Sada čtyř podtácků, dřevo + pryskyřice.', price: 790 },
+    { id: 'd3', name: 'Dekorativní miska', cat: 'doplnky', slug: 'miska', desc: 'Ruční miska z ořechu a čiré pryskyřice.', price: 1100 },
+    { id: 'd4', name: 'Klíčenka epoxid', cat: 'doplnky', slug: 'klíčenka', desc: 'Drobný dárek z odřezků a pryskyřice.', price: 350 },
+  ];
+
+  WOODS = [
+    { label: 'Ořech', color: '#5a3a22' },
+    { label: 'Dub', color: '#b08850' },
+    { label: 'Jasan', color: '#c9ab78' },
+    { label: 'Bříza', color: '#ddc79c' },
+  ];
+  RESINS = [
+    { label: 'Oceánská modř', color: '#1c5c78' },
+    { label: 'Smaragd', color: '#1f6e63' },
+    { label: 'Jantar', color: '#c88a3a' },
+    { label: 'Uhlová čerň', color: '#17140f' },
+    { label: 'Čirá', color: '#d8c7a2' },
+  ];
+  SHAPES = ['Obdélník', 'Oválné', 'Čtverec', 'Kulaté'];
+  RIVER_DIRS = ['Podél', 'Napříč', 'Diagonálně', 'U kraje'];
+
+
+  fmt(n) { return n.toLocaleString('cs-CZ').replace(/\u00A0/g, ' ') + ' Kč'; }
+
+  shade(hex, amt, alpha) {
+    const h = (hex || '#000000').replace('#', '');
+    let r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+    r = Math.max(0, Math.min(255, Math.round(r + amt)));
+    g = Math.max(0, Math.min(255, Math.round(g + amt)));
+    b = Math.max(0, Math.min(255, Math.round(b + amt)));
+    return alpha == null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  chip(active) {
+    return active
+      ? { bg: '#2b2420', fg: '#f4efe6', border: '#2b2420' }
+      : { bg: '#faf7f1', fg: '#2b2420', border: '#e0d7c6' };
+  }
+  swatchChip(active) {
+    return active
+      ? { bg: '#efe8db', border: '#2b2420' }
+      : { bg: '#faf7f1', border: '#e0d7c6' };
+  }
+
+  renderVals() {
+    const { page, cat, cart, cfg } = this.state;
+    const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
+
+    const navDefs = [
+      { key: 'home', label: 'Úvod' },
+      { key: 'products', label: 'Produkty' },
+      { key: 'custom', label: 'Výroba na míru' },
+      { key: 'about', label: 'O nás' },
+      { key: 'contact', label: 'Kontakt' },
+    ];
+    const nav = navDefs.map((n) => ({
+      label: n.label,
+      active: page === n.key,
+      color: page === n.key ? '#2b2420' : '#6b6155',
+      onClick: () => this.go(n.key),
+    }));
+
+    const catDefs = [
+      { key: 'vse', label: 'Vše' },
+      { key: 'stoly', label: 'Stoly' },
+      { key: 'prkenka', label: 'Prkénka' },
+      { key: 'hodiny', label: 'Hodiny' },
+      { key: 'doplnky', label: 'Doplňky' },
+    ];
+    const catLabelMap = { stoly: 'Stoly', prkenka: 'Prkénka', hodiny: 'Hodiny', doplnky: 'Doplňky' };
+    const cats = catDefs.map((c) => {
+      const ch = this.chip(cat === c.key);
+      return { label: c.label, bg: ch.bg, fg: ch.fg, border: ch.border, onClick: () => this.setState({ cat: c.key }) };
+    });
+
+    const products = this.PRODUCTS.filter((p) => cat === 'vse' || p.cat === cat).map((p) => ({
+      name: p.name, slug: p.slug, desc: p.desc, catLabel: catLabelMap[p.cat],
+      onRequest: p.price === null,
+      buyable: p.price !== null,
+      priceLabel: p.price === null ? 'Cena na dotaz' : this.fmt(p.price),
+      onAdd: () => this.addToCart(p.id),
+    }));
+
+    // cart line items
+    const cartItems = Object.entries(cart).map(([id, qty]) => {
+      const p = this.PRODUCTS.find((x) => x.id === id) || {};
+      return {
+        id, qty, slug: p.slug, name: p.name,
+        unitLabel: this.fmt(p.price || 0),
+        lineLabel: this.fmt((p.price || 0) * qty),
+        inc: () => this.setQty(id, qty + 1),
+        dec: () => this.setQty(id, qty - 1),
+        remove: () => this.setQty(id, 0),
+      };
+    });
+    const cartTotal = Object.entries(cart).reduce((sum, [id, qty]) => {
+      const p = this.PRODUCTS.find((x) => x.id === id);
+      return sum + (p && p.price ? p.price * qty : 0);
+    }, 0);
+    const shipping = cartTotal === 0 ? 0 : (cartTotal >= 2500 ? 0 : 149);
+
+    const homeCats = [
+      { slug: 'stoly', label: 'Stoly', sub: 'Jídelní & konferenční', key: 'stoly' },
+      { slug: 'prkénka', label: 'Prkénka', sub: 'Kuchyňská & servírovací', key: 'prkenka' },
+      { slug: 'hodiny', label: 'Hodiny', sub: 'Nástěnné z masivu', key: 'hodiny' },
+      { slug: 'doplňky', label: 'Doplňky', sub: 'Dekorace & drobnosti', key: 'doplnky' },
+    ].map((c) => ({ ...c, onClick: () => { this.setState({ cat: c.key }); this.go('products'); } }));
+
+    const woods = this.WOODS.map((w) => {
+      const s = this.swatchChip(cfg.wood === w.label);
+      return { label: w.label, color: w.color, bg: s.bg, border: s.border, onClick: () => this.setState({ cfg: { ...cfg, wood: w.label } }) };
+    });
+    const resins = this.RESINS.map((r) => {
+      const s = this.swatchChip(cfg.resin === r.label);
+      return { label: r.label, color: r.color, bg: s.bg, border: s.border, onClick: () => this.setState({ cfg: { ...cfg, resin: r.label } }) };
+    });
+    const shapes = this.SHAPES.map((sh) => {
+      const ch = this.chip(cfg.shape === sh);
+      return { label: sh, bg: ch.bg, fg: ch.fg, border: ch.border, onClick: () => this.setState({ cfg: { ...cfg, shape: sh } }) };
+    });
+    const onSize = (e) => { const v = e.target.value; this.setState((s) => ({ cfg: { ...s.cfg, size: v } })); };
+
+    const rivers = this.RIVER_DIRS.map((rd) => {
+      const ch = this.chip(cfg.river === rd);
+      return { label: rd, bg: ch.bg, fg: ch.fg, border: ch.border, onClick: () => this.setState({ cfg: { ...cfg, river: rd } }) };
+    });
+
+    const woodColor = (this.WOODS.find((w) => w.label === cfg.wood) || {}).color;
+    const resinColor = (this.RESINS.find((r) => r.label === cfg.resin) || {}).color;
+    const radiusMap = { 'Obdélník': '14px', 'Oválné': '150px / 110px', 'Čtverec': '14px', 'Kulaté': '50%' };
+    const previewRadius = radiusMap[cfg.shape];
+    const isSquareish = cfg.shape === 'Kulaté' || cfg.shape === 'Čtverec';
+    const topW = isSquareish ? 210 : 300;
+    const topH = isSquareish ? 210 : 172;
+
+    // ---- realistic angled table (perspective) ----
+    const grainHi = this.shade(woodColor, 34, 0.5);
+    const grainLo = this.shade(woodColor, -40, 0.55);
+
+    const sceneStyle = {
+      position: 'relative', width: '420px', height: '340px',
+      perspective: '1300px', perspectiveOrigin: '50% 34%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    };
+    const tableGroupStyle = {
+      position: 'relative', width: topW + 'px', height: topH + 'px',
+      transformStyle: 'preserve-3d', transform: 'rotateX(53deg) rotateZ(-2deg)',
+      transition: 'all .5s ease', marginTop: '-26px',
+    };
+    // top surface (grain + river + gloss live inside; overflow clips to shape)
+    const topSurfaceStyle = {
+      position: 'absolute', inset: 0, borderRadius: previewRadius, overflow: 'hidden',
+      boxShadow: 'inset 0 2px 5px rgba(255,255,255,.22), inset 0 -3px 10px rgba(0,0,0,.25)',
+      background: [
+        'repeating-linear-gradient(1.5deg, ' + grainLo + ' 0px, ' + grainLo + ' 1px, transparent 1px, transparent 5px)',
+        'repeating-linear-gradient(1.5deg, ' + grainHi + ' 0px, ' + grainHi + ' 1px, transparent 1px, transparent 11px)',
+        'repeating-linear-gradient(179deg, rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 2px, transparent 2px, transparent 16px)',
+        'radial-gradient(120% 140% at 24% 0%, ' + this.shade(woodColor, 28) + ', transparent 55%)',
+        'linear-gradient(160deg, ' + this.shade(woodColor, 18) + ', ' + this.shade(woodColor, -22) + ')',
+      ].join(','),
+    };
+    // underside = slab thickness (offset in Z so the edge shows in perspective)
+    const undersideStyle = {
+      position: 'absolute', inset: 0, borderRadius: previewRadius,
+      transform: 'translateZ(-16px)',
+      background: 'linear-gradient(160deg, ' + this.shade(woodColor, -26) + ', ' + this.shade(woodColor, -52) + ')',
+      boxShadow: '0 0 0 1px rgba(0,0,0,.15)',
+    };
+    // four legs — counter-rotated so they stand vertical, hanging from the corners
+    const legBase = {
+      position: 'absolute', width: '12px', height: '86px', borderRadius: '2px',
+      transformOrigin: 'top center', transform: 'rotateX(-53deg)',
+      background: 'linear-gradient(90deg, ' + this.shade(woodColor, -34) + ', ' + this.shade(woodColor, 4) + ' 45%, ' + this.shade(woodColor, -40) + ')',
+      boxShadow: '0 8px 12px -6px rgba(0,0,0,.4)',
+    };
+    const legEls = [
+      Object.assign({}, legBase, { top: '14px', left: '16px' }),
+      Object.assign({}, legBase, { top: '14px', right: '16px' }),
+      Object.assign({}, legBase, { bottom: '14px', left: '16px' }),
+      Object.assign({}, legBase, { bottom: '14px', right: '16px' }),
+    ];
+    const floorShadowStyle = {
+      position: 'absolute', bottom: '40px', left: '50%', width: (topW * 1.02) + 'px', height: '40px',
+      transform: 'translateX(-50%)', borderRadius: '50%',
+      background: 'radial-gradient(closest-side, rgba(0,0,0,.4), rgba(0,0,0,.18) 55%, transparent)',
+      filter: 'blur(9px)',
+    };
+    const slug = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
+    const slotId = 'combo-' + slug(cfg.wood) + '_' + slug(cfg.resin) + '_' + slug(cfg.shape) + '_' + slug(cfg.river);
+    const slotPlaceholder = 'Přetáhněte fotku této kombinace';
+
+    // glossy translucent resin river; realistic depth + highlights
+    const rLight = this.shade(resinColor, 70, 0.92);
+    const rMid = this.shade(resinColor, 6, 0.96);
+    const rDark = this.shade(resinColor, -46, 0.98);
+    const riverBg = [
+      'linear-gradient(118deg, rgba(255,255,255,.5) 0%, transparent 20%)',
+      'linear-gradient(300deg, rgba(255,255,255,.18) 0%, transparent 34%)',
+      'linear-gradient(118deg, ' + rLight + ' 0%, ' + rMid + ' 46%, ' + rDark + ' 100%)',
+    ].join(',');
+    const riverShadow = 'inset 0 0 26px rgba(0,0,0,.4), inset 0 3px 8px rgba(255,255,255,.35), 0 0 20px ' + this.shade(resinColor, -10, 0.45);
+    const riverPos = {
+      'Podél':      { top: '-8%', bottom: '-8%', left: '39%', width: '22%', transform: 'rotate(2deg)' },
+      'Napříč':     { left: '-8%', right: '-8%', top: '38%', height: '26%', transform: 'rotate(-1.5deg)' },
+      'Diagonálně': { left: '-14%', right: '-14%', top: '37%', height: '28%', transform: 'rotate(31deg) scale(1.35)' },
+      'U kraje':    { top: '-8%', bottom: '-8%', left: '17%', width: '19%', transform: 'rotate(3deg)' },
+    }[cfg.river];
+    const riverStyle = Object.assign({
+      position: 'absolute', background: riverBg, boxShadow: riverShadow,
+      filter: 'blur(.3px)', transition: 'all .5s ease', borderRadius: '40% 60% 45% 55% / 50%',
+    }, riverPos);
+    const showRiver = true;
+    const glossStyle = {
+      position: 'absolute', inset: 0, pointerEvents: 'none',
+      background: 'linear-gradient(115deg, rgba(255,255,255,.22), transparent 42%)',
+    };
+
+    const cfgSummary = `${cfg.wood} · ${cfg.resin} · řeka ${cfg.river}\n${cfg.shape} · ${cfg.size || 'rozměr neuveden'}`;
+
+    return {
+      cart: cartCount,
+      cartItems, cartEmpty: cartItems.length === 0, cartHasItems: cartItems.length > 0,
+      cartTotal: this.fmt(cartTotal),
+      shippingLabel: shipping === 0 ? 'Zdarma' : this.fmt(shipping),
+      grandTotal: this.fmt(cartTotal + shipping),
+      freeShipHint: cartTotal > 0 && cartTotal < 2500,
+      freeShipRemaining: this.fmt(2500 - cartTotal),
+      goCart: () => this.go('cart'),
+      isHome: page === 'home', isProducts: page === 'products', isCustom: page === 'custom',
+      isAbout: page === 'about', isContact: page === 'contact', isCart: page === 'cart',
+      nav, cats, products, homeCats,
+      insta: [1, 2, 3, 4, 5, 6],
+      goHome: () => this.go('home'), goProducts: () => this.go('products'),
+      goCustom: () => this.go('custom'), goAbout: () => this.go('about'), goContact: () => this.go('contact'),
+      woods, resins, shapes, rivers, onSize,
+      woodColor, resinColor, previewRadius, cfgSummary,
+      sceneStyle, tableGroupStyle, topSurfaceStyle, undersideStyle, legEls, floorShadowStyle,
+      riverStyle, glossStyle, showRiver,
+      slotId, slotPlaceholder,
+      inquirySent: this.state.inquirySent, inquiryOpen: !this.state.inquirySent,
+      sendInquiry: () => this.setState({ inquirySent: true }),
+      contactSent: this.state.contactSent, contactOpen: !this.state.contactSent,
+      sendContact: () => this.setState({ contactSent: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

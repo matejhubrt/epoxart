@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  /* surfaces */
+  --color-page: #f4efe6;
+  --color-surface: #faf7f1;
+  --color-warm: #ece2d0;
+  --color-warm-2: #e5dbc7;
+  --color-footer: #efe8db;
+
+  /* text */
+  --color-ink: #2b2420;
+  --color-body: #5a5045;
+  --color-muted: #6b6155;
+  --color-faint: #8a7d6a;
+  --color-faintest: #a2937c;
+
+  /* accents */
+  --color-amber: #a06f37;
+  --color-brown-link: #8a6a4f;
+  --color-teal: #1f6e63;
+  --color-teal-hover: #17544c;
+  --color-teal-wash: #e6f0ec;
+
+  /* borders / state */
+  --color-border: #e6ddcc;
+  --color-border-2: #e0d7c6;
+  --color-danger: #b08575;
+  --color-selection: #d8c9b0;
+
+  /* wood swatches */
+  --color-wood-orech: #5a3a22;
+  --color-wood-dub: #b08850;
+  --color-wood-jasan: #c9ab78;
+  --color-wood-briza: #ddc79c;
+
+  /* resin swatches */
+  --color-resin-ocean: #1c5c78;
+  --color-resin-smaragd: #1f6e63;
+  --color-resin-jantar: #c88a3a;
+  --color-resin-cerna: #17140f;
+  --color-resin-cira: #d8c7a2;
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "Space Grotesk", sans-serif;
+  --font-mono: "Space Mono", monospace;
+
+  --container-content: 1240px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+}
+
+@layer utilities {
+  .hatch {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-warm) 0,
+      var(--color-warm) 13px,
+      var(--color-warm-2) 13px,
+      var(--color-warm-2) 26px
+    );
+  }
+}
