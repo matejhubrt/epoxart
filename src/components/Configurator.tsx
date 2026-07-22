@@ -107,23 +107,6 @@ function TablePreview({ cfg }: { cfg: Config }) {
     boxShadow: "0 0 0 1px rgba(0,0,0,.15)",
   };
 
-  const legBase: CSSProperties = {
-    position: "absolute",
-    width: "12px",
-    height: "86px",
-    borderRadius: "2px",
-    transformOrigin: "top center",
-    transform: "rotateX(-53deg)",
-    background: `linear-gradient(90deg, ${shade(woodColor, -34)}, ${shade(woodColor, 4)} 45%, ${shade(woodColor, -40)})`,
-    boxShadow: "0 8px 12px -6px rgba(0,0,0,.4)",
-  };
-  const legPositions: CSSProperties[] = [
-    { ...legBase, top: "14px", left: "16px" },
-    { ...legBase, top: "14px", right: "16px" },
-    { ...legBase, bottom: "14px", left: "16px" },
-    { ...legBase, bottom: "14px", right: "16px" },
-  ];
-
   const floorShadowStyle: CSSProperties = {
     position: "absolute",
     bottom: "40px",
@@ -180,9 +163,6 @@ function TablePreview({ cfg }: { cfg: Config }) {
     >
       <div style={floorShadowStyle} />
       <div style={tableGroupStyle}>
-        {legPositions.map((style, i) => (
-          <div key={i} style={style} />
-        ))}
         <div style={undersideStyle} />
         <div style={topSurfaceStyle}>
           <div style={riverStyle} />
@@ -263,8 +243,8 @@ export default function Configurator() {
   );
 
   return (
-    <div className="grid grid-cols-1 items-start gap-9 lg:grid-cols-[1fr_0.9fr]">
-      <div className="lg:sticky lg:top-[100px]">
+    <div className="grid grid-cols-1 items-start gap-9 md:grid-cols-[1fr_0.9fr]">
+      <div className="md:sticky md:top-[100px]">
         <div className="flex min-h-[460px] items-center justify-center rounded-[26px] bg-warm px-6 py-14 sm:px-10">
           <TablePreview cfg={cfg} />
         </div>
