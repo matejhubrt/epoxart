@@ -1,19 +1,6 @@
-import { useMemo, useState, type CSSProperties } from "react";
-
-const WOODS = [
-  { label: "Ořech", color: "#5a3a22" },
-  { label: "Dub", color: "#b08850" },
-  { label: "Jasan", color: "#c9ab78" },
-  { label: "Bříza", color: "#ddc79c" },
-] as const;
-
-const RESINS = [
-  { label: "Oceánská modř", color: "#1c5c78" },
-  { label: "Smaragd", color: "#1f6e63" },
-  { label: "Jantar", color: "#c88a3a" },
-  { label: "Uhlová čerň", color: "#17140f" },
-  { label: "Čirá", color: "#d8c7a2" },
-] as const;
+import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import type { ColorOption } from "../lib/content";
+import { submitInquiry } from "../lib/inquiries";
 
 const SHAPES = ["Obdélník", "Oválné", "Čtverec", "Kulaté"] as const;
 const RIVERS = ["Podél", "Napříč", "Diagonálně", "U kraje"] as const;
@@ -47,24 +34,22 @@ function shade(hex: string, amt: number, alpha?: number): string {
 }
 
 interface Config {
-  wood: (typeof WOODS)[number]["label"];
-  resin: (typeof RESINS)[number]["label"];
+  wood: string;
+  resin: string;
   shape: Shape;
   size: string;
   river: River;
 }
 
-const DEFAULT_CONFIG: Config = {
-  wood: "Ořech",
-  resin: "Oceánská modř",
-  shape: "Obdélník",
-  size: "",
-  river: "Podél",
-};
-
-function TablePreview({ cfg }: { cfg: Config }) {
-  const woodColor = WOODS.find((w) => w.label === cfg.wood)!.color;
-  const resinColor = RESINS.find((r) => r.label === cfg.resin)!.color;
+function TablePreview({
+  cfg,
+  woodColor,
+  resinColor,
+}: {
+  cfg: Config;
+  woodColor: string;
+  resinColor: string;
+}) {
   const radius = RADIUS_MAP[cfg.shape];
   const isSquareish = cfg.shape === "Kulaté" || cfg.shape === "Čtverec";
   const topW = isSquareish ? 210 : 300;
@@ -174,9 +159,34 @@ function TablePreview({ cfg }: { cfg: Config }) {
 }
 
 function InquiryForm({ cfg }: { cfg: Config }) {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-  if (sent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    // hidden "website" field: only bots fill it in
+    if (String(f.get("website") ?? "") !== "") {
+      setStatus("sent");
+      return;
+    }
+    setStatus("sending");
+    const res = await submitInquiry({
+      kind: "custom",
+      name: String(f.get("name") ?? ""),
+      email: String(f.get("email") ?? ""),
+      message: String(f.get("message") ?? ""),
+      config: {
+        wood: cfg.wood,
+        resin: cfg.resin,
+        shape: cfg.shape,
+        river: cfg.river,
+        size: cfg.size,
+      },
+    });
+    setStatus(res.ok ? "sent" : "error");
+  }
+
+  if (status === "sent") {
     return (
       <div className="rounded-[22px] bg-teal-wash p-7 text-teal">
         Děkujeme! Vaše poptávka byla odeslána — brzy se vám ozveme.
@@ -184,55 +194,68 @@ function InquiryForm({ cfg }: { cfg: Config }) {
     );
   }
 
+  const input =
+    "rounded-xl border border-border-2 bg-white px-4 py-[13px] text-sm focus:border-teal focus:outline-none";
+
   return (
-    <form
-      className="rounded-[22px] bg-surface p-7"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setSent(true);
-      }}
-    >
+    <form className="rounded-[22px] bg-surface p-7" onSubmit={onSubmit}>
       <h3 className="font-display text-[26px]">Nezávazná poptávka</h3>
       <p className="mt-1 text-[13px] text-muted">
         Ozveme se s cenovou nabídkou na míru vaší konfiguraci.
       </p>
 
       <div className="mt-5 flex flex-col gap-3">
-        <input
-          required
-          type="text"
-          placeholder="Jméno"
-          className="rounded-xl border border-border-2 bg-white px-4 py-[13px] text-sm focus:border-teal focus:outline-none"
-        />
-        <input
-          required
-          type="email"
-          placeholder="E-mail"
-          className="rounded-xl border border-border-2 bg-white px-4 py-[13px] text-sm focus:border-teal focus:outline-none"
-        />
+        <input required name="name" maxLength={200} type="text" placeholder="Jméno" className={input} />
+        <input required name="email" maxLength={320} type="email" placeholder="E-mail" className={input} />
         <textarea
+          name="message"
+          maxLength={5000}
           rows={4}
           placeholder="Poznámka (rozměr, termín, inspirace…)"
-          className="rounded-xl border border-border-2 bg-white px-4 py-[13px] text-sm focus:border-teal focus:outline-none"
+          className={input}
         />
-        <input type="hidden" name="wood" value={cfg.wood} />
-        <input type="hidden" name="resin" value={cfg.resin} />
-        <input type="hidden" name="shape" value={cfg.shape} />
-        <input type="hidden" name="river" value={cfg.river} />
-        <input type="hidden" name="size" value={cfg.size} />
+        <input
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="hidden"
+        />
+        {status === "error" && (
+          <p className="text-sm text-danger">
+            Poptávku se nepodařilo odeslat. Zkuste to prosím znovu nebo nám zavolejte.
+          </p>
+        )}
         <button
           type="submit"
-          className="mt-1 rounded-full bg-teal px-8 py-3.5 text-[13px] tracking-[0.06em] text-page transition-colors hover:bg-teal-hover"
+          disabled={status === "sending"}
+          className="mt-1 rounded-full bg-teal px-8 py-3.5 text-[13px] tracking-[0.06em] text-page transition-colors hover:bg-teal-hover disabled:opacity-60"
         >
-          ODESLAT POPTÁVKU
+          {status === "sending" ? "ODESÍLÁM…" : "ODESLAT POPTÁVKU"}
         </button>
       </div>
     </form>
   );
 }
 
-export default function Configurator() {
-  const [cfg, setCfg] = useState<Config>(DEFAULT_CONFIG);
+export default function Configurator({
+  woods,
+  resins,
+}: {
+  woods: ColorOption[];
+  resins: ColorOption[];
+}) {
+  const [cfg, setCfg] = useState<Config>({
+    wood: woods[0].label,
+    resin: resins[0].label,
+    shape: "Obdélník",
+    size: "",
+    river: "Podél",
+  });
+
+  const woodColor = (woods.find((w) => w.label === cfg.wood) ?? woods[0]).color;
+  const resinColor = (resins.find((r) => r.label === cfg.resin) ?? resins[0]).color;
 
   const summary = useMemo(
     () => ({
@@ -246,7 +269,7 @@ export default function Configurator() {
     <div className="grid grid-cols-1 items-start gap-9 md:grid-cols-[1fr_0.9fr]">
       <div className="md:sticky md:top-[100px]">
         <div className="flex min-h-[460px] items-center justify-center rounded-[26px] bg-warm px-6 py-14 sm:px-10">
-          <TablePreview cfg={cfg} />
+          <TablePreview cfg={cfg} woodColor={woodColor} resinColor={resinColor} />
         </div>
         <p className="mt-4 whitespace-pre-line text-center font-mono text-[11px] leading-relaxed text-faint">
           {summary.line1}
@@ -259,7 +282,7 @@ export default function Configurator() {
         <div>
           <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">DŘEVO</div>
           <div className="flex flex-wrap gap-2.5">
-            {WOODS.map((w) => {
+            {woods.map((w) => {
               const active = cfg.wood === w.label;
               return (
                 <button
@@ -281,7 +304,7 @@ export default function Configurator() {
         <div>
           <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ODSTÍN PRYSKYŘICE</div>
           <div className="flex flex-wrap gap-2.5">
-            {RESINS.map((r) => {
+            {resins.map((r) => {
               const active = cfg.resin === r.label;
               return (
                 <button

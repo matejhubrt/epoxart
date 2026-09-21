@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CATEGORY_LABELS, PRODUCTS, formatKc, type CategoryKey } from "../lib/products";
+import { CATEGORY_LABELS, formatKc, type CategoryKey, type Product } from "../lib/products";
 import { addToCart } from "../lib/cart";
 
 type CatFilter = "vse" | CategoryKey;
@@ -12,13 +12,19 @@ const CHIPS: { key: CatFilter; label: string }[] = [
   { key: "doplnky", label: "Doplňky" },
 ];
 
-export default function ProductGrid({ initialCat = "vse" }: { initialCat?: CatFilter }) {
+export default function ProductGrid({
+  products: all,
+  initialCat = "vse",
+}: {
+  products: Product[];
+  initialCat?: CatFilter;
+}) {
   const [cat, setCat] = useState<CatFilter>(initialCat);
   const [added, setAdded] = useState<string | null>(null);
 
   const products = useMemo(
-    () => PRODUCTS.filter((p) => cat === "vse" || p.cat === cat),
-    [cat]
+    () => all.filter((p) => cat === "vse" || p.cat === cat),
+    [all, cat]
   );
 
   function handleAdd(id: string) {
@@ -49,10 +55,23 @@ export default function ProductGrid({ initialCat = "vse" }: { initialCat?: CatFi
         })}
       </div>
 
+      {products.length === 0 && (
+        <p className="mt-10 text-sm text-muted">V této kategorii zatím nic nemáme.</p>
+      )}
+
       <div className="mt-8 grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
         {products.map((p) => (
           <div key={p.id} className="flex flex-col overflow-hidden rounded-[22px] bg-surface">
-            <div className="hatch relative h-[260px]">
+            <div className={`relative h-[260px] ${p.image ? "bg-warm" : "hatch"}`}>
+              {p.image && (
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              )}
               <span className="absolute left-3 top-3 rounded-full bg-surface px-2.5 py-1 text-[11px] text-body">
                 {CATEGORY_LABELS[p.cat]}
               </span>

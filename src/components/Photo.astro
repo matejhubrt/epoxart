@@ -1,0 +1,25 @@
+---
+import Hatch from "./Hatch.astro";
+
+interface Props {
+  src?: string | null;
+  alt?: string;
+  label?: string;
+  glow?: boolean;
+  class?: string;
+  eager?: boolean;
+}
+const { src, alt = "", label, glow = false, class: className = "", eager = false } = Astro.props;
+---
+
+{src ? (
+  <img
+    src={src}
+    alt={alt}
+    loading={eager ? "eager" : "lazy"}
+    decoding="async"
+    class:list={["block w-full object-cover", className]}
+  />
+) : (
+  <Hatch label={label} glow={glow} class={className} />
+)}

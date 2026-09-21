@@ -1,6 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ContactForm from "../components/ContactForm.tsx";
+import { getSiteData } from "../lib/data";
+import { phoneHref } from "../lib/content";
+
+const { content } = await getSiteData();
+const { texts } = content;
 ---
 
 <Layout title="Kontakt">
@@ -13,29 +18,33 @@ import ContactForm from "../components/ContactForm.tsx";
         <div>
           <div class="text-xs tracking-[0.14em] text-brown-link">TELEFON</div>
           <div class="mt-1 text-[15px]">
-            <a href="tel:+420732861160" class="hover:text-teal">+420 732 861 160</a>
-            <br />
-            <a href="tel:+420721157990" class="hover:text-teal">+420 721 157 990</a>
+            <a href={phoneHref(texts.phone1)} class="hover:text-teal">{texts.phone1}</a>
+            {texts.phone2 && (
+              <>
+                <br />
+                <a href={phoneHref(texts.phone2)} class="hover:text-teal">{texts.phone2}</a>
+              </>
+            )}
           </div>
         </div>
         <div>
           <div class="text-xs tracking-[0.14em] text-brown-link">E-MAIL</div>
           <div class="mt-1 text-[15px]">
-            <a href="mailto:info@epoxart.cz" class="hover:text-teal">info@epoxart.cz</a>
+            <a href={`mailto:${texts.email}`} class="hover:text-teal">{texts.email}</a>
           </div>
         </div>
         <div>
           <div class="text-xs tracking-[0.14em] text-brown-link">SÍDLO</div>
           <div class="mt-1 text-[15px] leading-relaxed">
-            Jakub Havrlík<br />
+            {texts.owner}<br />
             EpoxArt<br />
-            Čenkov 163, 262 23<br />
-            IČO: 23052431
+            {texts.address}<br />
+            IČO: {texts.ico}
           </div>
         </div>
         <div class="flex gap-3">
           <a
-            href="https://www.instagram.com/epoxart19/"
+            href={texts.instagram}
             target="_blank"
             rel="noopener noreferrer"
             class="flex-1 rounded-2xl bg-page px-4 py-3 text-center text-sm hover:text-teal"
@@ -43,7 +52,7 @@ import ContactForm from "../components/ContactForm.tsx";
             Instagram
           </a>
           <a
-            href="https://www.facebook.com/profile.php?id=61573065113314"
+            href={texts.facebook}
             target="_blank"
             rel="noopener noreferrer"
             class="flex-1 rounded-2xl bg-page px-4 py-3 text-center text-sm hover:text-teal"

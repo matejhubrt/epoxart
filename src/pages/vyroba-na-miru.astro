@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Configurator from "../components/Configurator.tsx";
+import { getSiteData } from "../lib/data";
+
+const { content } = await getSiteData();
 ---
 
 <Layout title="Výroba na míru">
@@ -13,7 +16,11 @@ import Configurator from "../components/Configurator.tsx";
     </p>
 
     <div class="mt-12">
-      <Configurator client:load />
+      <Configurator
+        client:load
+        woods={content.configurator.woods}
+        resins={content.configurator.resins}
+      />
     </div>
   </div>
 </Layout>

@@ -1,4 +1,12 @@
 ---
+import type { SiteTexts } from "../lib/content";
+import { phoneHref } from "../lib/content";
+
+interface Props {
+  texts: SiteTexts;
+}
+const { texts } = Astro.props;
+
 const menu = [
   { href: "/produkty", label: "Produkty" },
   { href: "/vyroba-na-miru", label: "Výroba na míru" },
@@ -11,9 +19,7 @@ const menu = [
   <div class="mx-auto grid max-w-content grid-cols-1 gap-8 px-6 py-12 text-[13px] text-muted sm:px-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
     <div>
       <div class="font-display text-2xl tracking-[0.12em] text-ink">EPOXART</div>
-      <p class="mt-3 max-w-xs leading-relaxed">
-        Ruční výroba unikátního nábytku z masivu a epoxidové pryskyřice. Každý kus je originál vytvořený s láskou k řemeslu.
-      </p>
+      <p class="mt-3 max-w-xs leading-relaxed">{texts.footerText}</p>
     </div>
 
     <div>
@@ -28,17 +34,17 @@ const menu = [
     <div>
       <div class="mb-3 font-medium text-ink">Kontakt</div>
       <ul class="space-y-2">
-        <li><a href="tel:+420732861160" class="hover:text-ink">+420 732 861 160</a></li>
-        <li><a href="mailto:info@epoxart.cz" class="hover:text-ink">info@epoxart.cz</a></li>
-        <li>Čenkov 163, 262 23</li>
+        <li><a href={phoneHref(texts.phone1)} class="hover:text-ink">{texts.phone1}</a></li>
+        <li><a href={`mailto:${texts.email}`} class="hover:text-ink">{texts.email}</a></li>
+        <li>{texts.address}</li>
       </ul>
     </div>
 
     <div>
       <div class="mb-3 font-medium text-ink">Sledujte nás</div>
       <ul class="space-y-2">
-        <li><a href="https://www.instagram.com/epoxart19/" target="_blank" rel="noopener noreferrer" class="hover:text-ink">Instagram</a></li>
-        <li><a href="https://www.facebook.com/profile.php?id=61573065113314" target="_blank" rel="noopener noreferrer" class="hover:text-ink">Facebook</a></li>
+        <li><a href={texts.instagram} target="_blank" rel="noopener noreferrer" class="hover:text-ink">Instagram</a></li>
+        <li><a href={texts.facebook} target="_blank" rel="noopener noreferrer" class="hover:text-ink">Facebook</a></li>
       </ul>
     </div>
   </div>

@@ -1,10 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ProductGrid from "../components/ProductGrid.tsx";
+import { getSiteData } from "../lib/data";
+import { CATEGORY_KEYS } from "../lib/products";
+
+const { products } = await getSiteData();
 
 const catParam = Astro.url.searchParams.get("kat");
-const validCats = ["stoly", "prkenka", "hodiny", "doplnky"];
-const initialCat = validCats.includes(catParam ?? "") ? catParam! : "vse";
+const initialCat = CATEGORY_KEYS.find((c) => c === catParam) ?? "vse";
 ---
 
 <Layout title="Produkty">
@@ -13,7 +16,7 @@ const initialCat = validCats.includes(catParam ?? "") ? catParam! : "vse";
     <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Naše produkty</h1>
 
     <div class="mt-10">
-      <ProductGrid client:load initialCat={initialCat} />
+      <ProductGrid client:load products={products} initialCat={initialCat} />
     </div>
   </div>
 </Layout>

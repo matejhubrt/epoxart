@@ -1,13 +1,8 @@
+import { useEffect, useMemo } from "react";
 import { useStore } from "@nanostores/react";
-import {
-  $cart,
-  $cartSubtotal,
-  $shipping,
-  $grandTotal,
-  FREE_SHIPPING_THRESHOLD,
-  setQty,
-} from "../lib/cart";
-import { productById, formatKc } from "../lib/products";
+import { $cart, setQty } from "../lib/cart";
+import { formatKc, type Product } from "../lib/products";
+import type { ShippingSettings } from "../lib/content";
 
 function Stepper({ id, qty }: { id: string; qty: number }) {
   return (
@@ -33,13 +28,24 @@ function Stepper({ id, qty }: { id: string; qty: number }) {
   );
 }
 
-export default function CartView() {
+export default function CartView({
+  products,
+  shipping: shippingRule,
+}: {
+  products: Product[];
+  shipping: ShippingSettings;
+}) {
   const cart = useStore($cart);
-  const subtotal = useStore($cartSubtotal);
-  const shipping = useStore($shipping);
-  const total = useStore($grandTotal);
+  const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
-  const entries = Object.entries(cart);
+  // products that were removed from the shop since they were added to the cart
+  useEffect(() => {
+    for (const id of Object.keys($cart.get())) {
+      if (!byId.has(id)) setQty(id, 0);
+    }
+  }, [byId]);
+
+  const entries = Object.entries(cart).filter(([id]) => byId.has(id));
 
   if (entries.length === 0) {
     return (
@@ -60,19 +66,26 @@ export default function CartView() {
     );
   }
 
-  const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
-  const showFreeShipHint = subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD;
+  const subtotal = entries.reduce((sum, [id, qty]) => sum + (byId.get(id)!.price ?? 0) * qty, 0);
+  const shipping =
+    subtotal === 0 ? 0 : subtotal >= shippingRule.freeFrom ? 0 : shippingRule.cost;
+  const total = subtotal + shipping;
+  const remaining = shippingRule.freeFrom - subtotal;
+  const showFreeShipHint = subtotal > 0 && subtotal < shippingRule.freeFrom;
 
   return (
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_0.85fr]">
       <div className="flex flex-col gap-4">
         {entries.map(([id, qty]) => {
-          const p = productById(id);
-          if (!p) return null;
+          const p = byId.get(id)!;
           const unit = p.price ?? 0;
           return (
             <div key={id} className="flex items-center gap-4 rounded-[20px] bg-surface p-[18px]">
-              <div className="hatch h-[104px] w-[104px] shrink-0 rounded-2xl" />
+              <div className="hatch h-[104px] w-[104px] shrink-0 overflow-hidden rounded-2xl">
+                {p.image && (
+                  <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-display text-[22px]">{p.name}</div>
                 <div className="text-xs text-faint">{formatKc(unit)} / ks</div>

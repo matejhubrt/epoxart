@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CartView from "../components/CartView.tsx";
+import { getSiteData } from "../lib/data";
+
+const { products, content } = await getSiteData();
 ---
 
 <Layout title="Košík">
@@ -9,7 +12,7 @@ import CartView from "../components/CartView.tsx";
     <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Váš košík</h1>
 
     <div class="mt-10">
-      <CartView client:load />
+      <CartView client:load products={products} shipping={content.shipping} />
     </div>
   </div>
 </Layout>

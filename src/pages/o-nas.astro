@@ -1,7 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Hatch from "../components/Hatch.astro";
+import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
+import { getSiteData } from "../lib/data";
+
+const { content } = await getSiteData();
+const { texts, images } = content;
 
 const process = [
   { n: "01", title: "Výběr dřeva", body: "Vybíráme kvalitní český masiv s výrazným charakterem." },
@@ -17,18 +21,14 @@ const process = [
       <div>
         <p class="font-mono text-xs tracking-[0.28em] text-amber">O NÁS</p>
         <h1 class="mt-4 font-display text-[42px] font-medium leading-[1.04] sm:text-[58px]">
-          Poctivé řemeslo z dílny v Čenkově.
+          {texts.aboutTitle}
         </h1>
-        <p class="mt-6 text-[15px] leading-[1.8] text-body">
-          V EpoxArt tvoříme originální designové produkty z masivního dřeva a epoxidové pryskyřice.
-          Každý kus — ať už jde o stůl, prkénko, hodiny nebo dekoraci — je ručně vyrobený a jedinečný.
-        </p>
-        <p class="mt-4 text-[15px] leading-[1.8] text-body">
-          Spojujeme surovou přírodu s moderním designem. Používáme jen české dřevo s jasným
-          původem a prémiové pryskyřice, které vydrží generace.
-        </p>
+        <p class="mt-6 text-[15px] leading-[1.8] text-body">{texts.aboutP1}</p>
+        <p class="mt-4 text-[15px] leading-[1.8] text-body">{texts.aboutP2}</p>
       </div>
-      <Hatch label="portrét · dílna / Jakub" class="h-[480px] rounded-[26px]" />
+      <div class="h-[480px] overflow-hidden rounded-[26px]">
+        <Photo src={images.about} alt={texts.owner} label="portrét · dílna / Jakub" class="h-full" />
+      </div>
     </div>
   </div>
 
