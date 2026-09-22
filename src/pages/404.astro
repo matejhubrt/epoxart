@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Pill from "../components/Pill.astro";
+---
+
+<Layout
+  title="Stránka nenalezena"
+  description="Tato stránka neexistuje nebo byla přesunuta."
+  noindex
+>
+  <div class="mx-auto flex max-w-content flex-col items-center px-[28px] py-24 text-center sm:py-32">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">CHYBA 404</p>
+    <h1 class="mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[80px]">
+      Tahle stránka <em class="text-teal not-italic italic">se ztratila.</em>
+    </h1>
+    <p class="mx-auto mt-6 max-w-[480px] text-[16px] leading-[1.7] text-body">
+      Odkaz je možná neplatný nebo jsme stránku přesunuli. Zkuste to od úvodní stránky.
+    </p>
+    <div class="mt-9 flex flex-wrap items-center justify-center gap-4">
+      <Pill href="/" variant="dark">ZPĚT NA ÚVOD</Pill>
+      <Pill href="/produkty" variant="outline">PROHLÉDNOUT PRODUKTY</Pill>
+    </div>
+  </div>
+</Layout>

@@ -15,7 +15,10 @@ const process = [
 ];
 ---
 
-<Layout title="O nás">
+<Layout
+  title="O nás"
+  description="Poznejte EpoxArt — dílnu Jakuba Havrlíka v Čenkově, kde vzniká ruční nábytek z masivního dřeva a epoxidové pryskyřice."
+>
   <div class="mx-auto max-w-content px-[28px] py-16">
     <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
       <div>
@@ -27,7 +30,12 @@ const process = [
         <p class="mt-4 text-[15px] leading-[1.8] text-body">{texts.aboutP2}</p>
       </div>
       <div class="h-[480px] overflow-hidden rounded-[26px]">
-        <Photo src={images.about} alt={texts.owner} label="portrét · dílna / Jakub" class="h-full" />
+        <Photo
+          src={images.about}
+          alt={`${texts.owner} v dílně EpoxArt`}
+          label="portrét · dílna / Jakub"
+          class="h-full"
+        />
       </div>
     </div>
   </div>

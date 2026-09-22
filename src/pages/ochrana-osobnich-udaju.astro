@@ -1,0 +1,162 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LegalSection from "../components/LegalSection.astro";
+import { getSiteData } from "../lib/data";
+
+const { content } = await getSiteData();
+const { texts } = content;
+
+const updated = "22. 9. 2026";
+---
+
+<Layout
+  title="Ochrana osobních údajů"
+  description="Zásady ochrany osobních údajů EpoxArt — jaké údaje zpracováváme, proč, jak dlouho je uchováváme a jaká máte práva."
+>
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">DOKUMENTY</p>
+    <h1 class="mt-4 font-display text-[38px] font-medium sm:text-[50px]">
+      Ochrana osobních údajů
+    </h1>
+    <p class="mt-3 text-sm text-muted">Poslední aktualizace: {updated}</p>
+
+    <div class="mt-10 flex max-w-[760px] flex-col gap-5">
+      <LegalSection title="1. Kdo je správcem vašich údajů">
+        <p>
+          Správcem osobních údajů je <strong>{texts.owner}</strong>, podnikající fyzická
+          osoba (EpoxArt), IČO: {texts.ico}, se sídlem {texts.address}, Česká republika
+          (dále jen „my" nebo „správce"). Kontaktovat nás můžete na e-mailu{" "}
+          <a href={`mailto:${texts.email}`}>{texts.email}</a> nebo telefonicky na{" "}
+          {texts.phone1}.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="2. Jaké údaje zpracováváme">
+        <p>Zpracováváme pouze údaje, které nám sami poskytnete:</p>
+        <ul>
+          <li>jméno a příjmení,</li>
+          <li>e-mailovou adresu,</li>
+          <li>telefonní číslo (pokud jej uvedete),</li>
+          <li>obsah vaší zprávy nebo poptávky, včetně zvolené konfigurace stolu,</li>
+          <li>
+            při objednávce zboží dále fakturační a doručovací údaje potřebné k vyřízení
+            objednávky.
+          </li>
+        </ul>
+        <p>
+          Nezpracováváme žádné zvláštní kategorie osobních údajů (např. zdravotní stav,
+          politické názory apod.) a neprovádíme automatizované rozhodování ani profilování.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="3. Proč a na jakém základě údaje zpracováváme">
+        <ul>
+          <li>
+            <strong>Vyřízení dotazu nebo poptávky</strong> — na základě vašeho zájmu
+            o naše služby, resp. jednání o uzavření smlouvy (čl. 6 odst. 1 písm. b) GDPR).
+          </li>
+          <li>
+            <strong>Vyřízení objednávky</strong> — plnění kupní smlouvy (čl. 6 odst. 1
+            písm. b) GDPR).
+          </li>
+          <li>
+            <strong>Plnění zákonných povinností</strong> — např. vedení účetnictví
+            (čl. 6 odst. 1 písm. c) GDPR).
+          </li>
+          <li>
+            <strong>Oprávněný zájem</strong> — ochrana webu proti zneužití formulářů
+            (čl. 6 odst. 1 písm. f) GDPR).
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Jak dlouho údaje uchováváme">
+        <p>
+          Zprávy a poptávky z formulářů uchováváme po dobu nezbytnou k jejich vyřízení
+          a přiměřenou dobu poté pro případ navazující komunikace, nejdéle však 2 roky od
+          posledního kontaktu. Údaje z uzavřených objednávek uchováváme po dobu
+          stanovenou daňovými a účetními předpisy (obvykle 10 let). Poté jsou údaje
+          bezpečně smazány.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="5. Komu údaje předáváme">
+        <p>
+          Vaše údaje nikomu neprodáváme. K jejich zpracování využíváme následující
+          prověřené zpracovatele, kteří pro nás zajišťují technický provoz webu:
+        </p>
+        <ul>
+          <li>
+            <strong>Supabase</strong> (databáze a přihlášení do administrace, servery
+            v EU),
+          </li>
+          <li><strong>Vercel</strong> (hosting webu).</li>
+        </ul>
+        <p>
+          Údaje mohou být zpřístupněny orgánům veřejné moci, pokud nám to ukládá zákon.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Soubory cookie a lokální úložiště" id="cookies">
+        <p>
+          Tento web nepoužívá žádné marketingové ani analytické (sledovací) soubory
+          cookie a nesbírá žádná anonymní statistická data o návštěvnosti.
+        </p>
+        <p>Používáme pouze technicky nezbytné ukládání dat v prohlížeči, konkrétně:</p>
+        <ul>
+          <li>
+            obsah <strong>nákupního košíku</strong> — uložen lokálně ve vašem prohlížeči,
+            abyste o něj nepřišli při zavření okna; nikam se neodesílá,
+          </li>
+          <li>
+            <strong>přihlašovací relaci správce webu</strong> v chráněné administraci
+            na adrese /admin — tato část se týká pouze majitele webu.
+          </li>
+        </ul>
+        <p>
+          Protože nepoužíváme žádné soubory vyžadující souhlas dle zákona
+          o elektronických komunikacích, web nezobrazuje cookie lištu se souhlasem.
+          Pokud v budoucnu nasadíme analytické nástroje, tuto sekci aktualizujeme
+          a doplníme příslušný souhlas.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Vaše práva">
+        <p>V souvislosti se zpracováním osobních údajů máte právo:</p>
+        <ul>
+          <li>na přístup ke svým osobním údajům,</li>
+          <li>na opravu nepřesných údajů,</li>
+          <li>na výmaz („právo být zapomenut"),</li>
+          <li>na omezení zpracování,</li>
+          <li>na přenositelnost údajů,</li>
+          <li>vznést námitku proti zpracování,</li>
+          <li>kdykoli odvolat udělený souhlas, byl-li zpracování na souhlasu založeno.</li>
+        </ul>
+        <p>
+          Tato práva můžete uplatnit na <a href={`mailto:${texts.email}`}>{texts.email}</a>.
+          Pokud se domníváte, že vaše údaje zpracováváme v rozporu se zákonem, máte
+          právo podat stížnost u{" "}
+          <a href="https://www.uoou.cz" target="_blank" rel="noopener noreferrer">
+            Úřadu pro ochranu osobních údajů
+          </a>{" "}
+          (Pplk. Sochora 27, 170 00 Praha 7).
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Zabezpečení">
+        <p>
+          Údaje jsou uloženy v zabezpečené databázi, přístup k administraci webu je
+          chráněn heslem a je omezen pouze na oprávněné osoby. Web je dostupný výhradně
+          přes zabezpečené spojení HTTPS.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="9. Změny těchto zásad">
+        <p>
+          Tyto zásady můžeme čas od času aktualizovat, například v souvislosti se změnou
+          fungování webu. Aktuální verze je vždy dostupná na této stránce.
+        </p>
+      </LegalSection>
+    </div>
+  </div>
+</Layout>

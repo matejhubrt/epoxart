@@ -30,10 +30,19 @@ const collections = CATEGORY_KEYS.map((cat) => ({
 }));
 ---
 
-<Layout title="Úvod">
+<Layout
+  title="Úvod"
+  description="EpoxArt — ruční výroba originálních stolů, prkének, hodin a doplňků z masivního dřeva a epoxidové pryskyřice. Navrhněte si stůl na míru v konfigurátoru."
+>
   <div class="mx-auto max-w-content px-[28px] pt-[28px]">
     <section class="relative flex h-[600px] items-center justify-center overflow-hidden rounded-[26px]">
-      <Photo src={images.hero} alt="EpoxArt" glow class="absolute inset-0 h-full" eager />
+      <Photo
+        src={images.hero}
+        alt="Ruční river stůl z masivního dřeva s epoxidovou pryskyřicí od EpoxArt"
+        glow
+        class="absolute inset-0 h-full"
+        eager
+      />
       {images.hero && <div class="absolute inset-0 bg-page/55"></div>}
       <div class="relative z-10 mx-auto max-w-[820px] px-6 text-center">
         <p class="font-mono text-xs tracking-[0.28em] text-amber">{texts.heroEyebrow}</p>
@@ -44,9 +53,11 @@ const collections = CATEGORY_KEYS.map((cat) => ({
         <p class="mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7] text-body">
           {texts.heroText}
         </p>
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Pill href="/produkty" variant="dark">PROHLÉDNOUT PRODUKTY</Pill>
-          <Pill href="/vyroba-na-miru" variant="outline">VÝROBA NA MÍRU</Pill>
+        <div class="mt-8 flex flex-col items-center gap-4">
+          <Pill href="/vyroba-na-miru" variant="dark">VÝROBA NA MÍRU</Pill>
+          <a href="/produkty" class="text-sm text-brown-link underline-offset-2 hover:text-teal hover:underline">
+            nebo si prohlédněte hotové produkty →
+          </a>
         </div>
       </div>
     </section>
@@ -140,7 +151,7 @@ const collections = CATEGORY_KEYS.map((cat) => ({
           style={`transition-delay:${i * 0.06}s`}
           class="block aspect-square overflow-hidden rounded-2xl"
         >
-          <Photo src={src} alt="Instagram @epoxart19" class="h-full w-full" />
+          <Photo src={src} alt={`Ukázka práce EpoxArt na Instagramu, fotka ${i + 1}`} class="h-full w-full" />
         </a>
       ))}
     </div>

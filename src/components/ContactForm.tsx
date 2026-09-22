@@ -1,24 +1,32 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { submitInquiry } from "../lib/inquiries";
+
+// Real visitors need at least this long to read the form and type into it;
+// a submission faster than this is almost certainly a bot script.
+const MIN_FILL_TIME_MS = 2500;
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const mountedAt = useRef(Date.now());
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    // hidden "website" field: only bots fill it in
-    if (String(f.get("website") ?? "") !== "") {
+    // hidden "website" field (only bots fill it in) + a minimum fill time —
+    // both fail silently as "sent" so we don't tip off the bot.
+    const isBot =
+      String(f.get("website") ?? "") !== "" || Date.now() - mountedAt.current < MIN_FILL_TIME_MS;
+    if (isBot) {
       setStatus("sent");
       return;
     }
     setStatus("sending");
     const res = await submitInquiry({
       kind: "contact",
-      name: String(f.get("name") ?? ""),
-      email: String(f.get("email") ?? ""),
-      subject: String(f.get("subject") ?? ""),
-      message: String(f.get("message") ?? ""),
+      name: String(f.get("name") ?? "").trim(),
+      email: String(f.get("email") ?? "").trim(),
+      subject: String(f.get("subject") ?? "").trim(),
+      message: String(f.get("message") ?? "").trim(),
     });
     setStatus(res.ok ? "sent" : "error");
   }

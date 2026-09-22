@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  id?: string;
+}
+const { title, id } = Astro.props;
+---
+
+<section id={id} class="scroll-mt-24 rounded-[22px] bg-surface p-6 sm:p-8">
+  <h2 class="font-display text-[24px] sm:text-[26px]">{title}</h2>
+  <div class="prose-legal mt-3 flex flex-col gap-3 text-[14.5px] leading-[1.75] text-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .prose-legal :global(strong) {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .prose-legal :global(a) {
+    color: var(--color-teal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose-legal :global(a:hover) {
+    color: var(--color-teal-hover);
+  }
+  .prose-legal :global(ul) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+</style>

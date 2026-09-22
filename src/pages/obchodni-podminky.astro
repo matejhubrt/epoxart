@@ -1,0 +1,131 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LegalSection from "../components/LegalSection.astro";
+import { getSiteData } from "../lib/data";
+
+const { content } = await getSiteData();
+const { texts, shipping } = content;
+
+const updated = "22. 9. 2026";
+---
+
+<Layout
+  title="Obchodní podmínky"
+  description="Obchodní podmínky EpoxArt — objednávky, ceny, doprava, reklamace a odstoupení od smlouvy."
+>
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">DOKUMENTY</p>
+    <h1 class="mt-4 font-display text-[38px] font-medium sm:text-[50px]">
+      Obchodní podmínky
+    </h1>
+    <p class="mt-3 text-sm text-muted">Poslední aktualizace: {updated}</p>
+
+    <div class="mt-10 flex max-w-[760px] flex-col gap-5">
+      <LegalSection title="1. Úvodní ustanovení">
+        <p>
+          Tyto obchodní podmínky upravují vzájemná práva a povinnosti mezi{" "}
+          <strong>{texts.owner}</strong>, podnikající fyzickou osobou (EpoxArt),
+          IČO: {texts.ico}, se sídlem {texts.address}, zapsanou v živnostenském
+          rejstříku (dále jen „prodávající"), a fyzickou osobou uzavírající smlouvu
+          mimo svou podnikatelskou činnost (dále jen „kupující" nebo „spotřebitel")
+          prostřednictvím webu epoxart.cz.
+        </p>
+        <p>
+          Prodávající <strong>není plátcem DPH</strong>. Veškeré uvedené ceny jsou
+          proto konečné.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="2. Objednávka a uzavření smlouvy">
+        <p>
+          Zboží z katalogu lze objednat vložením do košíku, u individuálně
+          konfigurovaných kusů (konfigurátor stolu) a zakázkové výroby probíhá
+          objednávka formou nezávazné poptávky, na kterou prodávající reaguje cenovou
+          nabídkou. Kupní smlouva je uzavřena okamžikem potvrzení objednávky (případně
+          cenové nabídky u zakázkové výroby) ze strany prodávajícího, typicky
+          e-mailem.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="3. Cena a platební podmínky">
+        <p>
+          Ceny zboží jsou uvedeny u jednotlivých produktů. U zakázkové výroby (např.
+          stoly konfigurované na míru) je cena stanovena individuální nabídkou po
+          poptávce, jelikož závisí na zvoleném materiálu, rozměru a provedení. Platbu
+          je možné provést způsobem dohodnutým při potvrzení objednávky.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="4. Doprava a dodání">
+        <p>
+          Standardní doba dodání je 5–10 pracovních dní od potvrzení objednávky, u
+          zakázkové výroby dle dohody v cenové nabídce. Cena dopravy činí{" "}
+          {shipping.cost} Kč a je zdarma při objednávce nad {shipping.freeFrom} Kč.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="5. Odstoupení od smlouvy do 14 dnů">
+        <p>
+          Spotřebitel má v souladu s § 1829 občanského zákoníku právo odstoupit od
+          smlouvy uzavřené distančním způsobem do <strong>14 dnů</strong> od převzetí
+          zboží, a to bez udání důvodu. Odstoupení lze zaslat na{" "}
+          <a href={`mailto:${texts.email}`}>{texts.email}</a>.
+        </p>
+        <p>
+          V souladu s § 1837 písm. d) občanského zákoníku{" "}
+          <strong>nelze odstoupit od smlouvy</strong> na dodávku zboží, které bylo
+          upraveno podle přání spotřebitele nebo pro jeho osobu — to se týká zejména
+          stolů a dalších kusů vyrobených na míru přes konfigurátor nebo na základě
+          individuální poptávky (volba dřeva, rozměru, tvaru apod.).
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Práva z vadného plnění (reklamace)">
+        <p>
+          Prodávající odpovídá za to, že zboží při převzetí nemá vady a je vyrobeno
+          poctivě, ručně, z popsaných materiálů. Práva z vadného plnění se řídí
+          příslušnými ustanoveními občanského zákoníku (zejména § 2158 a násl.).
+          Reklamaci lze uplatnit na <a href={`mailto:${texts.email}`}>{texts.email}</a>{" "}
+          nebo telefonicky na {texts.phone1}, s popisem vady a přiloženou fotografií.
+          Reklamace bude vyřízena bez zbytečného odkladu, nejpozději do 30 dnů.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Mimosoudní řešení sporů">
+        <p>
+          V případě, že mezi prodávajícím a spotřebitelem dojde ke vzniku spotřebitelského
+          sporu, má spotřebitel právo na jeho mimosoudní řešení u{" "}
+          <strong>České obchodní inspekce</strong>, se sídlem Štěpánská 567/15, 120 00
+          Praha 2, IČO: 000 20 869, internetová adresa:{" "}
+          <a href="https://adr.coi.cz" target="_blank" rel="noopener noreferrer">
+            adr.coi.cz
+          </a>. Spotřebitel může rovněž využít evropskou platformu pro řešení sporů
+          online dostupnou na{" "}
+          <a
+            href="https://ec.europa.eu/consumers/odr"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ec.europa.eu/consumers/odr
+          </a>.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Ochrana osobních údajů">
+        <p>
+          Zpracování osobních údajů v souvislosti s objednávkou se řídí{" "}
+          <a href="/ochrana-osobnich-udaju">Zásadami ochrany osobních údajů</a>.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="9. Závěrečná ustanovení">
+        <p>
+          Tyto obchodní podmínky se řídí právním řádem České republiky, zejména
+          zákonem č. 89/2012 Sb., občanský zákoník, a zákonem č. 634/1992 Sb., o
+          ochraně spotřebitele. Prodávající si vyhrazuje právo tyto podmínky
+          přiměřeně měnit; aktuální znění je vždy dostupné na této stránce.
+        </p>
+      </LegalSection>
+    </div>
+  </div>
+</Layout>

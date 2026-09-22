@@ -12,12 +12,12 @@
   --color-ink: #2b2420;
   --color-body: #5a5045;
   --color-muted: #6b6155;
-  --color-faint: #8a7d6a;
-  --color-faintest: #a2937c;
+  --color-faint: #706350; /* darkened from #8a7d6a for WCAG AA (4.5:1) on every surface it's used on */
+  --color-faintest: #72634c; /* darkened from #a2937c for the same reason */
 
   /* accents */
-  --color-amber: #a06f37;
-  --color-brown-link: #8a6a4f;
+  --color-amber: #8a5921; /* darkened from #a06f37 for WCAG AA */
+  --color-brown-link: #7e5e43; /* darkened from #8a6a4f for WCAG AA */
   --color-teal: #1f6e63;
   --color-teal-hover: #17544c;
   --color-teal-wash: #e6f0ec;
@@ -25,7 +25,7 @@
   /* borders / state */
   --color-border: #e6ddcc;
   --color-border-2: #e0d7c6;
-  --color-danger: #b08575;
+  --color-danger: #865b4b; /* darkened from #b08575 for WCAG AA */
   --color-selection: #d8c9b0;
 
   /* wood swatches */
