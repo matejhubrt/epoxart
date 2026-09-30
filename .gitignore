@@ -26,3 +26,4 @@ pnpm-debug.log*
 # local Claude Code settings
 .claude/settings.local.json
 .vercel
+Photos/
