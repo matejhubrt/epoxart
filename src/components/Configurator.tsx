@@ -36,6 +36,8 @@ function shade(hex: string, amt: number, alpha?: number): string {
 interface Config {
   wood: string;
   resin: string;
+  /** true = solid wood, no epoxy river at all */
+  noResin: boolean;
   shape: Shape;
   size: string;
   river: River;
@@ -150,7 +152,7 @@ function TablePreview({
       <div style={tableGroupStyle}>
         <div style={undersideStyle} />
         <div style={topSurfaceStyle}>
-          <div style={riverStyle} />
+          {!cfg.noResin && <div style={riverStyle} />}
           <div style={glossStyle} />
         </div>
       </div>
@@ -185,9 +187,9 @@ function InquiryForm({ cfg }: { cfg: Config }) {
       message: String(f.get("message") ?? "").trim(),
       config: {
         wood: cfg.wood,
-        resin: cfg.resin,
+        resin: cfg.noResin ? "Bez pryskyřice (čisté dřevo)" : cfg.resin,
         shape: cfg.shape,
-        river: cfg.river,
+        river: cfg.noResin ? "—" : cfg.river,
         size: cfg.size,
       },
     });
@@ -257,6 +259,7 @@ export default function Configurator({
   const [cfg, setCfg] = useState<Config>({
     wood: woods[0].label,
     resin: resins[0].label,
+    noResin: false,
     shape: "Obdélník",
     size: "",
     river: "Podél",
@@ -267,7 +270,9 @@ export default function Configurator({
 
   const summary = useMemo(
     () => ({
-      line1: `${cfg.wood} · ${cfg.resin} · řeka ${cfg.river}`,
+      line1: cfg.noResin
+        ? `${cfg.wood} · čisté dřevo, bez pryskyřice`
+        : `${cfg.wood} · ${cfg.resin} · řeka ${cfg.river}`,
       line2: `${cfg.shape} · ${cfg.size || "rozměr neuveden"}`,
     }),
     [cfg]
@@ -310,26 +315,52 @@ export default function Configurator({
         </div>
 
         <div>
-          <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ODSTÍN PRYSKYŘICE</div>
+          <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">PROVEDENÍ</div>
           <div className="flex flex-wrap gap-2.5">
-            {resins.map((r) => {
-              const active = cfg.resin === r.label;
-              return (
-                <button
-                  key={r.label}
-                  type="button"
-                  onClick={() => setCfg((c) => ({ ...c, resin: r.label }))}
-                  className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
-                    active ? "border-ink bg-footer" : "border-border-2 bg-surface"
-                  }`}
-                >
-                  <span className="h-4 w-4 rounded-full" style={{ background: r.color }} />
-                  {r.label}
-                </button>
-              );
-            })}
+            <button
+              type="button"
+              onClick={() => setCfg((c) => ({ ...c, noResin: false }))}
+              className={`rounded-full border px-[22px] py-2.5 text-[13.5px] transition-colors ${
+                !cfg.noResin ? "border-ink bg-ink text-page" : "border-border-2 bg-surface text-ink"
+              }`}
+            >
+              S epoxidovou pryskyřicí
+            </button>
+            <button
+              type="button"
+              onClick={() => setCfg((c) => ({ ...c, noResin: true }))}
+              className={`rounded-full border px-[22px] py-2.5 text-[13.5px] transition-colors ${
+                cfg.noResin ? "border-ink bg-ink text-page" : "border-border-2 bg-surface text-ink"
+              }`}
+            >
+              Čisté dřevo, bez pryskyřice
+            </button>
           </div>
         </div>
+
+        {!cfg.noResin && (
+          <div>
+            <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ODSTÍN PRYSKYŘICE</div>
+            <div className="flex flex-wrap gap-2.5">
+              {resins.map((r) => {
+                const active = cfg.resin === r.label;
+                return (
+                  <button
+                    key={r.label}
+                    type="button"
+                    onClick={() => setCfg((c) => ({ ...c, resin: r.label }))}
+                    className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
+                      active ? "border-ink bg-footer" : "border-border-2 bg-surface"
+                    }`}
+                  >
+                    <span className="h-4 w-4 rounded-full" style={{ background: r.color }} />
+                    {r.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div>
           <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">TVAR</div>
@@ -352,26 +383,28 @@ export default function Configurator({
           </div>
         </div>
 
-        <div>
-          <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">SMĚR ŘEKY</div>
-          <div className="flex flex-wrap gap-2.5">
-            {RIVERS.map((r) => {
-              const active = cfg.river === r;
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setCfg((c) => ({ ...c, river: r }))}
-                  className={`rounded-full border px-[22px] py-2.5 text-[13.5px] transition-colors ${
-                    active ? "border-ink bg-ink text-page" : "border-border-2 bg-surface text-ink"
-                  }`}
-                >
-                  {r}
-                </button>
-              );
-            })}
+        {!cfg.noResin && (
+          <div>
+            <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">SMĚR ŘEKY</div>
+            <div className="flex flex-wrap gap-2.5">
+              {RIVERS.map((r) => {
+                const active = cfg.river === r;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setCfg((c) => ({ ...c, river: r }))}
+                    className={`rounded-full border px-[22px] py-2.5 text-[13.5px] transition-colors ${
+                      active ? "border-ink bg-ink text-page" : "border-border-2 bg-surface text-ink"
+                    }`}
+                  >
+                    {r}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ROZMĚR NA MÍRU</div>
