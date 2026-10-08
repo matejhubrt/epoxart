@@ -13,7 +13,7 @@ import { getSupabase } from "../supabase";
 import { checkIsAdmin, fetchContent, saveSetting } from "../admin/api";
 import { removeImageByUrl, uploadImage } from "../admin/media";
 import { CATEGORY_KEYS, type CategoryKey } from "../products";
-import { MAX_CARDS, type BlocksSettings, type InfoCard, type SiteImages, type SiteTexts } from "../content";
+import { MAX_CARDS, MAX_GALLERY_PHOTOS, type BlocksSettings, type InfoCard, type SiteImages, type SiteTexts } from "../content";
 
 const FLAG = "epoxart-edit";
 
@@ -170,6 +170,43 @@ function showEntryPill() {
 
 // ---- the editor --------------------------------------------------------------------------
 
+/** Small ← → ✕ buttons in the corner of a card or photo; `after` runs once the DOM has changed. */
+function attachTools(item: HTMLElement, siblings: () => HTMLElement[], after: () => void, what: string) {
+  item.style.position = "relative";
+  const tools = el("div", { className: "ea-tools" });
+  const mk = (cls: string, label: string, title: string) => {
+    const b = el("button", { type: "button", className: cls }, label);
+    b.title = title;
+    b.setAttribute("aria-label", title);
+    return b;
+  };
+  const left = mk("ea-tool", "←", "Posunout dopředu");
+  const right = mk("ea-tool", "→", "Posunout dozadu");
+  const del = mk("ea-tool ea-del", "✕", `Smazat ${what}`);
+  left.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const all = siblings();
+    all[all.indexOf(item) - 1]?.before(item);
+    after();
+  });
+  right.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const all = siblings();
+    all[all.indexOf(item) + 1]?.after(item);
+    after();
+  });
+  del.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    item.remove();
+    after();
+  });
+  tools.append(left, right, del);
+  item.append(tools);
+}
+
 /** Makes an element click-to-type plain text: Enter finishes, pasted text is flattened. */
 function makeEditable(n: HTMLElement, onInput: () => void) {
   n.contentEditable = "plaintext-only";
@@ -278,35 +315,9 @@ export function startEditing() {
   }
 
   function decorate(list: CardList, item: HTMLElement) {
-    item.style.position = "relative";
     item.querySelectorAll<HTMLElement>("[data-card-field]").forEach((f) => makeEditable(f, updateBar));
 
-    const tools = el("div", { className: "ea-tools" });
-    const mk = (cls: string, label: string, title: string) => {
-      const b = el("button", { type: "button", className: cls }, label);
-      b.title = title;
-      b.setAttribute("aria-label", title);
-      return b;
-    };
-    const left = mk("ea-tool", "←", "Posunout dopředu");
-    const right = mk("ea-tool", "→", "Posunout dozadu");
-    const del = mk("ea-tool ea-del", "✕", "Smazat okénko");
-    left.addEventListener("click", () => {
-      const prev = itemsOf(list.node)[itemsOf(list.node).indexOf(item) - 1];
-      if (prev) prev.before(item);
-      relayout(list);
-    });
-    right.addEventListener("click", () => {
-      const next = itemsOf(list.node)[itemsOf(list.node).indexOf(item) + 1];
-      if (next) next.after(item);
-      relayout(list);
-    });
-    del.addEventListener("click", () => {
-      item.remove();
-      relayout(list);
-    });
-    tools.append(left, right, del);
-    item.append(tools);
+    attachTools(item, () => itemsOf(list.node), () => relayout(list), "okénko");
   }
 
   for (const node of document.querySelectorAll<HTMLElement>("[data-edit-list]")) {
@@ -342,6 +353,87 @@ export function startEditing() {
   }
 
   const changedLists = () => lists.filter((l) => JSON.stringify(readCards(l.node)) !== l.orig);
+
+  /* ---------- gallery ---------- */
+  const galleryNode = document.querySelector<HTMLElement>("[data-edit-gallery]");
+  const galleryItems = () =>
+    galleryNode
+      ? Array.from(galleryNode.children).filter(
+          (c): c is HTMLElement => c instanceof HTMLElement && c.hasAttribute("data-gallery-item")
+        )
+      : [];
+  const galleryUrls = () =>
+    galleryItems()
+      .map((f) => f.querySelector("img")?.getAttribute("src") ?? "")
+      .filter(Boolean);
+  let origGallery = JSON.stringify(galleryUrls());
+  /** photos uploaded in this session; deleted again if the owner discards the changes */
+  const galleryUploads = new Set<string>();
+  const galleryPicker = el("input", { type: "file", accept: "image/*", className: "" });
+  galleryPicker.multiple = true;
+  galleryPicker.style.display = "none";
+  document.body.append(galleryPicker);
+  let galleryBusy = false;
+  const galleryAdd = el("button", { type: "button", className: "ea-add" }, "+ Přidat fotky");
+  galleryAdd.style.aspectRatio = "4 / 3";
+
+  function galleryRelayout() {
+    if (!galleryNode) return;
+    galleryAdd.hidden = galleryItems().length >= MAX_GALLERY_PHOTOS;
+    galleryNode.append(galleryAdd); // always the last tile
+    if (ready) updateBar();
+  }
+
+  function decorateGalleryItem(item: HTMLElement) {
+    attachTools(item, galleryItems, galleryRelayout, "fotku");
+  }
+
+  if (galleryNode) {
+    document.querySelector<HTMLElement>("[data-gallery-empty]")?.setAttribute("hidden", "");
+    galleryItems().forEach(decorateGalleryItem);
+    galleryAdd.addEventListener("click", () => {
+      if (!galleryBusy) galleryPicker.click();
+    });
+    galleryPicker.addEventListener("change", async () => {
+      const files = Array.from(galleryPicker.files ?? []);
+      galleryPicker.value = "";
+      const blueprint = galleryNode.querySelector<HTMLTemplateElement>(":scope > template[data-edit-new]")
+        ?.content.firstElementChild;
+      if (files.length === 0 || !blueprint) return;
+      galleryBusy = true;
+      galleryAdd.disabled = true;
+      let done = 0;
+      const failed: string[] = [];
+      for (const file of files) {
+        if (galleryItems().length >= MAX_GALLERY_PHOTOS) {
+          failed.push(`${file.name} (galerie je plná)`);
+          continue;
+        }
+        galleryAdd.textContent = `Nahrávám ${done + failed.length + 1} / ${files.length}…`;
+        try {
+          const url = await uploadImage("gallery", file);
+          galleryUploads.add(url);
+          const item = blueprint.cloneNode(true) as HTMLElement;
+          item.dataset.url = url;
+          item.querySelector("img")?.setAttribute("src", url);
+          galleryAdd.before(item);
+          decorateGalleryItem(item);
+          done++;
+          galleryRelayout();
+        } catch {
+          failed.push(file.name);
+        }
+      }
+      galleryAdd.disabled = false;
+      galleryAdd.textContent = "+ Přidat fotky";
+      galleryBusy = false;
+      galleryRelayout();
+      if (failed.length > 0) say(`Nepodařilo se nahrát: ${failed.join(", ")}`, true);
+    });
+    galleryRelayout();
+  }
+
+  const galleryChanged = () => !!galleryNode && JSON.stringify(galleryUrls()) !== origGallery;
 
   /* ---------- photos ---------- */
   const imageEls = Array.from(document.querySelectorAll<HTMLElement>("[data-edit-image]"));
@@ -440,7 +532,9 @@ export function startEditing() {
   let message: { text: string; error: boolean } | null = null;
 
   function changeCount(): number {
-    return Object.keys(changedTexts()).length + imageChanges.size + changedLists().length;
+    return (
+      Object.keys(changedTexts()).length + imageChanges.size + changedLists().length + (galleryChanged() ? 1 : 0)
+    );
   }
 
   function updateBar() {
@@ -479,6 +573,15 @@ export function startEditing() {
         await saveSetting("blocks", blocks);
         for (const l of listChanges) l.orig = JSON.stringify(readCards(l.node));
       }
+      let removedGallery: string[] = [];
+      if (galleryChanged()) {
+        const photos = galleryUrls().slice(0, MAX_GALLERY_PHOTOS);
+        await saveSetting("gallery", { photos });
+        // photos removed now, plus ones uploaded and deleted again before saving
+        removedGallery = [...fresh.gallery.photos, ...galleryUploads].filter((u) => !photos.includes(u));
+        origGallery = JSON.stringify(galleryUrls());
+        galleryUploads.clear();
+      }
       if (imageChanges.size > 0) {
         let images = fresh.images;
         for (const [key, url] of imageChanges) images = withImage(images, key, url);
@@ -491,6 +594,8 @@ export function startEditing() {
             .map((u) => removeImageByUrl(u))
         );
       }
+      // deleted gallery photos: removed from storage unless a product or page still uses them
+      await Promise.all(removedGallery.map((u) => removeImageByUrl(u)));
       for (const [key, value] of Object.entries(texts)) origTexts.set(key, value as string);
       imageChanges.clear();
       refreshChangedMarks();
@@ -507,6 +612,7 @@ export function startEditing() {
     if (!window.confirm("Zahodit všechny neuložené změny?")) return;
     // photos uploaded during this session are not needed any more
     for (const url of imageChanges.values()) void removeImageByUrl(url);
+    for (const url of galleryUploads) void removeImageByUrl(url);
     imageChanges.clear();
     leaving = true;
     location.reload(); // shows the saved state again
@@ -515,6 +621,7 @@ export function startEditing() {
   function stop() {
     if (changeCount() > 0 && !window.confirm("Máte neuložené změny. Opravdu skončit bez uložení?")) return;
     for (const url of imageChanges.values()) void removeImageByUrl(url);
+    for (const url of galleryUploads) void removeImageByUrl(url);
     writeFlag(false);
     leaving = true;
     location.reload(); // simplest way back to the plain public page

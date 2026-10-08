@@ -1,5 +1,6 @@
 const PAGES: { href: string; title: string; text: string }[] = [
   { href: "/", title: "Úvodní stránka", text: "Hlavní fotka, nadpisy, kolekce, okénka pod nimi (přidat / smazat / přesunout) a fotky z Instagramu." },
+  { href: "/galerie", title: "Galerie", text: "Fotky v galerii: přidat více najednou, smazat, přesunout. Plus nadpis a úvodní text." },
   { href: "/o-nas", title: "O nás", text: "Příběh dílny, fotka a okénka s postupem výroby (přidat / smazat / přesunout)." },
   { href: "/produkty", title: "Produkty", text: "Nadpis stránky (samotné produkty jsou v záložce Produkty)." },
   { href: "/vyroba-na-miru", title: "Výroba na míru", text: "Nadpis a úvodní text konfigurátoru." },

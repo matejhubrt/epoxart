@@ -19,6 +19,8 @@ export interface SiteTexts {
   contactTitle: string;
   configTitle: string;
   configText: string;
+  galleryTitle: string;
+  galleryText: string;
   footerText: string;
   phone1: string;
   phone2: string;
@@ -73,6 +75,13 @@ export interface BlocksSettings {
 
 export const MAX_CARDS = 8;
 
+export interface GallerySettings {
+  /** public URLs of the photos on the gallery page, in display order */
+  photos: string[];
+}
+
+export const MAX_GALLERY_PHOTOS = 60;
+
 export interface SiteContent {
   texts: SiteTexts;
   images: SiteImages;
@@ -80,6 +89,7 @@ export interface SiteContent {
   configurator: ConfiguratorSettings;
   categories: CategorySettings;
   blocks: BlocksSettings;
+  gallery: GallerySettings;
 }
 
 export interface SiteData {
@@ -106,6 +116,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     aboutCtaTitle: "Máte nápad? Pojďme ho vyrobit.",
     productsTitle: "Naše produkty",
     contactTitle: "Ozvěte se nám",
+    galleryTitle: "Galerie",
+    galleryText: "Výběr z naší dílny — stoly, prkénka a další kousky, které jsme ručně vyrobili.",
     configTitle: "Konfigurátor stolu",
     configText:
       "Sestavte si vlastní kus. Vyberte dřevo, odstín pryskyřice, tvar a směr řeky — náhled se mění podle vás. Na závěr nám pošlete nezávaznou poptávku.",
@@ -133,6 +145,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   },
   shipping: { cost: 149, freeFrom: 2500 },
   categories: { hidden: [] },
+  gallery: { photos: [] },
   blocks: {
     why: [
       { title: "Poctivý masiv", body: "Jen české dřevo s jasným původem." },
@@ -247,7 +260,14 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
     process: cleanCards(b?.process, d.blocks.process),
   };
 
-  return { texts, images, shipping, configurator, categories, blocks };
+  const g = byKey.get("gallery") ?? {};
+  const gallery: GallerySettings = {
+    photos: (Array.isArray(g?.photos) ? (g.photos as unknown[]) : [])
+      .filter((u): u is string => typeof u === "string" && /^https?:\/\//.test(u))
+      .slice(0, MAX_GALLERY_PHOTOS),
+  };
+
+  return { texts, images, shipping, configurator, categories, blocks, gallery };
 }
 
 /** Database row -> the shape the UI uses. */

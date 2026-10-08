@@ -46,12 +46,35 @@ export async function uploadImage(folder: string, file: File): Promise<string> {
 
 const MARKER = `/storage/v1/object/public/${MEDIA_BUCKET}/`;
 
-/** Best-effort cleanup of a photo we uploaded earlier; never throws. */
-export async function removeImageByUrl(url: string | null | undefined): Promise<void> {
+/** True while a product, a page photo or the gallery still points at this photo. */
+async function isImageReferenced(url: string): Promise<boolean> {
   const supabase = getSupabase();
-  if (!supabase || !url) return;
-  const i = url.indexOf(MARKER);
-  if (i === -1) return;
-  const path = decodeURIComponent(url.slice(i + MARKER.length).split("?")[0]);
-  await supabase.storage.from(MEDIA_BUCKET).remove([path]).catch(() => undefined);
+  if (!supabase) return true;
+  const [settings, products] = await Promise.all([
+    supabase.from("site_settings").select("value"),
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("image_url", url),
+  ]);
+  // if we cannot tell, keep the file: a leftover photo is harmless, a broken one is not
+  if (settings.error || products.error) return true;
+  if ((products.count ?? 0) > 0) return true;
+  return JSON.stringify(settings.data ?? []).includes(url);
+}
+
+/**
+ * Best-effort cleanup of a photo we uploaded earlier; never throws.
+ * Photos can be shared (e.g. a product photo that is also in the gallery), so the file is
+ * only deleted once nothing refers to it any more. Call this AFTER saving the new state.
+ */
+export async function removeImageByUrl(url: string | null | undefined): Promise<void> {
+  try {
+    const supabase = getSupabase();
+    if (!supabase || !url) return;
+    const i = url.indexOf(MARKER);
+    if (i === -1) return;
+    if (await isImageReferenced(url)) return;
+    const path = decodeURIComponent(url.slice(i + MARKER.length).split("?")[0]);
+    await supabase.storage.from(MEDIA_BUCKET).remove([path]);
+  } catch {
+    /* cleanup only */
+  }
 }
