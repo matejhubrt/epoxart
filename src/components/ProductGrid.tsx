@@ -1,15 +1,12 @@
 import { useMemo, useState } from "react";
-import { CATEGORY_LABELS, formatKc, type CategoryKey, type Product } from "../lib/products";
+import { CATEGORY_KEYS, CATEGORY_LABELS, formatKc, type CategoryKey, type Product } from "../lib/products";
 import { addToCart } from "../lib/cart";
 
 type CatFilter = "vse" | CategoryKey;
 
 const CHIPS: { key: CatFilter; label: string }[] = [
   { key: "vse", label: "Vše" },
-  { key: "stoly", label: "Stoly" },
-  { key: "prkenka", label: "Prkénka" },
-  { key: "hodiny", label: "Hodiny" },
-  { key: "doplnky", label: "Doplňky" },
+  ...CATEGORY_KEYS.map((key) => ({ key, label: CATEGORY_LABELS[key] })),
 ];
 
 export default function ProductGrid({

@@ -4,6 +4,7 @@ import Configurator from "../components/Configurator.tsx";
 import { getSiteData } from "../lib/data";
 
 const { content } = await getSiteData();
+const { texts } = content;
 ---
 
 <Layout
@@ -12,10 +13,9 @@ const { content } = await getSiteData();
 >
   <div class="mx-auto max-w-content px-[28px] py-16">
     <p class="font-mono text-xs tracking-[0.28em] text-amber">VÝROBA NA MÍRU</p>
-    <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Konfigurátor stolu</h1>
-    <p class="mt-4 max-w-2xl text-[15px] leading-relaxed text-body">
-      Sestavte si vlastní kus. Vyberte dřevo, odstín pryskyřice, tvar a směr řeky — náhled se mění
-      podle vás. Na závěr nám pošlete nezávaznou poptávku.
+    <h1 data-edit-text="configTitle" class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">{texts.configTitle}</h1>
+    <p data-edit-text="configText" class="mt-4 max-w-2xl text-[15px] leading-relaxed text-body">
+      {texts.configText}
     </p>
 
     <div class="mt-12">

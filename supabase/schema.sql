@@ -37,7 +37,7 @@ $$;
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 1 and 120),
-  category text not null check (category in ('stoly', 'prkenka', 'hodiny', 'doplnky')),
+  category text not null check (category in ('stoly', 'prkenka', 'kuchyne', 'hodiny', 'doplnky')),
   description text not null default '' check (char_length(description) <= 600),
   price integer check (price is null or price >= 0),  -- null = "Cena na dotaz"
   image_url text,
@@ -45,6 +45,10 @@ create table if not exists public.products (
   visible boolean not null default true,
   created_at timestamptz not null default now()
 );
+-- databases created before the 'kuchyne' category existed need the wider list
+alter table public.products drop constraint if exists products_category_check;
+alter table public.products add constraint products_category_check
+  check (category in ('stoly', 'prkenka', 'kuchyne', 'hodiny', 'doplnky'));
 alter table public.products enable row level security;
 
 drop policy if exists "products public read" on public.products;

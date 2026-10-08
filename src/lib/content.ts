@@ -7,9 +7,18 @@ export interface SiteTexts {
   heroText: string;
   customTitle: string;
   customText: string;
+  collectionsTitle: string;
+  subStoly: string;
+  subPrkenka: string;
+  subKuchyne: string;
   aboutTitle: string;
   aboutP1: string;
   aboutP2: string;
+  aboutCtaTitle: string;
+  productsTitle: string;
+  contactTitle: string;
+  configTitle: string;
+  configText: string;
   footerText: string;
   phone1: string;
   phone2: string;
@@ -74,6 +83,16 @@ export const DEFAULT_CONTENT: SiteContent = {
     customTitle: "Navrhněte si kus, který bude jen váš.",
     customText:
       "Vyberte dřevo, odstín pryskyřice, tvar hrany i podnoží — a my z toho vytvoříme originál.",
+    collectionsTitle: "Co vyrábíme",
+    subStoly: "Jídelní & konferenční",
+    subPrkenka: "Kuchyňská & servírovací",
+    subKuchyne: "Z melaminu",
+    aboutCtaTitle: "Máte nápad? Pojďme ho vyrobit.",
+    productsTitle: "Naše produkty",
+    contactTitle: "Ozvěte se nám",
+    configTitle: "Konfigurátor stolu",
+    configText:
+      "Sestavte si vlastní kus. Vyberte dřevo, odstín pryskyřice, tvar a směr řeky — náhled se mění podle vás. Na závěr nám pošlete nezávaznou poptávku.",
     aboutTitle: "Poctivé řemeslo z dílny v Čenkově.",
     aboutP1:
       "V EpoxArt tvoříme originální designové produkty z masivního dřeva a epoxidové pryskyřice. Každý kus — ať už jde o stůl, prkénko, hodiny nebo dekoraci — je ručně vyrobený a jedinečný.",
@@ -93,7 +112,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   images: {
     hero: null,
     about: null,
-    categories: { stoly: null, prkenka: null, hodiny: null, doplnky: null },
+    categories: { stoly: null, prkenka: null, kuchyne: null, hodiny: null, doplnky: null },
     instagram: Array.from({ length: INSTAGRAM_SLOTS }, () => null),
   },
   shipping: { cost: 149, freeFrom: 2500 },
@@ -158,6 +177,7 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
     categories: {
       stoly: asUrl(cats.stoly),
       prkenka: asUrl(cats.prkenka),
+      kuchyne: asUrl(cats.kuchyne),
       hodiny: asUrl(cats.hodiny),
       doplnky: asUrl(cats.doplnky),
     },

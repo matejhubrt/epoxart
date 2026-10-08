@@ -23,17 +23,18 @@ const process = [
     <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
       <div>
         <p class="font-mono text-xs tracking-[0.28em] text-amber">O NÁS</p>
-        <h1 class="mt-4 font-display text-[42px] font-medium leading-[1.04] sm:text-[58px]">
+        <h1 data-edit-text="aboutTitle" class="mt-4 font-display text-[42px] font-medium leading-[1.04] sm:text-[58px]">
           {texts.aboutTitle}
         </h1>
-        <p class="mt-6 text-[15px] leading-[1.8] text-body">{texts.aboutP1}</p>
-        <p class="mt-4 text-[15px] leading-[1.8] text-body">{texts.aboutP2}</p>
+        <p data-edit-text="aboutP1" class="mt-6 text-[15px] leading-[1.8] text-body">{texts.aboutP1}</p>
+        <p data-edit-text="aboutP2" class="mt-4 text-[15px] leading-[1.8] text-body">{texts.aboutP2}</p>
       </div>
       <div class="h-[480px] overflow-hidden rounded-[26px]">
         <Photo
           src={images.about}
           alt={`${texts.owner} v dílně EpoxArt`}
           label="portrét · dílna / Jakub"
+          edit="about"
           class="h-full"
         />
       </div>
@@ -53,8 +54,8 @@ const process = [
   </section>
 
   <section class="mx-auto max-w-content px-[28px] py-16 text-center">
-    <h2 class="font-display text-[32px] font-medium sm:text-[40px]">
-      Máte nápad? Pojďme ho vyrobit.
+    <h2 data-edit-text="aboutCtaTitle" class="font-display text-[32px] font-medium sm:text-[40px]">
+      {texts.aboutCtaTitle}
     </h2>
     <Pill href="/vyroba-na-miru" variant="dark" class="mt-8">VÝROBA NA MÍRU</Pill>
   </section>

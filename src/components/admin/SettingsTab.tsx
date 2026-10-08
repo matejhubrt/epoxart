@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import type { ColorOption, ConfiguratorSettings, ShippingSettings } from "../../lib/content";
+import type { ColorOption, ConfiguratorSettings, ShippingSettings, SiteTexts } from "../../lib/content";
 import { CATEGORY_KEYS, CATEGORY_LABELS, type CategoryKey } from "../../lib/products";
 import { fetchContent, saveSetting } from "../../lib/admin/api";
 import { getSupabase } from "../../lib/supabase";
@@ -111,6 +111,87 @@ function PasswordCard({ notify }: { notify: Notify }) {
   );
 }
 
+type ContactKey = "phone1" | "phone2" | "email" | "owner" | "address" | "ico" | "instagram" | "facebook";
+
+const CONTACT_FIELDS: { key: ContactKey; label: string; hint?: string }[] = [
+  { key: "phone1", label: "TELEFON 1" },
+  { key: "phone2", label: "TELEFON 2", hint: "Nepovinné – nechte prázdné, pokud nemáte druhé číslo." },
+  { key: "email", label: "E-MAIL" },
+  { key: "owner", label: "JMÉNO MAJITELE" },
+  { key: "address", label: "ADRESA" },
+  { key: "ico", label: "IČO" },
+  { key: "instagram", label: "ODKAZ NA INSTAGRAM", hint: "Celá adresa, např. https://www.instagram.com/epoxart19/" },
+  { key: "facebook", label: "ODKAZ NA FACEBOOK", hint: "Celá adresa stránky na Facebooku." },
+];
+
+/** Contact details and social links: structured data (phone/mail links, legal pages), so a form, not click-to-type. */
+function ContactCard({ notify }: { notify: Notify }) {
+  const [orig, setOrig] = useState<Record<ContactKey, string> | null>(null);
+  const [vals, setVals] = useState<Record<ContactKey, string> | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetchContent()
+      .then((c) => {
+        const pick = Object.fromEntries(CONTACT_FIELDS.map((f) => [f.key, c.texts[f.key]])) as Record<ContactKey, string>;
+        setOrig(pick);
+        setVals(pick);
+      })
+      .catch((e) => notify(e instanceof Error ? e.message : "Chyba načtení.", "error"));
+  }, [notify]);
+
+  const dirty = !!orig && !!vals && CONTACT_FIELDS.some((f) => vals[f.key] !== orig[f.key]);
+  useDirtyGuard(dirty);
+
+  if (!vals) return null;
+
+  async function save() {
+    if (!vals) return;
+    const clean = Object.fromEntries(CONTACT_FIELDS.map((f) => [f.key, vals[f.key].trim()])) as Record<ContactKey, string>;
+    if (!clean.phone1 || !clean.email) return notify("Telefon 1 a e-mail nesmí být prázdné.", "error");
+    for (const k of ["instagram", "facebook"] as const) {
+      if (clean[k] && !clean[k].toLowerCase().startsWith("https://")) {
+        return notify("Odkazy musí začínat https://", "error");
+      }
+    }
+    setBusy(true);
+    try {
+      // read-modify-write, so texts changed directly on the pages are never overwritten
+      const fresh = await fetchContent();
+      const texts: SiteTexts = { ...fresh.texts, ...clean };
+      await saveSetting("texts", texts);
+      setOrig(clean);
+      setVals(clean);
+      notify("Kontaktní údaje uloženy.");
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "Uložení se nezdařilo.", "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card title="Kontaktní údaje a odkazy">
+      <div className="grid gap-4 sm:grid-cols-2">
+        {CONTACT_FIELDS.map((f) => (
+          <Field key={f.key} label={f.label} hint={f.hint}>
+            <input
+              value={vals[f.key]}
+              onChange={(e) => setVals({ ...vals, [f.key]: e.target.value })}
+              className={inputCls}
+            />
+          </Field>
+        ))}
+      </div>
+      <div className="mt-5">
+        <Button variant="primary" disabled={!dirty || busy} onClick={save}>
+          {busy ? "Ukládám…" : dirty ? "Uložit kontaktní údaje" : "Uloženo"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function SettingsTab({ notify }: { notify: Notify }) {
   const [origConf, setOrigConf] = useState<ConfiguratorSettings | null>(null);
   const [origShip, setOrigShip] = useState<ShippingSettings | null>(null);
@@ -187,7 +268,7 @@ export function SettingsTab({ notify }: { notify: Notify }) {
         <div>
           <h2 className="font-display text-[32px]">Nastavení</h2>
           <p className="text-sm text-muted">
-            Kategorie na webu, možnosti konfigurátoru stolu, doprava a heslo.
+            Kategorie na webu, konfigurátor stolu, doprava, kontaktní údaje a heslo.
           </p>
         </div>
         <Button variant="primary" disabled={!dirty || saving} onClick={save}>
@@ -267,6 +348,8 @@ export function SettingsTab({ notify }: { notify: Notify }) {
           </Field>
         </div>
       </Card>
+
+      <ContactCard notify={notify} />
 
       <PasswordCard notify={notify} />
     </div>

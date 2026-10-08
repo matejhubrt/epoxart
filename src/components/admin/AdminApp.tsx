@@ -4,12 +4,12 @@ import { getSupabase, supabaseConfigured } from "../../lib/supabase";
 import { checkIsAdmin, countUnread } from "../../lib/admin/api";
 import { Login, SetNewPassword } from "./Login";
 import { ProductsTab } from "./ProductsTab";
-import { SiteTab } from "./SiteTab";
+import { PagesTab } from "./PagesTab";
 import { InboxTab } from "./InboxTab";
 import { SettingsTab } from "./SettingsTab";
 import { Button, Toast, type Notify } from "./ui";
 
-type TabKey = "products" | "site" | "inbox" | "settings";
+type TabKey = "pages" | "products" | "inbox" | "settings";
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (
@@ -26,7 +26,7 @@ export default function AdminApp() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [recovery, setRecovery] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<TabKey>("products");
+  const [tab, setTab] = useState<TabKey>("pages");
   const [unread, setUnread] = useState(0);
   const [toast, setToast] = useState<{ message: string; kind: "ok" | "error" } | null>(null);
   const toastTimer = useRef<number>(undefined);
@@ -90,8 +90,8 @@ export default function AdminApp() {
   }
 
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
+    { key: "pages", label: "Úpravy stránek" },
     { key: "products", label: "Produkty" },
-    { key: "site", label: "Fotky a texty" },
     { key: "inbox", label: "Poptávky", badge: unread },
     { key: "settings", label: "Nastavení" },
   ];
@@ -149,8 +149,8 @@ export default function AdminApp() {
       </header>
 
       <main className="mx-auto max-w-[1080px] px-5 py-8 pb-24">
+        {tab === "pages" && <PagesTab />}
         {tab === "products" && <ProductsTab notify={notify} />}
-        {tab === "site" && <SiteTab notify={notify} />}
         {tab === "inbox" && <InboxTab notify={notify} onChanged={refreshUnread} />}
         {tab === "settings" && <SettingsTab notify={notify} />}
       </main>

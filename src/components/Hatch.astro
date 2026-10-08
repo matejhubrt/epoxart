@@ -3,11 +3,12 @@ interface Props {
   label?: string;
   glow?: boolean;
   class?: string;
+  edit?: string;
 }
-const { label, glow = false, class: className = "" } = Astro.props;
+const { label, glow = false, class: className = "", edit } = Astro.props;
 ---
 
-<div class:list={["hatch relative overflow-hidden", className]}>
+<div class:list={["hatch relative overflow-hidden", className]} data-edit-image={edit}>
   {glow && (
     <>
       <div

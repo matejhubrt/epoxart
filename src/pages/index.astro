@@ -4,7 +4,7 @@ import Hatch from "../components/Hatch.astro";
 import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
 import { getSiteData } from "../lib/data";
-import { CATEGORY_KEYS, CATEGORY_LABELS, type CategoryKey } from "../lib/products";
+import { CATEGORY_LABELS, HOME_CATEGORY_KEYS, type CategoryKey } from "../lib/products";
 
 const { content } = await getSiteData();
 const { texts, images } = content;
@@ -16,17 +16,18 @@ const whyCards = [
   { n: "04", title: "Na míru", body: "Barva, tvar i podnoží dle vás." },
 ];
 
-const collectionSubs: Record<CategoryKey, string> = {
-  stoly: "Jídelní & konferenční",
-  prkenka: "Kuchyňská & servírovací",
-  hodiny: "Nástěnné z masivu",
-  doplnky: "Dekorace & drobnosti",
+// which editable text holds the small caption under each tile
+const collectionSubKeys: Partial<Record<CategoryKey, "subStoly" | "subPrkenka" | "subKuchyne">> = {
+  stoly: "subStoly",
+  prkenka: "subPrkenka",
+  kuchyne: "subKuchyne",
 };
-const collections = CATEGORY_KEYS.filter((cat) => !content.categories.hidden.includes(cat)).map(
+const collections = HOME_CATEGORY_KEYS.filter((cat) => !content.categories.hidden.includes(cat)).map(
   (cat) => ({
     cat,
     label: CATEGORY_LABELS[cat],
-    sub: collectionSubs[cat],
+    subKey: collectionSubKeys[cat]!,
+    sub: texts[collectionSubKeys[cat]!],
     image: images.categories[cat],
   })
 );
@@ -39,6 +40,7 @@ const mdCols: Record<number, string> = {
   4: "md:grid-cols-4",
 };
 const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
+const heroPhoto = Boolean(images.hero);
 ---
 
 <Layout
@@ -53,26 +55,87 @@ const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
         glow
         class="absolute inset-0 h-full"
         eager
+        edit="hero"
       />
-      {images.hero && <div class="absolute inset-0 bg-page/55"></div>}
+      {heroPhoto && (
+        <div
+          class="pointer-events-none absolute inset-0"
+          style="background: radial-gradient(70% 75% at 50% 50%, rgba(22,15,10,.5), rgba(22,15,10,.22) 70%, rgba(22,15,10,.08) 100%);"
+        ></div>
+      )}
       <div class="relative z-10 mx-auto max-w-[820px] px-6 text-center">
-        <p class="font-mono text-xs tracking-[0.28em] text-amber">{texts.heroEyebrow}</p>
-        <h1 class="mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[72px] md:text-[88px]">
-          {texts.heroTitle1} <br />
-          <em class="text-teal not-italic italic">{texts.heroTitle2}</em>
+        <p
+          data-edit-text="heroEyebrow"
+          class:list={["font-mono text-xs tracking-[0.28em]", heroPhoto ? "text-white/90" : "text-amber"]}
+        >
+          {texts.heroEyebrow}
+        </p>
+        <h1
+          class:list={[
+            "mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[72px] md:text-[88px]",
+            heroPhoto && "text-white [text-shadow:0_2px_24px_rgba(0,0,0,.35)]",
+          ]}
+        >
+          <span data-edit-text="heroTitle1">{texts.heroTitle1}</span> <br />
+          <em data-edit-text="heroTitle2" class:list={["not-italic italic", heroPhoto ? "text-[#a6e0d3]" : "text-teal"]}>{texts.heroTitle2}</em>
         </h1>
-        <p class="mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7] text-body">
+        <p
+          data-edit-text="heroText"
+          class:list={[
+            "mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7]",
+            heroPhoto ? "text-white/95 [text-shadow:0_1px_12px_rgba(0,0,0,.4)]" : "text-body",
+          ]}
+        >
           {texts.heroText}
         </p>
         <div class="mt-8 flex flex-col items-center gap-4">
-          <Pill href="/vyroba-na-miru" variant="dark">VÝROBA NA MÍRU</Pill>
-          <a href="/produkty" class="text-sm text-brown-link underline-offset-2 hover:text-teal hover:underline">
+          <Pill href="/vyroba-na-miru" variant={heroPhoto ? "light" : "dark"}>VÝROBA NA MÍRU</Pill>
+          <a
+            href="/produkty"
+            class:list={[
+              "text-sm underline-offset-2 hover:underline",
+              heroPhoto ? "text-white/95 hover:text-white" : "text-brown-link hover:text-teal",
+            ]}
+          >
             nebo si prohlédněte hotové produkty →
           </a>
         </div>
       </div>
     </section>
   </div>
+
+  {collections.length > 0 && (
+    <section class="mx-auto max-w-content px-[28px] pb-8 pt-16">
+      <div class="mb-6 flex items-end justify-between">
+        <h2 data-edit-text="collectionsTitle" class="font-display text-[44px] font-medium">{texts.collectionsTitle}</h2>
+        <a href="/produkty" class="text-sm text-brown-link hover:text-teal">Zobrazit vše →</a>
+      </div>
+      <div class={`grid grid-cols-1 gap-[18px] sm:grid-cols-2 ${collectionGridCols}`}>
+        {collections.map((c, i) => (
+          <a
+            href={`/produkty?kat=${c.cat}`}
+            data-reveal
+            style={`transition-delay:${i * 0.06}s`}
+            class="group overflow-hidden rounded-[22px] bg-surface"
+          >
+            <div class="h-[300px] overflow-hidden">
+              <Photo
+                src={c.image}
+                alt={c.label}
+                label={c.label}
+                edit={`cat:${c.cat}`}
+                class="h-full transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            </div>
+            <div class="px-[22px] py-[18px]">
+              <div class="font-display text-2xl">{c.label}</div>
+              <div data-edit-text={c.subKey} class="text-xs text-brown-link">{c.sub}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 
   <section class="mx-auto max-w-content px-[28px] py-16">
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
@@ -91,36 +154,6 @@ const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
   </section>
 
   <section class="mx-auto max-w-content px-[28px] py-16">
-    <div class="mb-6 flex items-end justify-between">
-      <h2 class="font-display text-[44px] font-medium">Kolekce</h2>
-      <a href="/produkty" class="text-sm text-brown-link hover:text-teal">Zobrazit vše →</a>
-    </div>
-    <div class={`grid grid-cols-1 gap-[18px] sm:grid-cols-2 ${collectionGridCols}`}>
-      {collections.map((c, i) => (
-        <a
-          href={`/produkty?kat=${c.cat}`}
-          data-reveal
-          style={`transition-delay:${i * 0.06}s`}
-          class="group overflow-hidden rounded-[22px] bg-surface"
-        >
-          <div class="h-[300px] overflow-hidden">
-            <Photo
-              src={c.image}
-              alt={c.label}
-              label={c.label}
-              class="h-full transition-transform duration-500 group-hover:scale-[1.03]"
-            />
-          </div>
-          <div class="px-[22px] py-[18px]">
-            <div class="font-display text-2xl">{c.label}</div>
-            <div class="text-xs text-brown-link">{c.sub}</div>
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <section class="mx-auto max-w-content px-[28px] py-16">
     <div data-reveal class="relative overflow-hidden rounded-[26px]">
       <Hatch class="absolute inset-0" />
       <div
@@ -129,10 +162,10 @@ const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
       />
       <div class="relative z-10 mx-auto max-w-[640px] px-8 py-20 text-center">
         <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
-        <h2 class="mt-5 font-display text-[38px] font-medium sm:text-[54px]">
+        <h2 data-edit-text="customTitle" class="mt-5 font-display text-[38px] font-medium sm:text-[54px]">
           {texts.customTitle}
         </h2>
-        <p class="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-body">
+        <p data-edit-text="customText" class="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-body">
           {texts.customText}
         </p>
         <Pill href="/vyroba-na-miru" variant="teal" class="mt-8">SPUSTIT KONFIGURÁTOR</Pill>
@@ -162,7 +195,12 @@ const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
           style={`transition-delay:${i * 0.06}s`}
           class="block aspect-square overflow-hidden rounded-2xl"
         >
-          <Photo src={src} alt={`Ukázka práce EpoxArt na Instagramu, fotka ${i + 1}`} class="h-full w-full" />
+          <Photo
+            src={src}
+            alt={`Ukázka práce EpoxArt na Instagramu, fotka ${i + 1}`}
+            edit={`insta:${i}`}
+            class="h-full w-full"
+          />
         </a>
       ))}
     </div>

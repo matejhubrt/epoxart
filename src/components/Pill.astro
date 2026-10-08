@@ -1,7 +1,7 @@
 ---
 interface Props {
   href: string;
-  variant?: "dark" | "outline" | "teal" | "teal-outline";
+  variant?: "dark" | "outline" | "teal" | "teal-outline" | "light";
   class?: string;
 }
 const { href, variant = "dark", class: className = "" } = Astro.props;
@@ -11,6 +11,7 @@ const variants: Record<string, string> = {
   outline: "border border-ink text-ink hover:bg-ink hover:text-page",
   teal: "bg-teal text-page hover:bg-teal-hover",
   "teal-outline": "border border-teal text-teal hover:bg-teal hover:text-page",
+  light: "bg-surface text-ink hover:bg-white",
 };
 ---
 

@@ -1,4 +1,4 @@
-export type CategoryKey = "stoly" | "prkenka" | "hodiny" | "doplnky";
+export type CategoryKey = "stoly" | "prkenka" | "kuchyne" | "hodiny" | "doplnky";
 
 export interface Product {
   id: string;
@@ -11,11 +11,15 @@ export interface Product {
   image: string | null;
 }
 
-export const CATEGORY_KEYS: CategoryKey[] = ["stoly", "prkenka", "hodiny", "doplnky"];
+export const CATEGORY_KEYS: CategoryKey[] = ["stoly", "prkenka", "kuchyne", "hodiny", "doplnky"];
+
+/** The categories shown as tiles on the home page ("Co vyrábíme"). */
+export const HOME_CATEGORY_KEYS: CategoryKey[] = ["stoly", "prkenka", "kuchyne"];
 
 export const CATEGORY_LABELS: Record<CategoryKey, string> = {
   stoly: "Stoly",
   prkenka: "Prkénka",
+  kuchyne: "Kuchyňské linky",
   hodiny: "Hodiny",
   doplnky: "Doplňky",
 };

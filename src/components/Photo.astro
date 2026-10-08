@@ -8,8 +8,10 @@ interface Props {
   glow?: boolean;
   class?: string;
   eager?: boolean;
+  /** key of the editable site photo (lets the logged-in owner replace it in place) */
+  edit?: string;
 }
-const { src, alt = "", label, glow = false, class: className = "", eager = false } = Astro.props;
+const { src, alt = "", label, glow = false, class: className = "", eager = false, edit } = Astro.props;
 ---
 
 {src ? (
@@ -18,8 +20,9 @@ const { src, alt = "", label, glow = false, class: className = "", eager = false
     alt={alt}
     loading={eager ? "eager" : "lazy"}
     decoding="async"
+    data-edit-image={edit}
     class:list={["block w-full object-cover", className]}
   />
 ) : (
-  <Hatch label={label} glow={glow} class={className} />
+  <Hatch label={label} glow={glow} class={className} edit={edit} />
 )}

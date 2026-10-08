@@ -5,6 +5,7 @@ import { getSiteData } from "../lib/data";
 import { CATEGORY_KEYS } from "../lib/products";
 
 const { products, content } = await getSiteData();
+const { texts } = content;
 
 const visibleCategories = CATEGORY_KEYS.filter((c) => !content.categories.hidden.includes(c));
 const catParam = Astro.url.searchParams.get("kat");
@@ -17,7 +18,7 @@ const initialCat = visibleCategories.find((c) => c === catParam) ?? "vse";
 >
   <div class="mx-auto max-w-content px-[28px] py-16">
     <p class="font-mono text-xs tracking-[0.28em] text-amber">PRODUKTY</p>
-    <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Naše produkty</h1>
+    <h1 data-edit-text="productsTitle" class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">{texts.productsTitle}</h1>
 
     <div class="mt-10">
       <ProductGrid
