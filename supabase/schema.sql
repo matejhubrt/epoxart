@@ -59,10 +59,14 @@ create policy "products admin write" on public.products
 -- Site settings: texts, images, shipping, configurator options (one row each)
 -- ---------------------------------------------------------------------------
 create table if not exists public.site_settings (
-  key text primary key check (key in ('texts', 'images', 'shipping', 'configurator')),
+  key text primary key check (key in ('texts', 'images', 'shipping', 'configurator', 'categories')),
   value jsonb not null,
   updated_at timestamptz not null default now()
 );
+-- databases created before the 'categories' setting existed need the wider list
+alter table public.site_settings drop constraint if exists site_settings_key_check;
+alter table public.site_settings add constraint site_settings_key_check
+  check (key in ('texts', 'images', 'shipping', 'configurator', 'categories'));
 alter table public.site_settings enable row level security;
 
 drop policy if exists "settings public read" on public.site_settings;

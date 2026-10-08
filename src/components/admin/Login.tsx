@@ -41,7 +41,13 @@ export function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-12">
       <form onSubmit={onSubmit} className="w-full max-w-[400px] rounded-[26px] bg-surface p-8 sm:p-10">
-        <div className="font-display text-[26px] font-semibold tracking-[0.14em]">EPOXART</div>
+        <a
+          href="/"
+          title="Zpět na hlavní stránku"
+          className="inline-block font-display text-[26px] font-semibold tracking-[0.14em] hover:text-teal"
+        >
+          EPOXART
+        </a>
         <h1 className="mt-6 font-display text-[32px] font-medium leading-tight">Administrace</h1>
         <p className="mt-1 text-sm text-muted">Přihlaste se, abyste mohli upravovat web.</p>
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { CATEGORY_KEYS, CATEGORY_LABELS, formatKc, type CategoryKey } from "../../lib/products";
 import {
   deleteProduct,
+  fetchContent,
   fetchProducts,
   saveProduct,
   setProductVisible,
@@ -153,10 +154,15 @@ export function ProductsTab({ notify }: { notify: Notify }) {
   const [products, setProducts] = useState<AdminProduct[] | null>(null);
   const [editing, setEditing] = useState<ProductDraft | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [hiddenCats, setHiddenCats] = useState<CategoryKey[]>([]);
 
   const load = useCallback(async () => {
     try {
       setProducts(await fetchProducts());
+      // only used for a hint label, so a failure here is not worth an error message
+      fetchContent()
+        .then((c) => setHiddenCats(c.categories.hidden))
+        .catch(() => undefined);
     } catch (e) {
       notify(e instanceof Error ? e.message : "Chyba načtení.", "error");
       setProducts([]);
@@ -235,6 +241,7 @@ export function ProductsTab({ notify }: { notify: Notify }) {
                 <div className="text-xs text-faint">
                   {CATEGORY_LABELS[p.cat]} · {p.price === null ? "Cena na dotaz" : formatKc(p.price)}
                   {!p.visible && " · skryto"}
+                  {hiddenCats.includes(p.cat) && " · kategorie je vypnutá (Nastavení)"}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">

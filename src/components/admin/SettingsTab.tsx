@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { ColorOption, ConfiguratorSettings, ShippingSettings } from "../../lib/content";
+import { CATEGORY_KEYS, CATEGORY_LABELS, type CategoryKey } from "../../lib/products";
 import { fetchContent, saveSetting } from "../../lib/admin/api";
 import { getSupabase } from "../../lib/supabase";
 import { Button, Card, Field, inputCls, useDirtyGuard, type Notify } from "./ui";
@@ -116,6 +117,8 @@ export function SettingsTab({ notify }: { notify: Notify }) {
   const [conf, setConf] = useState<ConfiguratorSettings | null>(null);
   const [cost, setCost] = useState("");
   const [freeFrom, setFreeFrom] = useState("");
+  const [hidden, setHidden] = useState<CategoryKey[]>([]);
+  const [origHidden, setOrigHidden] = useState<CategoryKey[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -126,6 +129,8 @@ export function SettingsTab({ notify }: { notify: Notify }) {
         setConf(c.configurator);
         setCost(String(c.shipping.cost));
         setFreeFrom(String(c.shipping.freeFrom));
+        setHidden(c.categories.hidden);
+        setOrigHidden(c.categories.hidden);
       })
       .catch((e) => notify(e instanceof Error ? e.message : "Chyba načtení.", "error"));
   }, [notify]);
@@ -136,8 +141,9 @@ export function SettingsTab({ notify }: { notify: Notify }) {
       !!origShip &&
       (JSON.stringify(conf) !== JSON.stringify(origConf) ||
         cost !== String(origShip.cost) ||
-        freeFrom !== String(origShip.freeFrom)),
-    [conf, cost, freeFrom, origConf, origShip]
+        freeFrom !== String(origShip.freeFrom) ||
+        [...hidden].sort().join() !== [...origHidden].sort().join()),
+    [conf, cost, freeFrom, hidden, origConf, origHidden, origShip]
   );
   useDirtyGuard(dirty);
 
@@ -162,9 +168,11 @@ export function SettingsTab({ notify }: { notify: Notify }) {
       const shipping: ShippingSettings = { cost: Math.round(costNum), freeFrom: Math.round(freeNum) };
       await saveSetting("configurator", cleaned);
       await saveSetting("shipping", shipping);
+      await saveSetting("categories", { hidden });
       setConf(cleaned);
       setOrigConf(cleaned);
       setOrigShip(shipping);
+      setOrigHidden(hidden);
       notify("Nastavení uloženo.");
     } catch (e) {
       notify(e instanceof Error ? e.message : "Uložení se nezdařilo.", "error");
@@ -178,12 +186,51 @@ export function SettingsTab({ notify }: { notify: Notify }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-[32px]">Nastavení</h2>
-          <p className="text-sm text-muted">Možnosti konfigurátoru stolu, doprava a heslo.</p>
+          <p className="text-sm text-muted">
+            Kategorie na webu, možnosti konfigurátoru stolu, doprava a heslo.
+          </p>
         </div>
         <Button variant="primary" disabled={!dirty || saving} onClick={save}>
           {saving ? "Ukládám…" : dirty ? "Uložit změny" : "Vše uloženo"}
         </Button>
       </div>
+
+      <Card title="Kategorie na webu">
+        <p className="mb-4 text-sm text-muted">
+          Vypnutou kategorii návštěvníci neuvidí: zmizí z úvodní stránky i z filtru produktů a její
+          produkty se nezobrazí. Nic se nemaže, kdykoli ji můžete znovu zapnout.
+        </p>
+        <ul className="flex flex-col gap-3">
+          {CATEGORY_KEYS.map((k) => {
+            const on = !hidden.includes(k);
+            const isLastVisible = on && CATEGORY_KEYS.length - hidden.length === 1;
+            return (
+              <li
+                key={k}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-border-2 bg-white px-4 py-3"
+              >
+                <div>
+                  <div className="font-display text-[20px] leading-tight">{CATEGORY_LABELS[k]}</div>
+                  <div className="text-xs text-faint">
+                    {on ? "Zobrazeno na webu" : "Skryto, na webu není vidět"}
+                  </div>
+                </div>
+                <Button
+                  variant={on ? "outline" : "primary"}
+                  className="!px-4 !py-2"
+                  disabled={isLastVisible}
+                  title={isLastVisible ? "Alespoň jedna kategorie musí zůstat zapnutá." : undefined}
+                  onClick={() =>
+                    setHidden(on ? [...hidden, k] : hidden.filter((h) => h !== k))
+                  }
+                >
+                  {on ? "Vypnout" : "Zapnout"}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
 
       <Card title="Konfigurátor stolu">
         <div className="grid gap-8 md:grid-cols-2">

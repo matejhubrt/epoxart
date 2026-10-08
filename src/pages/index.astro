@@ -22,12 +22,23 @@ const collectionSubs: Record<CategoryKey, string> = {
   hodiny: "Nástěnné z masivu",
   doplnky: "Dekorace & drobnosti",
 };
-const collections = CATEGORY_KEYS.map((cat) => ({
-  cat,
-  label: CATEGORY_LABELS[cat],
-  sub: collectionSubs[cat],
-  image: images.categories[cat],
-}));
+const collections = CATEGORY_KEYS.filter((cat) => !content.categories.hidden.includes(cat)).map(
+  (cat) => ({
+    cat,
+    label: CATEGORY_LABELS[cat],
+    sub: collectionSubs[cat],
+    image: images.categories[cat],
+  })
+);
+
+// keep the tiles evenly spread when the owner switches some categories off
+const mdCols: Record<number, string> = {
+  1: "md:grid-cols-1",
+  2: "md:grid-cols-2",
+  3: "md:grid-cols-3",
+  4: "md:grid-cols-4",
+};
+const collectionGridCols = mdCols[collections.length] ?? "md:grid-cols-4";
 ---
 
 <Layout
@@ -84,7 +95,7 @@ const collections = CATEGORY_KEYS.map((cat) => ({
       <h2 class="font-display text-[44px] font-medium">Kolekce</h2>
       <a href="/produkty" class="text-sm text-brown-link hover:text-teal">Zobrazit vše →</a>
     </div>
-    <div class="grid grid-cols-1 gap-[18px] sm:grid-cols-2 md:grid-cols-4">
+    <div class={`grid grid-cols-1 gap-[18px] sm:grid-cols-2 ${collectionGridCols}`}>
       {collections.map((c, i) => (
         <a
           href={`/produkty?kat=${c.cat}`}

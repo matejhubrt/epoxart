@@ -100,7 +100,13 @@ export default function AdminApp() {
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-border bg-[rgba(250,247,241,0.92)] backdrop-blur-md">
         <div className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3.5">
-          <div className="font-display text-[22px] font-semibold tracking-[0.14em]">EPOXART</div>
+          <a
+            href="/"
+            title="Zpět na hlavní stránku"
+            className="font-display text-[22px] font-semibold tracking-[0.14em] hover:text-teal"
+          >
+            EPOXART
+          </a>
           <span className="rounded-full bg-footer px-3 py-1 text-[11px] tracking-[0.1em] text-brown-link">
             ADMINISTRACE
           </span>

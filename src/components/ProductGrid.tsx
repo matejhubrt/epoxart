@@ -14,12 +14,16 @@ const CHIPS: { key: CatFilter; label: string }[] = [
 
 export default function ProductGrid({
   products: all,
+  categories,
   initialCat = "vse",
 }: {
   products: Product[];
+  /** categories that are switched on; the others get no filter chip */
+  categories: CategoryKey[];
   initialCat?: CatFilter;
 }) {
   const [cat, setCat] = useState<CatFilter>(initialCat);
+  const chips = CHIPS.filter((c) => c.key === "vse" || categories.includes(c.key));
   const [added, setAdded] = useState<string | null>(null);
 
   const products = useMemo(
@@ -36,7 +40,7 @@ export default function ProductGrid({
   return (
     <div>
       <div className="flex flex-wrap gap-2.5">
-        {CHIPS.map((c) => {
+        {chips.map((c) => {
           const active = cat === c.key;
           return (
             <button

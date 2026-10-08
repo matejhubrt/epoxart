@@ -1,4 +1,4 @@
-import type { CategoryKey, Product } from "./products";
+import { CATEGORY_KEYS, type CategoryKey, type Product } from "./products";
 
 export interface SiteTexts {
   heroEyebrow: string;
@@ -44,11 +44,17 @@ export interface ConfiguratorSettings {
   resins: ColorOption[];
 }
 
+export interface CategorySettings {
+  /** categories the owner switched off: hidden from the shop, filters and home page */
+  hidden: CategoryKey[];
+}
+
 export interface SiteContent {
   texts: SiteTexts;
   images: SiteImages;
   shipping: ShippingSettings;
   configurator: ConfiguratorSettings;
+  categories: CategorySettings;
 }
 
 export interface SiteData {
@@ -91,6 +97,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     instagram: Array.from({ length: INSTAGRAM_SLOTS }, () => null),
   },
   shipping: { cost: 149, freeFrom: 2500 },
+  categories: { hidden: [] },
   configurator: {
     woods: [
       { label: "Ořech", color: "#5a3a22" },
@@ -169,7 +176,13 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
     resins: cleanColors(c?.resins, d.configurator.resins),
   };
 
-  return { texts, images, shipping, configurator };
+  const cat = byKey.get("categories") ?? {};
+  const hiddenRaw = Array.isArray(cat?.hidden) ? (cat.hidden as unknown[]) : [];
+  const categories: CategorySettings = {
+    hidden: CATEGORY_KEYS.filter((k) => hiddenRaw.includes(k)),
+  };
+
+  return { texts, images, shipping, configurator, categories };
 }
 
 /** Database row -> the shape the UI uses. */

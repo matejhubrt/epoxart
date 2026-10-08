@@ -31,9 +31,13 @@ export async function getSiteData(): Promise<SiteData> {
     if (products.error) throw products.error;
     if (settings.error) throw settings.error;
 
+    const content = mergeContent(settings.data ?? []);
     const data: SiteData = {
-      products: (products.data ?? []).map(rowToProduct),
-      content: mergeContent(settings.data ?? []),
+      // products in a category the owner switched off are not shown anywhere on the public site
+      products: (products.data ?? [])
+        .map(rowToProduct)
+        .filter((p) => !content.categories.hidden.includes(p.cat)),
+      content,
     };
     cached = { at: Date.now(), data };
     return data;
