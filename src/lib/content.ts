@@ -58,12 +58,28 @@ export interface CategorySettings {
   hidden: CategoryKey[];
 }
 
+/** One "window" (card) with a heading and a short text; its number is just its position. */
+export interface InfoCard {
+  title: string;
+  body: string;
+}
+
+export interface BlocksSettings {
+  /** the cards under the hero on the home page */
+  why: InfoCard[];
+  /** the production steps on the "O nás" page */
+  process: InfoCard[];
+}
+
+export const MAX_CARDS = 8;
+
 export interface SiteContent {
   texts: SiteTexts;
   images: SiteImages;
   shipping: ShippingSettings;
   configurator: ConfiguratorSettings;
   categories: CategorySettings;
+  blocks: BlocksSettings;
 }
 
 export interface SiteData {
@@ -117,6 +133,20 @@ export const DEFAULT_CONTENT: SiteContent = {
   },
   shipping: { cost: 149, freeFrom: 2500 },
   categories: { hidden: [] },
+  blocks: {
+    why: [
+      { title: "Poctivý masiv", body: "Jen české dřevo s jasným původem." },
+      { title: "Unikátnost", body: "Originál, který nikdo jiný nemá." },
+      { title: "Odolnost", body: "Oleje a pryskyřice na generace." },
+      { title: "Na míru", body: "Barva, tvar i podnoží dle vás." },
+    ],
+    process: [
+      { title: "Výběr dřeva", body: "Vybíráme kvalitní český masiv s výrazným charakterem." },
+      { title: "Zalití pryskyřicí", body: "Ruční míchání odstínů a pečlivé lití bez bublin." },
+      { title: "Broušení", body: "Postupné broušení do hedvábně hladkého povrchu." },
+      { title: "Finální olej", body: "Ochranné oleje, které povrch chrání na generace." },
+    ],
+  },
   configurator: {
     woods: [
       { label: "Ořech", color: "#5a3a22" },
@@ -143,6 +173,15 @@ function cleanColors(input: unknown, fallback: ColorOption[]): ColorOption[] {
       !!o && typeof o.label === "string" && o.label.trim() !== "" && HEX.test(o.color)
   );
   return valid.length > 0 ? valid : fallback;
+}
+
+/** A saved list wins even when it is empty (the owner may delete every card); junk falls back. */
+function cleanCards(input: unknown, fallback: InfoCard[]): InfoCard[] {
+  if (!Array.isArray(input)) return fallback;
+  return input
+    .filter((c): c is InfoCard => !!c && typeof c.title === "string" && typeof c.body === "string")
+    .map((c) => ({ title: c.title.slice(0, 80), body: c.body.slice(0, 300) }))
+    .slice(0, MAX_CARDS);
 }
 
 function asString(v: unknown, fallback: string): string {
@@ -202,7 +241,13 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
     hidden: CATEGORY_KEYS.filter((k) => hiddenRaw.includes(k)),
   };
 
-  return { texts, images, shipping, configurator, categories };
+  const b = byKey.get("blocks") ?? {};
+  const blocks: BlocksSettings = {
+    why: cleanCards(b?.why, d.blocks.why),
+    process: cleanCards(b?.process, d.blocks.process),
+  };
+
+  return { texts, images, shipping, configurator, categories, blocks };
 }
 
 /** Database row -> the shape the UI uses. */

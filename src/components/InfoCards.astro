@@ -1,0 +1,57 @@
+---
+import type { InfoCard } from "../lib/content";
+import { MAX_CARDS } from "../lib/content";
+
+interface Props {
+  /** which saved list this is ("why" on the home page, "process" on "O nás") */
+  listKey: "why" | "process";
+  cards: InfoCard[];
+  size?: "sm" | "lg";
+  /** fade-in on scroll (home page only) */
+  reveal?: boolean;
+}
+const { listKey, cards, size = "sm", reveal = false } = Astro.props;
+
+const cls = {
+  sm: { box: "p-[30px_28px]", num: "text-[34px]", title: "text-sm" },
+  lg: { box: "p-[30px_26px]", num: "text-[38px]", title: "text-[15px]" },
+}[size];
+const boxCls = `rounded-[20px] bg-surface ${cls.box}`;
+const pad = (n: number) => String(n).padStart(2, "0");
+// up to four cards share one row; the full class names are spelled out so Tailwind keeps them
+const mdCols = ["md:grid-cols-4", "md:grid-cols-1", "md:grid-cols-2", "md:grid-cols-3", "md:grid-cols-4"][
+  Math.min(cards.length, 4)
+];
+---
+
+<!-- an empty list stays hidden for visitors; the owner's editor un-hides it so cards can be added again -->
+<section data-edit-list-wrap hidden={cards.length === 0} class="mx-auto max-w-content px-[28px] py-16">
+  <div
+    data-edit-list={listKey}
+    data-edit-max={MAX_CARDS}
+    class:list={["grid grid-cols-1 gap-4 sm:grid-cols-2", mdCols]}
+  >
+    {cards.map((c, i) => (
+      <div
+        data-edit-item
+        data-reveal={reveal ? "" : undefined}
+        style={reveal ? `transition-delay:${i * 0.06}s` : undefined}
+        class={boxCls}
+      >
+        <div data-card-num class:list={["font-display text-teal", cls.num]}>{pad(i + 1)}</div>
+        <div data-card-field="title" class:list={["mt-2 font-bold", cls.title]}>{c.title}</div>
+        <p data-card-field="body" class="mt-1 text-[13px] leading-relaxed text-muted">{c.body}</p>
+      </div>
+    ))}
+    <!-- blueprint the editor copies when the owner adds a card -->
+    <template data-edit-new>
+      <div data-edit-item class={boxCls}>
+        <div data-card-num class:list={["font-display text-teal", cls.num]}>00</div>
+        <div data-card-field="title" class:list={["mt-2 font-bold", cls.title]}>Nový nadpis</div>
+        <p data-card-field="body" class="mt-1 text-[13px] leading-relaxed text-muted">
+          Krátký popis – klikněte a přepište.
+        </p>
+      </div>
+    </template>
+  </div>
+</section>

@@ -3,18 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import Hatch from "../components/Hatch.astro";
 import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
+import InfoCards from "../components/InfoCards.astro";
 import { getSiteData } from "../lib/data";
 import { CATEGORY_LABELS, HOME_CATEGORY_KEYS, type CategoryKey } from "../lib/products";
 
 const { content } = await getSiteData();
 const { texts, images } = content;
-
-const whyCards = [
-  { n: "01", title: "Poctivý masiv", body: "Jen české dřevo s jasným původem." },
-  { n: "02", title: "Unikátnost", body: "Originál, který nikdo jiný nemá." },
-  { n: "03", title: "Odolnost", body: "Oleje a pryskyřice na generace." },
-  { n: "04", title: "Na míru", body: "Barva, tvar i podnoží dle vás." },
-];
 
 // which editable text holds the small caption under each tile
 const collectionSubKeys: Partial<Record<CategoryKey, "subStoly" | "subPrkenka" | "subKuchyne">> = {
@@ -137,21 +131,7 @@ const heroPhoto = Boolean(images.hero);
     </section>
   )}
 
-  <section class="mx-auto max-w-content px-[28px] py-16">
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-      {whyCards.map((c, i) => (
-        <div
-          data-reveal
-          style={`transition-delay:${i * 0.06}s`}
-          class="rounded-[20px] bg-surface p-[30px_28px]"
-        >
-          <div class="font-display text-[34px] text-teal">{c.n}</div>
-          <div class="mt-2 text-sm font-bold">{c.title}</div>
-          <p class="mt-1 text-[13px] leading-relaxed text-muted">{c.body}</p>
-        </div>
-      ))}
-    </div>
-  </section>
+  <InfoCards listKey="why" cards={content.blocks.why} reveal />
 
   <section class="mx-auto max-w-content px-[28px] py-16">
     <div data-reveal class="relative overflow-hidden rounded-[26px]">

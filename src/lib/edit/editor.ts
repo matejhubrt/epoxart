@@ -13,7 +13,7 @@ import { getSupabase } from "../supabase";
 import { checkIsAdmin, fetchContent, saveSetting } from "../admin/api";
 import { removeImageByUrl, uploadImage } from "../admin/media";
 import { CATEGORY_KEYS, type CategoryKey } from "../products";
-import type { SiteImages, SiteTexts } from "../content";
+import { MAX_CARDS, type BlocksSettings, type InfoCard, type SiteImages, type SiteTexts } from "../content";
 
 const FLAG = "epoxart-edit";
 
@@ -101,6 +101,12 @@ const CSS = `
 .ea-btn[disabled]{opacity:.45;cursor:not-allowed}
 .ea-btn.ea-primary{background:#1f6e63;border-color:#1f6e63}
 .ea-btn.ea-primary:hover:not([disabled]){background:#2a8576}
+.ea-tools{position:absolute;top:10px;right:10px;z-index:5;display:flex;gap:4px}
+.ea-tool{width:28px;height:28px;border:0;border-radius:50%;background:#2b2420;color:#faf7f1;font:500 13px/1 "Space Grotesk",system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.ea-tool:hover{background:#1f6e63}
+.ea-tool.ea-del:hover{background:#865b4b}
+.ea-add{min-height:130px;border:2px dashed rgba(31,110,99,.55);border-radius:20px;background:transparent;color:#1f6e63;font:500 14px/1.2 "Space Grotesk",system-ui,sans-serif;cursor:pointer}
+.ea-add:hover{background:rgba(31,110,99,.08);border-color:#1f6e63}
 .ea-pill{position:fixed;right:16px;bottom:16px;z-index:1000;border:0;border-radius:999px;background:#2b2420;color:#faf7f1;padding:11px 18px;font:500 13px/1 "Space Grotesk",system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.3);opacity:.92}
 .ea-pill:hover{background:#1f6e63;opacity:1}
 `;
@@ -164,11 +170,38 @@ function showEntryPill() {
 
 // ---- the editor --------------------------------------------------------------------------
 
+/** Makes an element click-to-type plain text: Enter finishes, pasted text is flattened. */
+function makeEditable(n: HTMLElement, onInput: () => void) {
+  n.contentEditable = "plaintext-only";
+  if (n.contentEditable !== "plaintext-only") n.contentEditable = "true";
+  n.spellcheck = true;
+  n.setAttribute("role", "textbox");
+
+  n.addEventListener("keydown", (e) => {
+    // one paragraph = one text, so Enter just finishes editing
+    if (e.key === "Enter") {
+      e.preventDefault();
+      n.blur();
+    }
+  });
+  n.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData?.getData("text/plain") ?? "").replace(/\s+/g, " ");
+    document.execCommand("insertText", false, text);
+  });
+  n.addEventListener("input", onInput);
+  n.addEventListener("blur", () => {
+    const clean = norm(n.textContent);
+    if (clean !== n.textContent) n.textContent = clean;
+  });
+}
+
 export function startEditing() {
   injectStyles();
   document.documentElement.classList.add("ea-on");
   let saving = false;
   let leaving = false; // set right before a deliberate reload, so no "unsaved changes" warning appears
+  let ready = false; // the bar exists only after everything below is set up
 
   /* ---------- texts ---------- */
   const textEls = Array.from(document.querySelectorAll<HTMLElement>("[data-edit-text]"));
@@ -190,24 +223,7 @@ export function startEditing() {
   };
 
   for (const n of textEls) {
-    n.contentEditable = "plaintext-only";
-    if (n.contentEditable !== "plaintext-only") n.contentEditable = "true";
-    n.spellcheck = true;
-    n.setAttribute("role", "textbox");
-
-    n.addEventListener("keydown", (e) => {
-      // one paragraph = one text, so Enter just finishes editing
-      if (e.key === "Enter") {
-        e.preventDefault();
-        n.blur();
-      }
-    });
-    n.addEventListener("paste", (e) => {
-      e.preventDefault();
-      const text = (e.clipboardData?.getData("text/plain") ?? "").replace(/\s+/g, " ");
-      document.execCommand("insertText", false, text);
-    });
-    n.addEventListener("input", () => {
+    makeEditable(n, () => {
       // the same text can appear twice on a page (e.g. footer + body): keep copies in sync
       const key = n.dataset.editText!;
       for (const other of textEls) {
@@ -216,16 +232,116 @@ export function startEditing() {
       refreshChangedMarks();
       updateBar();
     });
-    n.addEventListener("blur", () => {
-      const clean = norm(n.textContent);
-      if (clean !== n.textContent) n.textContent = clean;
-    });
   }
 
   function refreshChangedMarks() {
     const changed = changedTexts() as Record<string, string>;
     for (const n of textEls) n.classList.toggle("ea-changed", n.dataset.editText! in changed);
   }
+
+  /* ---------- lists of cards ("windows") ---------- */
+  const MD_COLS = ["md:grid-cols-4", "md:grid-cols-1", "md:grid-cols-2", "md:grid-cols-3", "md:grid-cols-4"];
+  const pad2 = (n: number) => String(n).padStart(2, "0");
+
+  interface CardList {
+    key: keyof BlocksSettings;
+    node: HTMLElement;
+    template: HTMLTemplateElement | null;
+    addBtn: HTMLButtonElement;
+    orig: string;
+  }
+
+  const itemsOf = (node: HTMLElement) =>
+    Array.from(node.children).filter(
+      (c): c is HTMLElement => c instanceof HTMLElement && c.hasAttribute("data-edit-item")
+    );
+  const fieldText = (item: HTMLElement, name: string) =>
+    norm(item.querySelector(`[data-card-field="${name}"]`)?.textContent);
+  const readCards = (node: HTMLElement): InfoCard[] =>
+    itemsOf(node)
+      .map((it) => ({ title: fieldText(it, "title"), body: fieldText(it, "body") }))
+      .filter((c) => c.title || c.body);
+
+  const lists: CardList[] = [];
+
+  function relayout(list: CardList) {
+    const items = itemsOf(list.node);
+    items.forEach((it, i) => {
+      const num = it.querySelector("[data-card-num]");
+      if (num) num.textContent = pad2(i + 1);
+    });
+    list.node.classList.remove(...MD_COLS);
+    list.node.classList.add(MD_COLS[Math.min(items.length, 4)]);
+    list.addBtn.hidden = items.length >= MAX_CARDS;
+    list.node.append(list.addBtn); // always the last tile
+    if (ready) updateBar();
+  }
+
+  function decorate(list: CardList, item: HTMLElement) {
+    item.style.position = "relative";
+    item.querySelectorAll<HTMLElement>("[data-card-field]").forEach((f) => makeEditable(f, updateBar));
+
+    const tools = el("div", { className: "ea-tools" });
+    const mk = (cls: string, label: string, title: string) => {
+      const b = el("button", { type: "button", className: cls }, label);
+      b.title = title;
+      b.setAttribute("aria-label", title);
+      return b;
+    };
+    const left = mk("ea-tool", "←", "Posunout dopředu");
+    const right = mk("ea-tool", "→", "Posunout dozadu");
+    const del = mk("ea-tool ea-del", "✕", "Smazat okénko");
+    left.addEventListener("click", () => {
+      const prev = itemsOf(list.node)[itemsOf(list.node).indexOf(item) - 1];
+      if (prev) prev.before(item);
+      relayout(list);
+    });
+    right.addEventListener("click", () => {
+      const next = itemsOf(list.node)[itemsOf(list.node).indexOf(item) + 1];
+      if (next) next.after(item);
+      relayout(list);
+    });
+    del.addEventListener("click", () => {
+      item.remove();
+      relayout(list);
+    });
+    tools.append(left, right, del);
+    item.append(tools);
+  }
+
+  for (const node of document.querySelectorAll<HTMLElement>("[data-edit-list]")) {
+    const key = node.dataset.editList as keyof BlocksSettings;
+    if (key !== "why" && key !== "process") continue;
+    // an emptied list is hidden for visitors; the owner needs it back to add cards
+    node.closest("[data-edit-list-wrap]")?.removeAttribute("hidden");
+
+    const addBtn = el("button", { type: "button", className: "ea-add" }, "+ Přidat okénko");
+    const list: CardList = {
+      key,
+      node,
+      template: node.querySelector<HTMLTemplateElement>(":scope > template[data-edit-new]"),
+      addBtn,
+      orig: JSON.stringify(readCards(node)),
+    };
+    lists.push(list);
+    itemsOf(node).forEach((it) => decorate(list, it));
+    addBtn.addEventListener("click", () => {
+      const blueprint = list.template?.content.firstElementChild;
+      if (!blueprint || itemsOf(node).length >= MAX_CARDS) return;
+      const item = blueprint.cloneNode(true) as HTMLElement;
+      addBtn.before(item);
+      decorate(list, item);
+      relayout(list);
+      const title = item.querySelector<HTMLElement>('[data-card-field="title"]');
+      if (title) {
+        title.focus();
+        window.getSelection()?.selectAllChildren(title);
+      }
+    });
+    relayout(list);
+  }
+
+  const changedLists = () => lists.filter((l) => JSON.stringify(readCards(l.node)) !== l.orig);
 
   /* ---------- photos ---------- */
   const imageEls = Array.from(document.querySelectorAll<HTMLElement>("[data-edit-image]"));
@@ -324,7 +440,7 @@ export function startEditing() {
   let message: { text: string; error: boolean } | null = null;
 
   function changeCount(): number {
-    return Object.keys(changedTexts()).length + imageChanges.size;
+    return Object.keys(changedTexts()).length + imageChanges.size + changedLists().length;
   }
 
   function updateBar() {
@@ -355,6 +471,13 @@ export function startEditing() {
       const texts = changedTexts();
       if (Object.keys(texts).length > 0) {
         await saveSetting("texts", { ...fresh.texts, ...texts });
+      }
+      const listChanges = changedLists();
+      if (listChanges.length > 0) {
+        const blocks: BlocksSettings = { ...fresh.blocks };
+        for (const l of listChanges) blocks[l.key] = readCards(l.node).slice(0, MAX_CARDS);
+        await saveSetting("blocks", blocks);
+        for (const l of listChanges) l.orig = JSON.stringify(readCards(l.node));
       }
       if (imageChanges.size > 0) {
         let images = fresh.images;
@@ -416,5 +539,6 @@ export function startEditing() {
   };
   window.addEventListener("beforeunload", onBeforeUnload);
 
+  ready = true;
   updateBar();
 }

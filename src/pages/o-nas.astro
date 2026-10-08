@@ -2,17 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
+import InfoCards from "../components/InfoCards.astro";
 import { getSiteData } from "../lib/data";
 
 const { content } = await getSiteData();
 const { texts, images } = content;
 
-const process = [
-  { n: "01", title: "Výběr dřeva", body: "Vybíráme kvalitní český masiv s výrazným charakterem." },
-  { n: "02", title: "Zalití pryskyřicí", body: "Ruční míchání odstínů a pečlivé lití bez bublin." },
-  { n: "03", title: "Broušení", body: "Postupné broušení do hedvábně hladkého povrchu." },
-  { n: "04", title: "Finální olej", body: "Ochranné oleje, které povrch chrání na generace." },
-];
 ---
 
 <Layout
@@ -41,17 +36,7 @@ const process = [
     </div>
   </div>
 
-  <section class="mx-auto max-w-content px-[28px] py-16">
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-      {process.map((c) => (
-        <div class="rounded-[20px] bg-surface p-[30px_26px]">
-          <div class="font-display text-[38px] text-teal">{c.n}</div>
-          <div class="mt-2 text-[15px] font-bold">{c.title}</div>
-          <p class="mt-1 text-[13px] leading-relaxed text-muted">{c.body}</p>
-        </div>
-      ))}
-    </div>
-  </section>
+  <InfoCards listKey="process" cards={content.blocks.process} size="lg" />
 
   <section class="mx-auto max-w-content px-[28px] py-16 text-center">
     <h2 data-edit-text="aboutCtaTitle" class="font-display text-[32px] font-medium sm:text-[40px]">
