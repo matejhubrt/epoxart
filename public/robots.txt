@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /admin
 Allow: /
 
-Sitemap: https://epoxart-sooty.vercel.app/sitemap-index.xml
+Sitemap: https://www.epoxart.cz/sitemap-index.xml
