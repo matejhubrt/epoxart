@@ -47,7 +47,7 @@ const heroPhoto = Boolean(images.hero);
         src={images.hero}
         alt="Ruční river stůl z masivního dřeva s epoxidovou pryskyřicí od EpoxArt"
         glow
-        class="absolute inset-0 h-full"
+        class="kenburns absolute inset-0 h-full"
         eager
         edit="hero"
       />
@@ -60,13 +60,15 @@ const heroPhoto = Boolean(images.hero);
       <div class="relative z-10 mx-auto max-w-[820px] px-6 text-center">
         <p
           data-edit-text="heroEyebrow"
-          class:list={["font-mono text-xs tracking-[0.28em]", heroPhoto ? "text-white/90" : "text-amber"]}
+          style="--d:.1s"
+          class:list={["anim-up font-mono text-xs tracking-[0.28em]", heroPhoto ? "text-white/90" : "text-amber"]}
         >
           {texts.heroEyebrow}
         </p>
         <h1
+          style="--d:.25s"
           class:list={[
-            "mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[72px] md:text-[88px]",
+            "anim-up mt-5 font-display text-[56px] font-medium leading-[1] sm:text-[72px] md:text-[88px]",
             heroPhoto && "text-white [text-shadow:0_2px_24px_rgba(0,0,0,.35)]",
           ]}
         >
@@ -75,14 +77,15 @@ const heroPhoto = Boolean(images.hero);
         </h1>
         <p
           data-edit-text="heroText"
+          style="--d:.45s"
           class:list={[
-            "mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7]",
+            "anim-up mx-auto mt-6 max-w-[540px] text-[17px] leading-[1.7]",
             heroPhoto ? "text-white/95 [text-shadow:0_1px_12px_rgba(0,0,0,.4)]" : "text-body",
           ]}
         >
           {texts.heroText}
         </p>
-        <div class="mt-8 flex flex-col items-center gap-4">
+        <div class="anim-up mt-8 flex flex-col items-center gap-4" style="--d:.65s">
           <Pill href="/vyroba-na-miru" variant={heroPhoto ? "light" : "dark"}>VÝROBA NA MÍRU</Pill>
           <a
             href="/produkty"
@@ -110,15 +113,15 @@ const heroPhoto = Boolean(images.hero);
             href={`/produkty?kat=${c.cat}`}
             data-reveal
             style={`transition-delay:${i * 0.06}s`}
-            class="group overflow-hidden rounded-[22px] bg-surface"
+            class="card-lift group overflow-hidden rounded-[22px] bg-surface"
           >
-            <div class="h-[300px] overflow-hidden">
+            <div class="img-zoom h-[300px] overflow-hidden">
               <Photo
                 src={c.image}
                 alt={c.label}
                 label={c.label}
                 edit={`cat:${c.cat}`}
-                class="h-full transition-transform duration-500 group-hover:scale-[1.03]"
+                class="h-full"
               />
             </div>
             <div class="px-[22px] py-[18px]">

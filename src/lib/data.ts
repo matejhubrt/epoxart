@@ -1,5 +1,5 @@
 import { DEFAULT_CONTENT, mergeContent, rowToProduct, type SiteData } from "./content";
-import { DEFAULT_PRODUCTS } from "./products";
+import { assignSlugs, DEFAULT_PRODUCTS } from "./products";
 import { getSupabase } from "./supabase";
 
 const TTL_MS = 10_000;
@@ -34,9 +34,11 @@ export async function getSiteData(): Promise<SiteData> {
     const content = mergeContent(settings.data ?? []);
     const data: SiteData = {
       // products in a category the owner switched off are not shown anywhere on the public site
-      products: (products.data ?? [])
-        .map(rowToProduct)
-        .filter((p) => !content.categories.hidden.includes(p.cat)),
+      // slugs are assigned on the full visible list, so an address never changes because
+      // a category was switched off and on
+      products: assignSlugs((products.data ?? []).map(rowToProduct)).filter(
+        (p) => !content.categories.hidden.includes(p.cat)
+      ),
       content,
     };
     cached = { at: Date.now(), data };

@@ -27,7 +27,13 @@ const photos = gallery.photos;
       class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
     >
       {photos.map((url, i) => (
-        <figure data-gallery-item data-url={url} class="overflow-hidden rounded-[18px] bg-surface">
+        <figure
+          data-gallery-item
+          data-url={url}
+          data-reveal="scale"
+          style={`transition-delay:${(i % 3) * 0.08}s`}
+          class="img-zoom overflow-hidden rounded-[18px] bg-surface"
+        >
           <button
             type="button"
             data-open-photo
@@ -39,7 +45,7 @@ const photos = gallery.photos;
               alt={`Fotka z dílny EpoxArt, ${i + 1}`}
               loading={i < 6 ? "eager" : "lazy"}
               decoding="async"
-              class="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.04]"
+              class="h-full w-full object-cover"
             />
           </button>
         </figure>

@@ -61,9 +61,17 @@ export default function ProductGrid({
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((p) => (
-          <div key={p.id} className="flex flex-col overflow-hidden rounded-[22px] bg-surface">
-            <div className={`relative h-[260px] ${p.image ? "bg-warm" : "hatch"}`}>
+        {products.map((p, i) => (
+          <div
+            key={`${cat}-${p.id}`}
+            className="card-lift card-in flex flex-col overflow-hidden rounded-[22px] bg-surface"
+            style={{ animationDelay: `${Math.min(i, 8) * 55}ms` }}
+          >
+            <a
+              href={`/produkty/${p.slug}`}
+              aria-label={`Detail produktu ${p.name}`}
+              className={`img-zoom relative block h-[260px] overflow-hidden ${p.image ? "bg-warm" : "hatch"}`}
+            >
               {p.image && (
                 <img
                   src={p.image}
@@ -76,18 +84,28 @@ export default function ProductGrid({
               <span className="absolute left-3 top-3 rounded-full bg-surface px-2.5 py-1 text-[11px] text-body">
                 {CATEGORY_LABELS[p.cat]}
               </span>
-            </div>
+            </a>
             <div className="flex flex-1 flex-col px-[22px] py-5">
-              <h3 className="font-display text-[23px]">{p.name}</h3>
+              <h3 className="font-display text-[23px] leading-tight">
+                <a href={`/produkty/${p.slug}`} className="hover:text-teal">
+                  {p.name}
+                </a>
+              </h3>
               <p className="mt-1 text-[12.5px] leading-relaxed text-faint">{p.desc}</p>
+              <a
+                href={`/produkty/${p.slug}`}
+                className="mt-2 text-[12.5px] text-brown-link underline-offset-2 hover:text-teal hover:underline"
+              >
+                Zobrazit detail →
+              </a>
               <div className="mt-auto flex items-center justify-between pt-5">
                 <span className="text-base font-semibold">
                   {p.price === null ? "Cena na dotaz" : formatKc(p.price)}
                 </span>
                 {p.price === null ? (
                   <a
-                    href="/vyroba-na-miru"
-                    className="rounded-full border border-teal px-5 py-2 text-[13px] text-teal transition-colors hover:bg-teal hover:text-page"
+                    href={`/produkty/${p.slug}`}
+                    className="btn-press rounded-full border border-teal px-5 py-2 text-[13px] text-teal transition-colors hover:bg-teal hover:text-page"
                   >
                     Poptat
                   </a>
@@ -95,7 +113,7 @@ export default function ProductGrid({
                   <button
                     type="button"
                     onClick={() => handleAdd(p.id)}
-                    className="rounded-full bg-ink px-5 py-2 text-[13px] text-page transition-opacity hover:opacity-90"
+                    className="btn-press rounded-full bg-ink px-5 py-2 text-[13px] text-page transition-opacity hover:opacity-90"
                   >
                     {added === p.id ? "Přidáno ✓" : "Do košíku"}
                   </button>

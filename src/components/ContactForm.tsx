@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { submitInquiry } from "../lib/inquiries";
 
 // Real visitors need at least this long to read the form and type into it;
@@ -8,6 +8,15 @@ const MIN_FILL_TIME_MS = 2500;
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const mountedAt = useRef(Date.now());
+  const subjectRef = useRef<HTMLInputElement>(null);
+
+  // links from a product page open the form with the subject already filled in
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("predmet");
+    if (wanted && subjectRef.current && !subjectRef.current.value) {
+      subjectRef.current.value = wanted.slice(0, 300);
+    }
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,7 +58,7 @@ export default function ContactForm() {
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <input required name="name" maxLength={200} type="text" placeholder="Jméno" className={input} />
         <input required name="email" maxLength={320} type="email" placeholder="E-mail" className={input} />
-        <input name="subject" maxLength={300} type="text" placeholder="Předmět" className={`${input} sm:col-span-2`} />
+        <input ref={subjectRef} name="subject" maxLength={300} type="text" placeholder="Předmět" className={`${input} sm:col-span-2`} />
         <textarea
           required
           name="message"

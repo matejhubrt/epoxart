@@ -112,7 +112,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     collectionsTitle: "Co vyrábíme",
     subStoly: "Jídelní & konferenční",
     subPrkenka: "Kuchyňská & servírovací",
-    subKuchyne: "Z melaminu",
+    subKuchyne: "Z laminátových desek",
     aboutCtaTitle: "Máte nápad? Pojďme ho vyrobit.",
     productsTitle: "Naše produkty",
     contactTitle: "Ozvěte se nám",
@@ -274,6 +274,7 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
 export function rowToProduct(r: Record<string, unknown>): Product {
   return {
     id: String(r.id),
+    slug: "", // filled in by assignSlugs once the whole list is known
     name: String(r.name ?? ""),
     cat: r.category as CategoryKey,
     desc: String(r.description ?? ""),

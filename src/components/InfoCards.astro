@@ -16,7 +16,7 @@ const cls = {
   sm: { box: "p-[30px_28px]", num: "text-[34px]", title: "text-sm" },
   lg: { box: "p-[30px_26px]", num: "text-[38px]", title: "text-[15px]" },
 }[size];
-const boxCls = `rounded-[20px] bg-surface ${cls.box}`;
+const boxCls = `card-lift rounded-[20px] bg-surface ${cls.box}`;
 const pad = (n: number) => String(n).padStart(2, "0");
 // up to four cards share one row; the full class names are spelled out so Tailwind keeps them
 const mdCols = ["md:grid-cols-4", "md:grid-cols-1", "md:grid-cols-2", "md:grid-cols-3", "md:grid-cols-4"][

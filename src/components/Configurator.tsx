@@ -43,6 +43,106 @@ interface Config {
   river: River;
 }
 
+type Species = "orech" | "dub" | "jasan" | "briza" | "other";
+
+/** Which kind of wood a swatch label means; unknown names still get a neutral grain. */
+function speciesOf(label: string): Species {
+  const l = label
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+  if (l.includes("orech")) return "orech";
+  if (l.includes("dub")) return "dub";
+  if (l.includes("jasan")) return "jasan";
+  if (l.includes("briz")) return "briza";
+  return "other";
+}
+
+interface Grain {
+  /** feTurbulence base frequency "x y": low x + high y = long streaks along the board */
+  freq: string;
+  octaves: number;
+  seed: number;
+  /** how strong the dark growth rings are (0..1) */
+  dark: number;
+  /** how strong the light streaks are (0..1) */
+  light: number;
+  /** wavy-ness of the rings */
+  swirl: number;
+  /** fine pores / medullary flecks */
+  pores: number;
+  /** base colour pushed darker (negative) or lighter (positive) so the texture sits well on it */
+  tone: number;
+}
+
+const GRAINS: Record<Species, Grain> = {
+  orech: { freq: "0.0035 0.085", octaves: 5, seed: 7, dark: 0.62, light: 0.28, swirl: 26, pores: 0.18, tone: -6 },
+  dub: { freq: "0.0055 0.15", octaves: 5, seed: 3, dark: 0.5, light: 0.34, swirl: 12, pores: 0.4, tone: 0 },
+  jasan: { freq: "0.004 0.24", octaves: 4, seed: 11, dark: 0.34, light: 0.32, swirl: 8, pores: 0.12, tone: 4 },
+  briza: { freq: "0.008 0.36", octaves: 4, seed: 5, dark: 0.22, light: 0.26, swirl: 5, pores: 0.1, tone: 6 },
+  other: { freq: "0.005 0.16", octaves: 5, seed: 9, dark: 0.42, light: 0.3, swirl: 12, pores: 0.2, tone: 0 },
+};
+
+/** Wood grain painted with SVG noise, tinted by the swatch colour: looks like real boards, no image files. */
+function WoodGrain({ species, color, uid }: { species: Species; color: string; uid: string }) {
+  const g = GRAINS[species];
+  const base = shade(color, g.tone);
+  return (
+    <svg
+      viewBox="0 0 300 300"
+      preserveAspectRatio="none"
+      width="100%"
+      height="100%"
+      style={{ position: "absolute", inset: 0, display: "block" }}
+      aria-hidden="true"
+    >
+      <defs>
+        {/* dark growth rings: noise stretched along the board, gently bent */}
+        <filter id={`${uid}-dark`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency={g.freq} numOctaves={g.octaves} seed={g.seed} result="n" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={2} seed={g.seed + 4} result="bend" />
+          <feDisplacementMap in="n" in2="bend" scale={g.swirl} xChannelSelector="R" yChannelSelector="G" result="d" />
+          <feColorMatrix
+            in="d"
+            type="matrix"
+            values="0 0 0 0 0.08  0 0 0 0 0.04  0 0 0 0 0.01  0 0 0 3.4 -1.55"
+          />
+        </filter>
+        {/* light streaks between the rings */}
+        <filter id={`${uid}-light`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency={g.freq} numOctaves={g.octaves} seed={g.seed + 21} result="n" />
+          <feColorMatrix
+            in="n"
+            type="matrix"
+            values="0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.78  0 0 0 3 -1.7"
+          />
+        </filter>
+        {/* tiny pores, short dashes along the grain */}
+        <filter id={`${uid}-pores`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045 0.9" numOctaves={2} seed={g.seed + 40} result="n" />
+          <feColorMatrix
+            in="n"
+            type="matrix"
+            values="0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0 0  0 0 0 5 -2.9"
+          />
+        </filter>
+        <linearGradient id={`${uid}-light-fall`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.22" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.22" />
+        </linearGradient>
+      </defs>
+      <rect width="300" height="300" fill={base} />
+      <rect width="300" height="300" filter={`url(#${uid}-dark)`} opacity={g.dark} />
+      <rect width="300" height="300" filter={`url(#${uid}-light)`} opacity={g.light} />
+      <rect width="300" height="300" filter={`url(#${uid}-pores)`} opacity={g.pores} />
+      <rect width="300" height="300" fill={`url(#${uid}-light-fall)`} />
+    </svg>
+  );
+}
+
+const SLAB_LAYERS = 8;
+
 function TablePreview({
   cfg,
   woodColor,
@@ -56,9 +156,8 @@ function TablePreview({
   const isSquareish = cfg.shape === "Kulaté" || cfg.shape === "Čtverec";
   const topW = isSquareish ? 210 : 300;
   const topH = isSquareish ? 210 : 172;
-
-  const grainHi = shade(woodColor, 34, 0.5);
-  const grainLo = shade(woodColor, -40, 0.55);
+  const species = speciesOf(cfg.wood);
+  const uid = `w${species}`;
 
   const tableGroupStyle: CSSProperties = {
     position: "relative",
@@ -66,7 +165,7 @@ function TablePreview({
     height: topH + "px",
     transformStyle: "preserve-3d",
     transform: "rotateX(53deg) rotateZ(-2deg)",
-    transition: "all .5s ease",
+    transition: "width .5s ease, height .5s ease",
     marginTop: "-26px",
   };
 
@@ -75,23 +174,9 @@ function TablePreview({
     inset: 0,
     borderRadius: radius,
     overflow: "hidden",
-    boxShadow: "inset 0 2px 5px rgba(255,255,255,.22), inset 0 -3px 10px rgba(0,0,0,.25)",
-    background: [
-      `repeating-linear-gradient(1.5deg, ${grainLo} 0px, ${grainLo} 1px, transparent 1px, transparent 5px)`,
-      `repeating-linear-gradient(1.5deg, ${grainHi} 0px, ${grainHi} 1px, transparent 1px, transparent 11px)`,
-      `repeating-linear-gradient(179deg, rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 2px, transparent 2px, transparent 16px)`,
-      `radial-gradient(120% 140% at 24% 0%, ${shade(woodColor, 28)}, transparent 55%)`,
-      `linear-gradient(160deg, ${shade(woodColor, 18)}, ${shade(woodColor, -22)})`,
-    ].join(","),
-  };
-
-  const undersideStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    borderRadius: radius,
-    transform: "translateZ(-16px)",
-    background: `linear-gradient(160deg, ${shade(woodColor, -26)}, ${shade(woodColor, -52)})`,
-    boxShadow: "0 0 0 1px rgba(0,0,0,.15)",
+    transition: "border-radius .5s ease",
+    boxShadow: "inset 0 2px 5px rgba(255,255,255,.26), inset 0 -3px 10px rgba(0,0,0,.28)",
+    transform: "translateZ(0.5px)",
   };
 
   const floorShadowStyle: CSSProperties = {
@@ -104,6 +189,7 @@ function TablePreview({
     borderRadius: "50%",
     background: "radial-gradient(closest-side, rgba(0,0,0,.4), rgba(0,0,0,.18) 55%, transparent)",
     filter: "blur(9px)",
+    transition: "width .5s ease",
   };
 
   const rLight = shade(resinColor, 70, 0.92);
@@ -123,6 +209,7 @@ function TablePreview({
     filter: "blur(.3px)",
     transition: "all .5s ease",
     borderRadius: "40% 60% 45% 55% / 50%",
+    overflow: "hidden",
     ...RIVER_POS[cfg.river],
   };
 
@@ -130,7 +217,7 @@ function TablePreview({
     position: "absolute",
     inset: 0,
     pointerEvents: "none",
-    background: "linear-gradient(115deg, rgba(255,255,255,.22), transparent 42%)",
+    background: "linear-gradient(115deg, rgba(255,255,255,.2), transparent 42%)",
   };
 
   return (
@@ -149,11 +236,34 @@ function TablePreview({
       }}
     >
       <div style={floorShadowStyle} />
-      <div style={tableGroupStyle}>
-        <div style={undersideStyle} />
-        <div style={topSurfaceStyle}>
-          {!cfg.noResin && <div style={riverStyle} />}
-          <div style={glossStyle} />
+      <div className="table-float">
+        <div style={tableGroupStyle}>
+          {/* the board's thickness: a stack of slightly darker copies underneath the top */}
+          {Array.from({ length: SLAB_LAYERS }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: radius,
+                transform: `translateZ(${-(i + 1) * 2}px)`,
+                background: shade(woodColor, -34 - i * 4),
+                transition: "border-radius .5s ease",
+              }}
+            />
+          ))}
+          <div style={topSurfaceStyle}>
+            {/* remounted on every wood change, so the new grain fades in */}
+            <div key={`${cfg.wood}-${woodColor}`} className="wood-fade" style={{ position: "absolute", inset: 0 }}>
+              <WoodGrain species={species} color={woodColor} uid={uid} />
+            </div>
+            {!cfg.noResin && (
+              <div style={riverStyle}>
+                <div className="resin-sheen" />
+              </div>
+            )}
+            <div style={glossStyle} />
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,134 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ProductBuy from "../../components/ProductBuy.tsx";
+import { getSiteData } from "../../lib/data";
+import { CATEGORY_LABELS, formatKc } from "../../lib/products";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+
+const { products, content } = await getSiteData();
+const { shipping } = content;
+
+const { slug } = Astro.params;
+const product = products.find((p) => p.slug === slug);
+if (!product) {
+  return Astro.rewrite("/404");
+}
+
+const related = products.filter((p) => p.cat === product.cat && p.id !== product.id).slice(0, 3);
+const categoryLabel = CATEGORY_LABELS[product.cat];
+const description =
+  product.desc.trim() ||
+  `${product.name} — ručně vyrobený kus z dílny EpoxArt. ${categoryLabel}, masivní dřevo a epoxidová pryskyřice.`;
+
+const pageUrl = new URL(`/produkty/${product.slug}`, SITE_URL).toString();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  description,
+  category: categoryLabel,
+  ...(product.image ? { image: [product.image] } : {}),
+  brand: { "@type": "Brand", name: SITE_NAME },
+  ...(product.price !== null
+    ? {
+        offers: {
+          "@type": "Offer",
+          url: pageUrl,
+          priceCurrency: "CZK",
+          price: product.price,
+          availability: "https://schema.org/InStock",
+        },
+      }
+    : {}),
+};
+---
+
+<Layout title={product.name} description={description}>
+  <div class="mx-auto max-w-content px-[28px] py-12 sm:py-16">
+    <nav aria-label="Drobečková navigace" class="text-[13px] text-muted">
+      <a href="/produkty" class="hover:text-teal">← Všechny produkty</a>
+      <span class="mx-2 text-faintest">/</span>
+      <a href={`/produkty?kat=${product.cat}`} class="hover:text-teal">{categoryLabel}</a>
+    </nav>
+
+    <div class="mt-8 grid grid-cols-1 items-start gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-14">
+      <div class="img-zoom overflow-hidden rounded-[26px] bg-warm" data-reveal>
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="eager"
+            decoding="async"
+            class="block aspect-[4/3] w-full object-cover"
+          />
+        ) : (
+          <div class="hatch flex aspect-[4/3] w-full items-center justify-center font-mono text-[11px] tracking-wide text-faint">
+            [ fotka se připravuje ]
+          </div>
+        )}
+      </div>
+
+      <div data-reveal style="transition-delay:.1s">
+        <span class="inline-block rounded-full bg-surface px-3 py-1 text-[11px] tracking-[0.1em] text-body">
+          {categoryLabel.toUpperCase()}
+        </span>
+        <h1 class="mt-4 font-display text-[40px] font-medium leading-[1.05] sm:text-[52px]">
+          {product.name}
+        </h1>
+
+        <p class="mt-5 text-[26px] font-semibold">
+          {product.price === null ? "Cena na dotaz" : formatKc(product.price)}
+        </p>
+
+        <p class="mt-5 whitespace-pre-line text-[15.5px] leading-[1.8] text-body">{description}</p>
+
+        <div class="mt-8">
+          <ProductBuy client:load id={product.id} name={product.name} price={product.price} />
+        </div>
+
+        <ul class="mt-9 space-y-3 border-t border-border pt-7 text-[13.5px] text-body">
+          <li class="flex gap-3"><span class="text-teal">✓</span> Ruční výroba v dílně v Čenkově</li>
+          <li class="flex gap-3"><span class="text-teal">✓</span> Masivní dřevo a epoxidová pryskyřice, každý kus je originál</li>
+          <li class="flex gap-3">
+            <span class="text-teal">✓</span>
+            {product.price === null
+              ? "Cenu a termín vám sdělíme po nezávazné poptávce"
+              : `Doprava ${formatKc(shipping.cost)}, zdarma od ${formatKc(shipping.freeFrom)}`}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {related.length > 0 && (
+      <section class="mt-20">
+        <h2 class="font-display text-[32px] font-medium">Mohlo by se vám líbit</h2>
+        <div class="mt-6 grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
+          {related.map((p, i) => (
+            <a
+              href={`/produkty/${p.slug}`}
+              data-reveal
+              style={`transition-delay:${i * 0.07}s`}
+              class="card-lift group overflow-hidden rounded-[22px] bg-surface"
+            >
+              <div class="img-zoom h-[220px] overflow-hidden bg-warm">
+                {p.image ? (
+                  <img src={p.image} alt={p.name} loading="lazy" decoding="async" class="h-full w-full object-cover" />
+                ) : (
+                  <div class="hatch h-full w-full" />
+                )}
+              </div>
+              <div class="px-5 py-4">
+                <div class="font-display text-[22px] leading-tight">{p.name}</div>
+                <div class="mt-1 text-[13px] text-muted">
+                  {p.price === null ? "Cena na dotaz" : formatKc(p.price)}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</Layout>

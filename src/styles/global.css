@@ -70,3 +70,197 @@
     );
   }
 }
+
+/* ------------------------------------------------------------------------- */
+/* Motion: small, calm and purposeful. Everything is switched off for people  */
+/* who ask their system for reduced motion (see the media query at the end).  */
+/* ------------------------------------------------------------------------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    background-position: 130% 0;
+  }
+  55%,
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+@keyframes wood-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* page content eases in after navigation */
+main {
+  animation: fade-in 0.5s ease both;
+}
+
+/* hero: slow zoom on the photo, text rises in one line after another */
+.kenburns {
+  animation: kenburns 22s ease-in-out infinite alternate;
+  transform-origin: 50% 60%;
+}
+.anim-up {
+  animation: fade-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+/* cards: lift on hover, image zooms inside its frame */
+.card-lift {
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease;
+}
+.card-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 38px -18px rgba(43, 36, 32, 0.28);
+}
+.card-in {
+  animation: fade-up 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.img-zoom img {
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.card-lift:hover .img-zoom img,
+.img-zoom:hover img,
+a.img-zoom:hover img {
+  transform: scale(1.06);
+}
+
+/* buttons feel pressable */
+.btn-press {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: transform 0.18s ease, background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+.btn-press:hover {
+  transform: translateY(-1px);
+}
+.btn-press:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* the cart badge bumps when something is added */
+.bump {
+  animation: bump 0.45s ease;
+}
+
+/* navigation: underline slides in on hover */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-teal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* scroll reveal variants */
+html [data-reveal="scale"] {
+  transform: scale(0.94);
+}
+html [data-reveal="scale"].is-revealed {
+  transform: none;
+}
+
+/* configurator preview */
+.table-float {
+  animation: float-y 6s ease-in-out infinite;
+}
+/* a slow band of light sweeps across the resin, like light moving over a wet surface */
+.resin-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.42) 50%, transparent 62%);
+  background-size: 260% 100%;
+  animation: sheen 6.5s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+.wood-fade {
+  animation: wood-in 0.55s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
