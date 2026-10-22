@@ -6,156 +6,141 @@ import { getSiteData } from "../lib/data";
 const { content } = await getSiteData();
 const { texts } = content;
 
-const updated = "30. 9. 2026";
+const effective = "15. 7. 2026";
 ---
 
 <Layout
   title="Ochrana osobních údajů"
-  description="Zásady ochrany osobních údajů EpoxArt — jaké údaje zpracováváme, proč, jak dlouho je uchováváme a jaká máte práva."
+  description="Zásady ochrany osobních údajů EpoxArt (GDPR) — jaké údaje zpracováváme, proč, jak dlouho je uchováváme a jaká máte práva."
 >
   <div class="mx-auto max-w-content px-[28px] py-16">
     <p class="font-mono text-xs tracking-[0.28em] text-amber">DOKUMENTY</p>
     <h1 class="mt-4 font-display text-[38px] font-medium sm:text-[50px]">
-      Ochrana osobních údajů
+      Zásady ochrany osobních údajů (GDPR)
     </h1>
-    <p class="mt-3 text-sm text-muted">Poslední aktualizace: {updated}</p>
+    <p class="mt-3 text-sm text-muted">Účinnost od: {effective}</p>
 
     <div class="mt-10 flex max-w-[760px] flex-col gap-5">
-      <LegalSection title="1. Kdo je správcem vašich údajů">
+      <LegalSection title="1. Základní ustanovení">
         <p>
-          Správcem osobních údajů je <strong>{texts.owner}</strong>, podnikající fyzická
-          osoba (EpoxArt), IČO: {texts.ico}, se sídlem {texts.address}, Česká republika
-          (dále jen „my" nebo „správce"). Kontaktovat nás můžete na e-mailu{" "}
-          <a href={`mailto:${texts.email}`}>{texts.email}</a> nebo telefonicky na{" "}
-          {texts.phone1}.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="2. Jaké údaje zpracováváme">
-        <p>Zpracováváme pouze údaje, které nám sami poskytnete:</p>
-        <ul>
-          <li>jméno a příjmení,</li>
-          <li>e-mailovou adresu,</li>
-          <li>telefonní číslo (pokud jej uvedete),</li>
-          <li>obsah vaší zprávy nebo poptávky, včetně zvolené konfigurace stolu,</li>
-          <li>
-            při objednávce zboží dále fakturační a doručovací údaje potřebné k vyřízení
-            objednávky.
-          </li>
-        </ul>
-        <p>
-          Nezpracováváme žádné zvláštní kategorie osobních údajů (např. zdravotní stav,
-          politické názory apod.) a neprovádíme automatizované rozhodování ani profilování.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="3. Proč a na jakém základě údaje zpracováváme">
-        <ul>
-          <li>
-            <strong>Vyřízení dotazu nebo poptávky</strong> — na základě vašeho zájmu
-            o naše služby, resp. jednání o uzavření smlouvy (čl. 6 odst. 1 písm. b) GDPR).
-          </li>
-          <li>
-            <strong>Vyřízení objednávky</strong> — plnění kupní smlouvy (čl. 6 odst. 1
-            písm. b) GDPR).
-          </li>
-          <li>
-            <strong>Plnění zákonných povinností</strong> — např. vedení účetnictví
-            (čl. 6 odst. 1 písm. c) GDPR).
-          </li>
-          <li>
-            <strong>Oprávněný zájem</strong> — ochrana webu proti zneužití formulářů
-            (čl. 6 odst. 1 písm. f) GDPR).
-          </li>
-        </ul>
-      </LegalSection>
-
-      <LegalSection title="4. Jak dlouho údaje uchováváme">
-        <p>
-          Zprávy a poptávky z formulářů uchováváme po dobu nezbytnou k jejich vyřízení
-          a přiměřenou dobu poté pro případ navazující komunikace, nejdéle však 2 roky od
-          posledního kontaktu. Údaje z uzavřených objednávek uchováváme po dobu
-          stanovenou daňovými a účetními předpisy (obvykle 10 let). Poté jsou údaje
-          bezpečně smazány.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="5. Komu údaje předáváme">
-        <p>
-          Vaše údaje nikomu neprodáváme. K jejich zpracování využíváme následující
-          prověřené zpracovatele, kteří pro nás zajišťují technický provoz webu:
+          1.1. Správcem osobních údajů podle čl. 4 bod 7 nařízení Evropského parlamentu a Rady
+          (EU) 2016/679 o ochraně fyzických osob v souvislosti se zpracováním osobních údajů
+          a o volném pohybu těchto údajů (dále jen „GDPR") je:
         </p>
         <ul>
-          <li>
-            <strong>Supabase</strong> (databáze a přihlášení do administrace, servery
-            v EU),
-          </li>
-          <li><strong>Vercel</strong> (hosting webu).</li>
+          <li>Jméno a příjmení: <strong>{texts.owner}</strong></li>
+          <li>IČO: {texts.ico}</li>
+          <li>Sídlo/Adresa podnikání: {texts.address}</li>
+          <li>Zápis v registru: Zapsán v živnostenském rejstříku vedeném Městským úřadem v Příbrami</li>
+          <li>E-mail: <a href={`mailto:${texts.email}`}>{texts.email}</a></li>
+          <li>Telefon: {texts.phone1}</li>
+        </ul>
+        <p>(dále jen „Správce").</p>
+        <p>
+          1.2. Osobními údaji se rozumí veškeré informace o identifikované nebo identifikovatelné
+          fyzické osobě (Kupujícím).
+        </p>
+        <p>1.3. Správce nejmenoval pověřence pro ochranu osobních údajů.</p>
+      </LegalSection>
+
+      <LegalSection title="2. Jaké osobní údaje zpracováváme a proč?">
+        <p>
+          2.1. Správce zpracovává osobní údaje, které jste mu poskytli při objednávce nebo
+          v průběhu komunikace. Jedná se o:
+        </p>
+        <ul>
+          <li>Jméno a příjmení</li>
+          <li>Poštovní a fakturační adresu</li>
+          <li>E-mailovou adresu</li>
+          <li>Telefonní číslo</li>
+          <li>Platební údaje (číslo účtu)</li>
         </ul>
         <p>
-          Údaje mohou být zpřístupněny orgánům veřejné moci, pokud nám to ukládá zákon.
+          2.2. Zákonným důvodem pro zpracování těchto údajů je plnění kupní smlouvy mezi vámi
+          a Správcem (podle čl. 6 odst. 1 písm. b) GDPR) a splnění zákonných povinností (např.
+          účetnictví a daňové zákony).
+        </p>
+        <p>
+          2.3. Účelem zpracování je vyřízení vaší objednávky, doručení stolu či jiného zboží
+          a komunikace s vámi ohledně zakázkové výroby.
         </p>
       </LegalSection>
 
-      <LegalSection title="6. Soubory cookie a lokální úložiště" id="cookies">
-        <p>
-          Tento web nepoužívá žádné marketingové ani analytické (sledovací) soubory
-          cookie a nesbírá žádná anonymní statistická data o návštěvnosti.
-        </p>
-        <p>Používáme pouze technicky nezbytné ukládání dat v prohlížeči, konkrétně:</p>
+      <LegalSection title="3. Jak dlouho údaje uchováváme?">
+        <p>3.1. Správce uchovává osobní údaje:</p>
         <ul>
           <li>
-            obsah <strong>nákupního košíku</strong> — uložen lokálně ve vašem prohlížeči,
-            abyste o něj nepřišli při zavření okna; nikam se neodesílá,
+            Po dobu nezbytnou k výkonu práv a povinností vyplývajících ze smluvního vztahu (např.
+            pro vyřízení případné reklamace do 2 let od nákupu).
           </li>
           <li>
-            <strong>přihlašovací relaci správce webu</strong> v chráněné administraci
-            na adrese /admin — tato část se týká pouze majitele webu.
+            Po dobu, kterou ukládají daňové a účetní zákony České republiky (u faktur je to
+            obvykle 10 let od konce zdaňovacího období).
           </li>
         </ul>
-        <p>
-          Protože nepoužíváme žádné soubory vyžadující souhlas dle zákona
-          o elektronických komunikacích, web nezobrazuje cookie lištu se souhlasem.
-          Pokud v budoucnu nasadíme analytické nástroje, tuto sekci aktualizujeme
-          a doplníme příslušný souhlas.
-        </p>
       </LegalSection>
 
-      <LegalSection title="7. Vaše práva">
-        <p>V souvislosti se zpracováním osobních údajů máte právo:</p>
+      <LegalSection title="4. Kdo další má k údajům přístup? (Příjemci osobních údajů)">
+        <p>
+          4.1. Vaše osobní údaje jsou v bezpečí, ale pro úspěšné vyřízení objednávky je musíme
+          předat našim partnerům, kteří pro nás zajišťují specifické služby. Jsou to:
+        </p>
         <ul>
-          <li>na přístup ke svým osobním údajům,</li>
-          <li>na opravu nepřesných údajů,</li>
-          <li>na výmaz („právo být zapomenut"),</li>
-          <li>na omezení zpracování,</li>
-          <li>na přenositelnost údajů,</li>
-          <li>vznést námitku proti zpracování,</li>
-          <li>kdykoli odvolat udělený souhlas, byl-li zpracování na souhlasu založeno.</li>
+          <li>
+            Přepravní společnosti (např. PPL, DHL, Toptrans, Zásilkovna – aby vám mohli doručit
+            balík).
+          </li>
+          <li>Poskytovatel e-shopového řešení a platební brány (pro zpracování online plateb).</li>
+          <li>Externí účetní (pro správné zaúčtování faktur).</li>
         </ul>
         <p>
-          Tato práva můžete uplatnit na <a href={`mailto:${texts.email}`}>{texts.email}</a>.
-          Pokud se domníváte, že vaše údaje zpracováváme v rozporu se zákonem, máte
-          právo podat stížnost u{" "}
-          <a href="https://uoou.gov.cz" target="_blank" rel="noopener noreferrer">
-            Úřadu pro ochranu osobních údajů
-          </a>{" "}
-          (Pplk. Sochora 27, 170 00 Praha 7).
+          4.2. Správce nemá v úmyslu předat osobní údaje do třetí země (mimo EU) nebo
+          mezinárodní organizaci.
         </p>
       </LegalSection>
 
-      <LegalSection title="8. Zabezpečení">
+      <LegalSection title="5. Vaše práva">
+        <p>5.1. Za podmínek stanovených v GDPR máte:</p>
+        <ul>
+          <li>Právo na přístup ke svým osobním údajům.</li>
+          <li>Právo na opravu osobních údajů, pokud jsou nesprávné.</li>
+          <li>
+            Právo na výmaz osobních údajů („právo být zapomenut"), pokud již pominul důvod jejich
+            zpracování a nebrání tomu jiný zákon (např. povinnost archivovat faktury).
+          </li>
+          <li>Právo vznést námitku proti zpracování.</li>
+          <li>Právo na přenositelnost údajů.</li>
+        </ul>
         <p>
-          Údaje jsou uloženy v zabezpečené databázi, přístup k administraci webu je
-          chráněn heslem a je omezen pouze na oprávněné osoby. Web je dostupný výhradně
-          přes zabezpečené spojení HTTPS.
+          5.2. Pokud se domníváte, že vaše osobní údaje zpracováváme v rozporu se zákonem, máte
+          právo podat stížnost u Úřadu pro ochranu osobních údajů (Pplk. Sochora 27, 170 00
+          Praha 7,
+          <a href="https://www.uoou.cz" target="_blank" rel="noopener noreferrer">www.uoou.cz</a>).
         </p>
       </LegalSection>
 
-      <LegalSection title="9. Změny těchto zásad">
+      <LegalSection title="6. Zabezpečení osobních údajů">
         <p>
-          Tyto zásady můžeme čas od času aktualizovat, například v souvislosti se změnou
-          fungování webu. Aktuální verze je vždy dostupná na této stránce.
+          6.1. Správce prohlašuje, že přijal všechna vhodná technická a organizační opatření
+          k zabezpečení osobních údajů (šifrovaný přenos webu přes HTTPS protokol, zabezpečený
+          přístup do administračního rozhraní e-shopu a k počítači).
         </p>
+        <p>
+          6.2. K osobním údajům mají přístup pouze osoby oprávněné Správcem (sám {texts.owner},
+          případně smluvní účetní).
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Závěrečná ustanovení">
+        <p>
+          7.1. Odesláním objednávky z internetového obchodu potvrzujete, že jste seznámen/a
+          s podmínkami ochrany osobních údajů a že je v celém rozsahu přijímáte.
+        </p>
+        <p>
+          7.2. Správce je oprávněn tyto podmínky změnit. Novou verzi zásad ochrany osobních
+          údajů zveřejní na svých internetových stránkách.
+        </p>
+        <p>Tyto podmínky nabývají účinnosti dnem {effective}.</p>
       </LegalSection>
     </div>
   </div>
