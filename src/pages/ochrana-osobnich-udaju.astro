@@ -64,6 +64,21 @@ const effective = "15. 7. 2026";
           2.3. Účelem zpracování je vyřízení vaší objednávky, doručení stolu či jiného zboží
           a komunikace s vámi ohledně zakázkové výroby.
         </p>
+        <p>
+          2.4. <strong>Kontaktní formulář a poptávka na webu.</strong> Když nám napíšete přes
+          kontaktní formulář nebo odešlete poptávku z konfigurátoru stolu, zpracováváme jméno,
+          e-mailovou adresu, obsah vaší zprávy a zvolenou konfiguraci stolu (dřevo, odstín
+          pryskyřice, tvar, rozměr). Důvodem je vyřízení vašeho dotazu a jednání o případné
+          smlouvě (čl. 6 odst. 1 písm. b) GDPR). Formuláře jsou chráněny proti zneužití
+          neviditelným polem a měřením doby vyplnění; žádná jiná data o vašem chování na webu
+          nesbíráme.
+        </p>
+        <p>
+          2.5. <strong>Provozní údaje.</strong> Poskytovatel hostingu webu (viz bod 4) automaticky
+          zpracovává technické údaje o návštěvě, zejména IP adresu a čas přístupu, a to
+          z důvodu bezpečného a spolehlivého provozu webu (oprávněný zájem, čl. 6 odst. 1
+          písm. f) GDPR). My sami tyto údaje nevyhodnocujeme.
+        </p>
       </LegalSection>
 
       <LegalSection title="3. Jak dlouho údaje uchováváme?">
@@ -76,6 +91,10 @@ const effective = "15. 7. 2026";
           <li>
             Po dobu, kterou ukládají daňové a účetní zákony České republiky (u faktur je to
             obvykle 10 let od konce zdaňovacího období).
+          </li>
+          <li>
+            Zprávy a poptávky z formulářů na webu po dobu nezbytnou k jejich vyřízení
+            a navazující komunikaci, nejdéle 2 roky od posledního kontaktu. Poté jsou smazány.
           </li>
         </ul>
       </LegalSection>
@@ -94,8 +113,33 @@ const effective = "15. 7. 2026";
           <li>Externí účetní (pro správné zaúčtování faktur).</li>
         </ul>
         <p>
-          4.2. Správce nemá v úmyslu předat osobní údaje do třetí země (mimo EU) nebo
-          mezinárodní organizaci.
+          K technickému provozu tohoto webu využíváme dále tyto zpracovatele:
+        </p>
+        <ul>
+          <li>
+            <strong>Supabase</strong> — databáze, ve které se ukládají poptávky a zprávy
+            z formulářů, a přihlášení do administrace. Databáze je umístěna v EU (Frankfurt,
+            Německo).
+          </li>
+          <li>
+            <strong>Vercel</strong> — hosting webu; při návštěvě zpracovává technické údaje
+            včetně IP adresy.
+          </li>
+          <li>
+            <strong>WEDOS</strong> — registrátor domény a poskytovatel e-mailové schránky
+            {" "}<a href={`mailto:${texts.email}`}>{texts.email}</a>, přes kterou s vámi komunikujeme.
+          </li>
+        </ul>
+        <p>
+          Údaje nikomu neprodáváme. Mohou být zpřístupněny orgánům veřejné moci, pokud nám to
+          ukládá zákon.
+        </p>
+        <p>
+          4.2. Společnosti Supabase a Vercel mají sídlo v USA, proto nelze vyloučit, že s údaji
+          mohou být zpracovávány i mimo EU. Předání je zajištěno zákonnými zárukami, zejména
+          standardními smluvními doložkami Evropské komise, případně certifikací poskytovatele
+          v rámci rámce EU-US Data Privacy Framework. Jiným třetím zemím ani mezinárodním
+          organizacím údaje nepředáváme.
         </p>
       </LegalSection>
 
@@ -119,7 +163,32 @@ const effective = "15. 7. 2026";
         </p>
       </LegalSection>
 
-      <LegalSection title="6. Zabezpečení osobních údajů">
+      <LegalSection title="6. Soubory cookie a místní úložiště v prohlížeči" id="cookies">
+        <p>
+          6.1. Tento web nepoužívá žádné marketingové ani analytické (sledovací) soubory cookie
+          a nesbírá žádná statistická data o návštěvnosti. Nepoužíváme Google Analytics, Facebook
+          Pixel ani podobné nástroje.
+        </p>
+        <p>6.2. Používáme pouze technicky nezbytné ukládání dat ve vašem prohlížeči:</p>
+        <ul>
+          <li>
+            obsah <strong>nákupního košíku</strong> — uložen jen lokálně ve vašem prohlížeči,
+            abyste o něj nepřišli po zavření okna; nikam se neodesílá,
+          </li>
+          <li>
+            <strong>přihlašovací relaci správce webu</strong> v chráněné administraci — týká se
+            pouze majitele webu.
+          </li>
+        </ul>
+        <p>
+          6.3. Protože používáme výhradně technicky nezbytné ukládání, které nevyžaduje souhlas
+          podle zákona o elektronických komunikacích, web nezobrazuje cookie lištu. Pokud
+          v budoucnu nasadíme analytické nebo marketingové nástroje, tyto zásady upravíme
+          a vyžádáme si váš souhlas.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="7. Zabezpečení osobních údajů">
         <p>
           6.1. Správce prohlašuje, že přijal všechna vhodná technická a organizační opatření
           k zabezpečení osobních údajů (šifrovaný přenos webu přes HTTPS protokol, zabezpečený
@@ -131,7 +200,7 @@ const effective = "15. 7. 2026";
         </p>
       </LegalSection>
 
-      <LegalSection title="7. Závěrečná ustanovení">
+      <LegalSection title="8. Závěrečná ustanovení">
         <p>
           7.1. Odesláním objednávky z internetového obchodu potvrzujete, že jste seznámen/a
           s podmínkami ochrany osobních údajů a že je v celém rozsahu přijímáte.
