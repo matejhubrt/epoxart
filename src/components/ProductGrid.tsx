@@ -57,7 +57,30 @@ export default function ProductGrid({
       </div>
 
       {products.length === 0 && (
-        <p className="mt-10 text-sm text-muted">V této kategorii zatím nic nemáme.</p>
+        <div className="card-in mt-10 rounded-[26px] bg-surface px-8 py-14 text-center sm:px-14">
+          <p className="font-mono text-xs tracking-[0.28em] text-amber">PŘIPRAVUJEME</p>
+          <h2 className="mt-4 font-display text-[34px] font-medium leading-tight sm:text-[42px]">
+            {cat === "vse" ? "Nabídku právě připravujeme" : "Tuto kolekci právě připravujeme"}
+          </h2>
+          <p className="mx-auto mt-4 max-w-[520px] text-[15px] leading-relaxed text-body">
+            Nové kousky z naší dílny přibudou již brzy. Mezitím si můžete navrhnout vlastní
+            stůl v konfigurátoru, nebo nám napište a rádi vám poradíme.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <a
+              href="/vyroba-na-miru"
+              className="btn-press rounded-full bg-teal px-8 py-3.5 text-[13px] tracking-[0.06em] text-page hover:bg-teal-hover"
+            >
+              NAVRHNOUT VLASTNÍ STŮL
+            </a>
+            <a
+              href="/kontakt"
+              className="btn-press rounded-full border border-ink px-8 py-3.5 text-[13px] tracking-[0.06em] text-ink hover:bg-ink hover:text-page"
+            >
+              NAPSAT NÁM
+            </a>
+          </div>
+        </div>
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">

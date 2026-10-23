@@ -323,6 +323,10 @@ function InquiryForm({ cfg }: { cfg: Config }) {
       <p className="mt-1 text-[13px] text-muted">
         Ozveme se s cenovou nabídkou na míru vaší konfiguraci.
       </p>
+      <p className="mt-3 rounded-xl bg-footer px-4 py-3 text-[12.5px] leading-relaxed text-body">
+        Stoly a další nábytek na míru <strong>doručujeme osobně</strong>. Termín a místo předání
+        domluvíme spolu v cenové nabídce.
+      </p>
 
       <div className="mt-5 flex flex-col gap-3">
         <input required name="name" maxLength={200} type="text" placeholder="Jméno" className={input} />

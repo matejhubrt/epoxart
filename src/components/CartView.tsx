@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useStore } from "@nanostores/react";
 import { $cart, setQty } from "../lib/cart";
-import { formatKc, type Product } from "../lib/products";
+import { formatKc, isPersonalDelivery, type Product } from "../lib/products";
 import type { ShippingSettings } from "../lib/content";
 
 function Stepper({ id, qty }: { id: string; qty: number }) {
@@ -67,11 +67,17 @@ export default function CartView({
   }
 
   const subtotal = entries.reduce((sum, [id, qty]) => sum + (byId.get(id)!.price ?? 0) * qty, 0);
+  // Stoly and kitchens are delivered in person, so only the parcel-shipped goods count towards postage
+  const parcelSubtotal = entries.reduce((sum, [id, qty]) => {
+    const p = byId.get(id)!;
+    return isPersonalDelivery(p.cat) ? sum : sum + (p.price ?? 0) * qty;
+  }, 0);
+  const hasPersonal = entries.some(([id]) => isPersonalDelivery(byId.get(id)!.cat));
   const shipping =
-    subtotal === 0 ? 0 : subtotal >= shippingRule.freeFrom ? 0 : shippingRule.cost;
+    parcelSubtotal === 0 ? 0 : parcelSubtotal >= shippingRule.freeFrom ? 0 : shippingRule.cost;
   const total = subtotal + shipping;
-  const remaining = shippingRule.freeFrom - subtotal;
-  const showFreeShipHint = subtotal > 0 && subtotal < shippingRule.freeFrom;
+  const remaining = shippingRule.freeFrom - parcelSubtotal;
+  const showFreeShipHint = parcelSubtotal > 0 && parcelSubtotal < shippingRule.freeFrom;
 
   return (
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_0.85fr]">
@@ -118,9 +124,15 @@ export default function CartView({
           <span>{formatKc(subtotal)}</span>
         </div>
         <div className="mt-2 flex justify-between text-sm text-body">
-          <span>Doprava</span>
-          <span>{shipping === 0 ? "Zdarma" : formatKc(shipping)}</span>
+          <span>Doprava zásilkou</span>
+          <span>{parcelSubtotal === 0 ? "—" : shipping === 0 ? "Zdarma" : formatKc(shipping)}</span>
         </div>
+        {hasPersonal && (
+          <div className="mt-2 flex justify-between gap-4 text-sm text-body">
+            <span>Osobní doručení</span>
+            <span className="text-right">dle dohody</span>
+          </div>
+        )}
 
         {showFreeShipHint && (
           <div className="mt-4 rounded-xl bg-footer px-4 py-3 text-xs text-brown-link">
@@ -143,7 +155,7 @@ export default function CartView({
         </button>
 
         <p className="mt-4 text-center text-xs text-faintest">
-          Bezpečná platba · Ruční výroba · Doručení 5–10 dní
+          Ruční výroba · Menší zboží zasíláme, stoly a nábytek doručujeme osobně
         </p>
       </div>
     </div>

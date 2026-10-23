@@ -26,6 +26,13 @@ export const CATEGORY_LABELS: Record<CategoryKey, string> = {
   doplnky: "Doplňky",
 };
 
+/** Large furniture is delivered by the maker in person; everything else is shipped as a parcel. */
+export const PERSONAL_DELIVERY_CATEGORIES: CategoryKey[] = ["stoly", "kuchyne"];
+
+export function isPersonalDelivery(cat: CategoryKey): boolean {
+  return PERSONAL_DELIVERY_CATEGORIES.includes(cat);
+}
+
 /** "Jídelní stůl Vltava" -> "jidelni-stul-vltava" */
 export function slugify(name: string): string {
   const s = name
