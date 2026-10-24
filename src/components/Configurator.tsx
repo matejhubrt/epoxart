@@ -298,24 +298,111 @@ function InquiryForm({ cfg }: { cfg: Config }) {
   );
 }
 
-function PigmentButton({ p, active, onPick }: { p: Pigment; active: boolean; onPick: () => void }) {
+function Swatch({ p, size = "h-4 w-4" }: { p: Pigment; size?: string }) {
   return (
-    <button
-      type="button"
-      onClick={onPick}
-      aria-pressed={active}
-      className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
-        active ? "border-ink bg-footer" : "border-border-2 bg-surface"
-      }`}
-    >
-      <span
-        className="h-4 w-4 shrink-0 rounded-full border border-black/10"
-        style={{
-          background: p.shine ? `radial-gradient(circle at 35% 30%, ${p.shine}, ${p.color} 70%)` : p.color,
-        }}
-      />
-      {p.label}
-    </button>
+    <span
+      className={`${size} shrink-0 rounded-full border border-black/10`}
+      style={{
+        background: p.shine ? `radial-gradient(circle at 35% 30%, ${p.shine}, ${p.color} 70%)` : p.color,
+      }}
+    />
+  );
+}
+
+/** One button showing the chosen pigment; it opens the full list, grouped into metallic and opaque. */
+function PigmentPicker({
+  pigments,
+  value,
+  onChange,
+}: {
+  pigments: Pigment[];
+  value: Pigment;
+  onChange: (label: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const groups = [
+    { title: "Metalické pigmenty", list: pigments.filter((p) => p.shine) },
+    { title: "Neprůhledné pigmenty", list: pigments.filter((p) => !p.shine) },
+  ].filter((g) => g.list.length > 0);
+
+  // close on a click outside or on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={root} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-3 rounded-xl border border-border-2 bg-white px-4 py-3 text-left text-sm transition-colors hover:border-ink focus:border-teal focus:outline-none"
+      >
+        <Swatch p={value} size="h-6 w-6" />
+        <span className="flex-1">
+          {value.label}
+          <span className="ml-2 text-xs text-faint">{value.shine ? "metalický" : "neprůhledný"}</span>
+        </span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Odstín pryskyřice"
+          className="absolute inset-x-0 top-full z-20 mt-2 max-h-[340px] overflow-y-auto rounded-xl border border-border-2 bg-white p-2 shadow-[0_18px_38px_-18px_rgba(43,36,32,0.35)]"
+        >
+          {groups.map((g) => (
+            <div key={g.title} className="mb-1 last:mb-0">
+              <div className="px-2 pb-1 pt-2 text-[11px] tracking-[0.08em] text-faint">{g.title}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2">
+                {g.list.map((p) => {
+                  const active = p.label === value.label;
+                  return (
+                    <button
+                      key={p.label}
+                      type="button"
+                      role="option"
+                      aria-selected={active}
+                      onClick={() => {
+                        onChange(p.label);
+                        setOpen(false);
+                      }}
+                      className={`flex items-center gap-2.5 rounded-lg px-2 py-2 text-left text-[13px] transition-colors hover:bg-footer ${
+                        active ? "bg-footer font-medium" : ""
+                      }`}
+                    >
+                      <Swatch p={p} />
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -337,10 +424,6 @@ export default function Configurator({
   });
 
   const pigment = pigments.find((p) => p.label === cfg.resin) ?? pigments[0];
-  const pigmentGroups = [
-    { title: "Metalické pigmenty", list: pigments.filter((p) => p.shine) },
-    { title: "Neprůhledné pigmenty", list: pigments.filter((p) => !p.shine) },
-  ];
 
   const summary = useMemo(
     () => ({
@@ -427,23 +510,11 @@ export default function Configurator({
         {!cfg.noResin && (
           <div>
             <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ODSTÍN PRYSKYŘICE</div>
-            {pigmentGroups.map(({ title, list }) =>
-              list.length === 0 ? null : (
-                <div key={title} className="mb-3 last:mb-0">
-                  <div className="mb-2 text-[11px] text-faint">{title}</div>
-                  <div className="flex flex-wrap gap-2">
-                    {list.map((p) => (
-                      <PigmentButton
-                        key={p.label}
-                        p={p}
-                        active={cfg.resin === p.label}
-                        onPick={() => setCfg((c) => ({ ...c, resin: p.label }))}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )
-            )}
+            <PigmentPicker
+              pigments={pigments}
+              value={pigment}
+              onChange={(label) => setCfg((c) => ({ ...c, resin: label }))}
+            />
           </div>
         )}
 
