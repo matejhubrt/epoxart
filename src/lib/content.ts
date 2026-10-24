@@ -21,6 +21,9 @@ export interface SiteTexts {
   configText: string;
   galleryTitle: string;
   galleryText: string;
+  kitchenTitle: string;
+  kitchenText: string;
+  kitchenGalleryTitle: string;
   footerText: string;
   phone1: string;
   phone2: string;
@@ -100,6 +103,8 @@ export interface SiteContent {
   categories: CategorySettings;
   blocks: BlocksSettings;
   gallery: GallerySettings;
+  /** finished kitchens shown on the kitchen page */
+  kitchens: GallerySettings;
 }
 
 export interface SiteData {
@@ -126,6 +131,10 @@ export const DEFAULT_CONTENT: SiteContent = {
     aboutCtaTitle: "Máte nápad? Pojďme ho vyrobit.",
     productsTitle: "Naše produkty",
     contactTitle: "Ozvěte se nám",
+    kitchenTitle: "Kuchyně na zakázku",
+    kitchenText:
+      "Každou kuchyň vyrábíme na míru vašemu prostoru i vkusu, z laminátových desek v dekorech podle vašeho přání. Prohlédněte si hotové realizace, nechte se inspirovat a napište nám, co si představujete.",
+    kitchenGalleryTitle: "Naše hotové kuchyně",
     galleryTitle: "Galerie",
     galleryText: "Výběr z naší dílny — stoly, prkénka a další kousky, které jsme ručně vyrobili.",
     configTitle: "Konfigurátor stolu",
@@ -156,6 +165,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   shipping: { cost: 149, freeFrom: 2500 },
   categories: { hidden: [] },
   gallery: { photos: [] },
+  kitchens: { photos: [] },
   blocks: {
     why: [
       { title: "Poctivý masiv", body: "Jen české dřevo s jasným původem." },
@@ -294,7 +304,14 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
       .slice(0, MAX_GALLERY_PHOTOS),
   };
 
-  return { texts, images, shipping, configurator, categories, blocks, gallery };
+  const k = byKey.get("kitchens") ?? {};
+  const kitchens: GallerySettings = {
+    photos: (Array.isArray(k?.photos) ? (k.photos as unknown[]) : [])
+      .filter((u): u is string => typeof u === "string" && /^https?:\/\//.test(u))
+      .slice(0, MAX_GALLERY_PHOTOS),
+  };
+
+  return { texts, images, shipping, configurator, categories, blocks, gallery, kitchens };
 }
 
 /** Database row -> the shape the UI uses. */

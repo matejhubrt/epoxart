@@ -116,7 +116,7 @@ export async function fetchContent(): Promise<SiteContent> {
 }
 
 export async function saveSetting(
-  key: "texts" | "images" | "shipping" | "configurator" | "categories" | "blocks" | "gallery",
+  key: "texts" | "images" | "shipping" | "configurator" | "categories" | "blocks" | "gallery" | "kitchens",
   value: unknown
 ): Promise<void> {
   const { error } = await db()

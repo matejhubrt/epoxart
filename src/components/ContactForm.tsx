@@ -5,7 +5,20 @@ import { submitInquiry } from "../lib/inquiries";
 // a submission faster than this is almost certainly a bot script.
 const MIN_FILL_TIME_MS = 2500;
 
-export default function ContactForm() {
+export default function ContactForm({
+  title = "Napište nám",
+  subject = "",
+  messagePlaceholder = "Vaše zpráva",
+  submitLabel = "ODESLAT ZPRÁVU",
+  sentText = "Děkujeme za zprávu! Ozveme se vám co nejdříve.",
+}: {
+  title?: string;
+  /** subject pre-filled in the form (the visitor can still change it) */
+  subject?: string;
+  messagePlaceholder?: string;
+  submitLabel?: string;
+  sentText?: string;
+}) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const mountedAt = useRef(Date.now());
   const subjectRef = useRef<HTMLInputElement>(null);
@@ -43,7 +56,7 @@ export default function ContactForm() {
   if (status === "sent") {
     return (
       <div className="rounded-[22px] bg-teal-wash p-8 text-teal">
-        Děkujeme za zprávu! Ozveme se vám co nejdříve.
+        {sentText}
       </div>
     );
   }
@@ -53,18 +66,18 @@ export default function ContactForm() {
 
   return (
     <form className="rounded-[22px] bg-surface p-[34px]" onSubmit={onSubmit}>
-      <h2 className="font-display text-[30px]">Napište nám</h2>
+      <h2 className="font-display text-[30px]">{title}</h2>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <input required name="name" maxLength={200} type="text" placeholder="Jméno" className={input} />
         <input required name="email" maxLength={320} type="email" placeholder="E-mail" className={input} />
-        <input ref={subjectRef} name="subject" maxLength={300} type="text" placeholder="Předmět" className={`${input} sm:col-span-2`} />
+        <input ref={subjectRef} defaultValue={subject} name="subject" maxLength={300} type="text" placeholder="Předmět" className={`${input} sm:col-span-2`} />
         <textarea
           required
           name="message"
           maxLength={5000}
           rows={5}
-          placeholder="Vaše zpráva"
+          placeholder={messagePlaceholder}
           className={`${input} sm:col-span-2`}
         />
         <input
@@ -88,7 +101,7 @@ export default function ContactForm() {
         disabled={status === "sending"}
         className="mt-6 rounded-full bg-teal px-8 py-3.5 text-[13px] tracking-[0.06em] text-page transition-colors hover:bg-teal-hover disabled:opacity-60"
       >
-        {status === "sending" ? "ODESÍLÁM…" : "ODESLAT ZPRÁVU"}
+        {status === "sending" ? "ODESÍLÁM…" : submitLabel}
       </button>
     </form>
   );

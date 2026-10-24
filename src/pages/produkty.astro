@@ -9,6 +9,9 @@ const { texts } = content;
 
 const visibleCategories = CATEGORY_KEYS.filter((c) => !content.categories.hidden.includes(c));
 const catParam = Astro.url.searchParams.get("kat");
+if (catParam === "kuchyne" && visibleCategories.includes("kuchyne")) {
+  return Astro.redirect("/produkty/kuchyne", 301);
+}
 const initialCat = visibleCategories.find((c) => c === catParam) ?? "vse";
 ---
 

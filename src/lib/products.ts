@@ -29,6 +29,11 @@ export const CATEGORY_LABELS: Record<CategoryKey, string> = {
 /** Large furniture is delivered by the maker in person; everything else is shipped as a parcel. */
 export const PERSONAL_DELIVERY_CATEGORIES: CategoryKey[] = ["stoly", "kuchyne"];
 
+/** Address of a category's page; kitchens are all custom work, so they have their own page. */
+export function categoryHref(cat: CategoryKey): string {
+  return cat === "kuchyne" ? "/produkty/kuchyne" : `/produkty?kat=${cat}`;
+}
+
 export function isPersonalDelivery(cat: CategoryKey): boolean {
   return PERSONAL_DELIVERY_CATEGORIES.includes(cat);
 }

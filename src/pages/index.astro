@@ -5,7 +5,7 @@ import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
 import InfoCards from "../components/InfoCards.astro";
 import { getSiteData } from "../lib/data";
-import { CATEGORY_LABELS, HOME_CATEGORY_KEYS, type CategoryKey } from "../lib/products";
+import { CATEGORY_LABELS, HOME_CATEGORY_KEYS, categoryHref, type CategoryKey } from "../lib/products";
 
 const { content } = await getSiteData();
 const { texts, images } = content;
@@ -110,7 +110,7 @@ const heroPhoto = Boolean(images.hero);
       <div class={`grid grid-cols-1 gap-[18px] sm:grid-cols-2 ${collectionGridCols}`}>
         {collections.map((c, i) => (
           <a
-            href={`/produkty?kat=${c.cat}`}
+            href={categoryHref(c.cat)}
             data-reveal
             style={`transition-delay:${i * 0.06}s`}
             class="card-lift group overflow-hidden rounded-[22px] bg-surface"

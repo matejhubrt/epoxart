@@ -1,11 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import PhotoGallery from "../components/PhotoGallery.astro";
 import { getSiteData } from "../lib/data";
-import { MAX_GALLERY_PHOTOS } from "../lib/content";
 
 const { content } = await getSiteData();
 const { texts, gallery } = content;
-const photos = gallery.photos;
 ---
 
 <Layout
@@ -21,126 +20,12 @@ const photos = gallery.photos;
       {texts.galleryText}
     </p>
 
-    <div
-      data-edit-gallery
-      data-edit-max={MAX_GALLERY_PHOTOS}
-      class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3"
-    >
-      {photos.map((url, i) => (
-        <figure
-          data-gallery-item
-          data-url={url}
-          data-reveal="scale"
-          style={`transition-delay:${(i % 3) * 0.08}s`}
-          class="img-zoom overflow-hidden rounded-[18px] bg-surface"
-        >
-          <button
-            type="button"
-            data-open-photo
-            aria-label={`Zvětšit fotku ${i + 1}`}
-            class="block aspect-[4/3] w-full cursor-zoom-in overflow-hidden"
-          >
-            <img
-              src={url}
-              alt={`Fotka z dílny EpoxArt, ${i + 1}`}
-              loading={i < 6 ? "eager" : "lazy"}
-              decoding="async"
-              class="h-full w-full object-cover"
-            />
-          </button>
-        </figure>
-      ))}
-      <!-- blueprint the editor copies for every photo the owner adds -->
-      <template data-edit-new>
-        <figure data-gallery-item data-url="" class="overflow-hidden rounded-[18px] bg-surface">
-          <button
-            type="button"
-            data-open-photo
-            aria-label="Zvětšit fotku"
-            class="block aspect-[4/3] w-full cursor-zoom-in overflow-hidden"
-          >
-            <img src="" alt="Fotka z dílny EpoxArt" class="h-full w-full object-cover" />
-          </button>
-        </figure>
-      </template>
-    </div>
-
-    <p data-gallery-empty hidden={photos.length > 0} class="mt-10 text-[15px] text-muted">
-      Galerie se připravuje – fotky tu brzy přibudou.
-    </p>
+    <PhotoGallery
+      photos={gallery.photos}
+      editKey="gallery"
+      class="mt-10"
+      altPrefix="Fotka z dílny EpoxArt"
+      emptyText="Galerie se připravuje – fotky tu brzy přibudou."
+    />
   </div>
-
-  <script>
-    // simple full-screen viewer: click a photo, then ← → or the arrows, Esc to close
-    const grid = document.querySelector<HTMLElement>("[data-edit-gallery]");
-    let overlay: HTMLDivElement | null = null;
-    let index = 0;
-    let opener: HTMLElement | null = null;
-
-    const urls = () =>
-      Array.from(grid?.querySelectorAll<HTMLElement>("[data-gallery-item]") ?? [])
-        .map((f) => f.querySelector("img")?.getAttribute("src") ?? "")
-        .filter(Boolean);
-
-    function show(i: number) {
-      const list = urls();
-      if (!overlay || list.length === 0) return;
-      index = (i + list.length) % list.length;
-      overlay.querySelector("img")!.setAttribute("src", list[index]);
-      overlay.querySelector("[data-counter]")!.textContent = `${index + 1} / ${list.length}`;
-    }
-
-    function close() {
-      overlay?.remove();
-      overlay = null;
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", onKey);
-      opener?.focus();
-    }
-
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-      else if (e.key === "ArrowLeft") show(index - 1);
-      else if (e.key === "ArrowRight") show(index + 1);
-    }
-
-    function open(i: number) {
-      if (overlay) return;
-      overlay = document.createElement("div");
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-label", "Fotka z galerie");
-      overlay.className =
-        "fixed inset-0 z-[300] flex items-center justify-center bg-[rgba(16,11,8,0.92)] p-4 sm:p-10";
-      const btn =
-        "absolute flex h-11 w-11 items-center justify-center rounded-full bg-white/12 text-2xl text-white hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white";
-      overlay.innerHTML = `
-        <img alt="" class="max-h-full max-w-full rounded-lg object-contain shadow-2xl" />
-        <button type="button" data-close aria-label="Zavřít" class="${btn} right-4 top-4">✕</button>
-        <button type="button" data-prev aria-label="Předchozí fotka" class="${btn} left-3 top-1/2 -translate-y-1/2">‹</button>
-        <button type="button" data-next aria-label="Další fotka" class="${btn} right-3 top-1/2 -translate-y-1/2">›</button>
-        <span data-counter class="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-white/80"></span>`;
-      overlay.addEventListener("click", (e) => {
-        const t = e.target as HTMLElement;
-        if (t.closest("[data-prev]")) show(index - 1);
-        else if (t.closest("[data-next]")) show(index + 1);
-        else if (t.tagName !== "IMG") close();
-      });
-      document.body.append(overlay);
-      document.body.style.overflow = "hidden";
-      document.addEventListener("keydown", onKey);
-      show(i);
-      overlay.querySelector<HTMLElement>("[data-close]")?.focus();
-    }
-
-    grid?.addEventListener("click", (e) => {
-      // the owner's editor (edit mode) uses clicks for its own buttons
-      if (document.documentElement.classList.contains("ea-on")) return;
-      const trigger = (e.target as HTMLElement).closest<HTMLElement>("[data-open-photo]");
-      if (!trigger) return;
-      const items = Array.from(grid.querySelectorAll("[data-gallery-item]"));
-      opener = trigger;
-      open(items.indexOf(trigger.closest("[data-gallery-item]")!));
-    });
-  </script>
 </Layout>

@@ -356,6 +356,9 @@ export function startEditing() {
 
   /* ---------- gallery ---------- */
   const galleryNode = document.querySelector<HTMLElement>("[data-edit-gallery]");
+  // the same component serves the Galerie page ("gallery") and the kitchen page ("kitchens")
+  const galleryKey: "gallery" | "kitchens" =
+    galleryNode?.dataset.editGallery === "kitchens" ? "kitchens" : "gallery";
   const galleryItems = () =>
     galleryNode
       ? Array.from(galleryNode.children).filter(
@@ -411,7 +414,7 @@ export function startEditing() {
         }
         galleryAdd.textContent = `Nahrávám ${done + failed.length + 1} / ${files.length}…`;
         try {
-          const url = await uploadImage("gallery", file);
+          const url = await uploadImage(galleryKey, file);
           galleryUploads.add(url);
           const item = blueprint.cloneNode(true) as HTMLElement;
           item.dataset.url = url;
@@ -576,9 +579,9 @@ export function startEditing() {
       let removedGallery: string[] = [];
       if (galleryChanged()) {
         const photos = galleryUrls().slice(0, MAX_GALLERY_PHOTOS);
-        await saveSetting("gallery", { photos });
+        await saveSetting(galleryKey, { photos });
         // photos removed now, plus ones uploaded and deleted again before saving
-        removedGallery = [...fresh.gallery.photos, ...galleryUploads].filter((u) => !photos.includes(u));
+        removedGallery = [...fresh[galleryKey].photos, ...galleryUploads].filter((u) => !photos.includes(u));
         origGallery = JSON.stringify(galleryUrls());
         galleryUploads.clear();
       }

@@ -39,6 +39,19 @@ export default function ProductGrid({
       <div className="flex flex-wrap gap-2.5">
         {chips.map((c) => {
           const active = cat === c.key;
+          const chipClass = `rounded-full border px-[22px] py-2.5 text-[13.5px] transition-colors ${
+            active
+              ? "border-ink bg-ink text-page"
+              : "border-border-2 bg-surface text-ink hover:border-ink"
+          }`;
+          // kitchens are all custom work: their own page with gallery and inquiry
+          if (c.key === "kuchyne") {
+            return (
+              <a key={c.key} href="/produkty/kuchyne" className={chipClass}>
+                {c.label}
+              </a>
+            );
+          }
           return (
             <button
               key={c.key}
@@ -146,6 +159,26 @@ export default function ProductGrid({
           </div>
         ))}
       </div>
+
+      {cat === "stoly" && (
+        <div className="card-in mt-10 flex flex-col items-start justify-between gap-6 rounded-[26px] bg-surface px-8 py-9 sm:flex-row sm:items-center sm:px-12">
+          <div>
+            <h2 className="font-display text-[30px] font-medium leading-tight sm:text-[36px]">
+              Nenašli jste svůj stůl?
+            </h2>
+            <p className="mt-2 max-w-[520px] text-[15px] leading-relaxed text-body">
+              Navrhněte si vlastní: vyberte dřevo, odstín pryskyřice, tvar i rozměr a pošlete nám
+              nezávaznou poptávku.
+            </p>
+          </div>
+          <a
+            href="/vyroba-na-miru"
+            className="btn-press shrink-0 rounded-full bg-teal px-8 py-4 text-[13px] tracking-[0.06em] text-page hover:bg-teal-hover"
+          >
+            OTEVŘÍT KONFIGURÁTOR
+          </a>
+        </div>
+      )}
     </div>
   );
 }
