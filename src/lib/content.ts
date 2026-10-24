@@ -45,14 +45,24 @@ export interface ShippingSettings {
   freeFrom: number;
 }
 
-export interface ColorOption {
+/** The woods the configurator has rendered pictures for (public/konfigurator/<shape>-<id>-<river>.webp). */
+export const WOOD_IDS = ["dub", "buk", "jasan", "orech"] as const;
+export type WoodId = (typeof WOOD_IDS)[number];
+export const WOOD_LABELS: Record<WoodId, string> = { dub: "Dub", buk: "Buk", jasan: "Jasan", orech: "Ořech" };
+/** swatch colour of each wood as it looks oiled */
+export const WOOD_SWATCHES: Record<WoodId, string> = { dub: "#c08a50", buk: "#cfa27a", jasan: "#d8b98d", orech: "#6a4a36" };
+
+/** A resin pigment. With `shine` it is metallic (mica): it shimmers from `color` to `shine`. */
+export interface Pigment {
   label: string;
   color: string;
+  shine: string | null;
 }
 
 export interface ConfiguratorSettings {
-  woods: ColorOption[];
-  resins: ColorOption[];
+  /** woods the owner switched off */
+  hiddenWoods: WoodId[];
+  pigments: Pigment[];
 }
 
 export interface CategorySettings {
@@ -161,30 +171,44 @@ export const DEFAULT_CONTENT: SiteContent = {
     ],
   },
   configurator: {
-    woods: [
-      { label: "Ořech", color: "#5a3a22" },
-      { label: "Dub", color: "#b08850" },
-      { label: "Jasan", color: "#c9ab78" },
-      { label: "Bříza", color: "#ddc79c" },
-    ],
-    resins: [
-      { label: "Oceánská modř", color: "#1c5c78" },
-      { label: "Smaragd", color: "#1f6e63" },
-      { label: "Jantar", color: "#c88a3a" },
-      { label: "Uhlová čerň", color: "#17140f" },
-      { label: "Čirá", color: "#d8c7a2" },
+    hiddenWoods: [],
+    // Metallic: Eye Candy pearl pigments, colours measured from the pigment in resin.
+    // Opaque: DIPON epoxy pastes, by RAL code.
+    pigments: [
+      { label: "Kin Gold", color: "#ba7f32", shine: "#ecc36b" },
+      { label: "Rose Gold", color: "#d98a7e", shine: "#fcdfc5" },
+      { label: "Shu Copper", color: "#7d2721", shine: "#ce6962" },
+      { label: "Amaterasu Silver", color: "#727177", shine: "#c9c8ce" },
+      { label: "Samurai Black", color: "#28262e", shine: "#616067" },
+      { label: "Akoya White", color: "#c3bebd", shine: "#e6e3e3" },
+      { label: "Okinawa Blue", color: "#0777a6", shine: "#4eadcb" },
+      { label: "Ocean Blue", color: "#064f9f", shine: "#2a85c7" },
+      { label: "Emerald Green", color: "#0a6a4a", shine: "#449277" },
+      { label: "Akai Tsuki Red", color: "#67100b", shine: "#ab322a" },
+      { label: "Murasaki Violet", color: "#301b35", shine: "#704c7d" },
+      { label: "Černá RAL 9005", color: "#0e0e10", shine: null },
+      { label: "Bílá RAL 9003", color: "#ecece7", shine: null },
+      { label: "Grafitová RAL 7024", color: "#474a50", shine: null },
+      { label: "Světle šedá RAL 7035", color: "#cbd0cc", shine: null },
+      { label: "Azurová RAL 5009", color: "#2e5978", shine: null },
+      { label: "Smaragdová RAL 6001", color: "#28713e", shine: null },
+      { label: "Signální červená RAL 3001", color: "#a72920", shine: null },
+      { label: "Řepková žlutá RAL 1021", color: "#f6b600", shine: null },
     ],
   },
 };
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
-function cleanColors(input: unknown, fallback: ColorOption[]): ColorOption[] {
+/** Saved pigments live under `pigments`; the older `resins` colour list is no longer used. */
+function cleanPigments(input: unknown, fallback: Pigment[]): Pigment[] {
   if (!Array.isArray(input)) return fallback;
-  const valid = input.filter(
-    (o): o is ColorOption =>
-      !!o && typeof o.label === "string" && o.label.trim() !== "" && HEX.test(o.color)
-  );
+  const valid = input
+    .filter(
+      (o): o is Pigment =>
+        !!o && typeof o.label === "string" && o.label.trim() !== "" && HEX.test(o.color)
+    )
+    .map((o) => ({ label: o.label, color: o.color, shine: HEX.test(o.shine ?? "") ? o.shine : null }));
   return valid.length > 0 ? valid : fallback;
 }
 
@@ -243,9 +267,12 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
   };
 
   const c = byKey.get("configurator") ?? {};
+  const hiddenWoodsRaw = Array.isArray(c?.hiddenWoods) ? (c.hiddenWoods as unknown[]) : [];
+  const hiddenWoods = WOOD_IDS.filter((w) => hiddenWoodsRaw.includes(w));
   const configurator: ConfiguratorSettings = {
-    woods: cleanColors(c?.woods, d.configurator.woods),
-    resins: cleanColors(c?.resins, d.configurator.resins),
+    // at least one wood stays visible
+    hiddenWoods: hiddenWoods.length < WOOD_IDS.length ? hiddenWoods : [],
+    pigments: cleanPigments(c?.pigments, d.configurator.pigments),
   };
 
   const cat = byKey.get("categories") ?? {};

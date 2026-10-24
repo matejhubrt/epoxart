@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import type { ColorOption, ConfiguratorSettings, ShippingSettings, SiteTexts } from "../../lib/content";
+import {
+  WOOD_IDS,
+  WOOD_LABELS,
+  WOOD_SWATCHES,
+  type ConfiguratorSettings,
+  type Pigment,
+  type ShippingSettings,
+  type SiteTexts,
+} from "../../lib/content";
 import { CATEGORY_KEYS, CATEGORY_LABELS, type CategoryKey } from "../../lib/products";
 import { fetchContent, saveSetting } from "../../lib/admin/api";
 import { getSupabase } from "../../lib/supabase";
@@ -7,38 +15,55 @@ import { Button, Card, Field, inputCls, useDirtyGuard, type Notify } from "./ui"
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
-function ColorList({
-  title,
-  items,
-  onChange,
-}: {
-  title: string;
-  items: ColorOption[];
-  onChange: (items: ColorOption[]) => void;
-}) {
-  const update = (i: number, patch: Partial<ColorOption>) =>
+const MAX_PIGMENTS = 30;
+const colorInputCls = "h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border-2 bg-white p-1";
+
+/** Resin pigments: name, colour and, for metallic ones, the colour they shimmer to. */
+function PigmentList({ items, onChange }: { items: Pigment[]; onChange: (items: Pigment[]) => void }) {
+  const update = (i: number, patch: Partial<Pigment>) =>
     onChange(items.map((o, n) => (n === i ? { ...o, ...patch } : o)));
 
   return (
     <div>
-      <div className="mb-2 text-xs tracking-[0.12em] text-brown-link">{title}</div>
+      <div className="mb-2 text-xs tracking-[0.12em] text-brown-link">PIGMENTY PRYSKYŘICE</div>
+      <p className="mb-3 text-xs text-faint">
+        Metalický pigment se na náhledu třpytí od základní barvy ke světlejšímu odlesku. Neprůhledný je jednolitý.
+      </p>
       <ul className="flex flex-col gap-2.5">
         {items.map((o, i) => (
-          <li key={i} className="flex items-center gap-3">
+          <li key={i} className="flex flex-wrap items-center gap-2.5 sm:flex-nowrap">
             <input
               type="color"
               value={HEX.test(o.color) ? o.color : "#000000"}
               onChange={(e) => update(i, { color: e.target.value })}
-              className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-border-2 bg-white p-1"
+              className={colorInputCls}
               aria-label={`Barva: ${o.label}`}
             />
+            {o.shine !== null && (
+              <input
+                type="color"
+                value={HEX.test(o.shine) ? o.shine : "#ffffff"}
+                onChange={(e) => update(i, { shine: e.target.value })}
+                className={colorInputCls}
+                aria-label={`Odlesk: ${o.label}`}
+                title="Barva odlesku"
+              />
+            )}
             <input
               value={o.label}
               maxLength={40}
               onChange={(e) => update(i, { label: e.target.value })}
-              className={inputCls}
+              className={`${inputCls} min-w-0 flex-1`}
               aria-label="Název"
             />
+            <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
+              <input
+                type="checkbox"
+                checked={o.shine !== null}
+                onChange={(e) => update(i, { shine: e.target.checked ? "#ffffff" : null })}
+              />
+              Metalický
+            </label>
             <Button
               variant="danger"
               className="!px-3.5 !py-2"
@@ -53,10 +78,10 @@ function ColorList({
       </ul>
       <Button
         className="mt-3 !py-2"
-        disabled={items.length >= 12}
-        onClick={() => onChange([...items, { label: "Nový odstín", color: "#8a6a4f" }])}
+        disabled={items.length >= MAX_PIGMENTS}
+        onClick={() => onChange([...items, { label: "Nový pigment", color: "#8a6a4f", shine: null }])}
       >
-        + Přidat
+        + Přidat pigment
       </Button>
     </div>
   );
@@ -237,14 +262,18 @@ export function SettingsTab({ notify }: { notify: Notify }) {
     if (!Number.isFinite(costNum) || costNum < 0 || !Number.isFinite(freeNum) || freeNum < 0) {
       return notify("Doprava: zadejte prosím čísla (Kč).", "error");
     }
-    if ([...conf.woods, ...conf.resins].some((o) => !o.label.trim())) {
-      return notify("Každý odstín musí mít název.", "error");
+    if (conf.pigments.some((o) => !o.label.trim())) {
+      return notify("Každý pigment musí mít název.", "error");
+    }
+    const labels = conf.pigments.map((o) => o.label.trim().toLowerCase());
+    if (new Set(labels).size !== labels.length) {
+      return notify("Dva pigmenty mají stejný název, přejmenujte prosím jeden z nich.", "error");
     }
     setSaving(true);
     try {
       const cleaned: ConfiguratorSettings = {
-        woods: conf.woods.map((o) => ({ ...o, label: o.label.trim() })),
-        resins: conf.resins.map((o) => ({ ...o, label: o.label.trim() })),
+        hiddenWoods: conf.hiddenWoods,
+        pigments: conf.pigments.map((o) => ({ ...o, label: o.label.trim() })),
       };
       const shipping: ShippingSettings = { cost: Math.round(costNum), freeFrom: Math.round(freeNum) };
       await saveSetting("configurator", cleaned);
@@ -314,17 +343,46 @@ export function SettingsTab({ notify }: { notify: Notify }) {
       </Card>
 
       <Card title="Konfigurátor stolu">
-        <div className="grid gap-8 md:grid-cols-2">
-          <ColorList
-            title="DŘEVA"
-            items={conf.woods}
-            onChange={(woods) => setConf({ ...conf, woods })}
-          />
-          <ColorList
-            title="ODSTÍNY PRYSKYŘICE"
-            items={conf.resins}
-            onChange={(resins) => setConf({ ...conf, resins })}
-          />
+        <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <div className="mb-2 text-xs tracking-[0.12em] text-brown-link">DŘEVA</div>
+            <p className="mb-3 text-xs text-faint">
+              Náhled má hotové fotky pro tato čtyři dřeva. Dřevo, které nenabízíte, můžete vypnout.
+            </p>
+            <ul className="flex flex-col gap-2.5">
+              {WOOD_IDS.map((w) => {
+                const on = !conf.hiddenWoods.includes(w);
+                const isLastVisible = on && WOOD_IDS.length - conf.hiddenWoods.length === 1;
+                return (
+                  <li
+                    key={w}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border-2 bg-white px-4 py-2.5"
+                  >
+                    <span className="flex items-center gap-2.5 text-sm">
+                      <span className="h-4 w-4 rounded-full" style={{ background: WOOD_SWATCHES[w] }} />
+                      {WOOD_LABELS[w]}
+                      {!on && <span className="text-xs text-faint">(skryto)</span>}
+                    </span>
+                    <Button
+                      variant={on ? "outline" : "primary"}
+                      className="!px-4 !py-1.5"
+                      disabled={isLastVisible}
+                      title={isLastVisible ? "Alespoň jedno dřevo musí zůstat zapnuté." : undefined}
+                      onClick={() =>
+                        setConf({
+                          ...conf,
+                          hiddenWoods: on ? [...conf.hiddenWoods, w] : conf.hiddenWoods.filter((h) => h !== w),
+                        })
+                      }
+                    >
+                      {on ? "Vypnout" : "Zapnout"}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <PigmentList items={conf.pigments} onChange={(pigments) => setConf({ ...conf, pigments })} />
         </div>
       </Card>
 

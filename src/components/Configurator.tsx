@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import type { ColorOption } from "../lib/content";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { WOOD_IDS, WOOD_LABELS, WOOD_SWATCHES, type Pigment, type WoodId } from "../lib/content";
 import { submitInquiry } from "../lib/inquiries";
 
 const SHAPES = ["Obdélník", "Oválné", "Čtverec", "Kulaté"] as const;
@@ -8,33 +8,8 @@ const RIVERS = ["Podél", "Napříč", "Diagonálně", "U kraje"] as const;
 type Shape = (typeof SHAPES)[number];
 type River = (typeof RIVERS)[number];
 
-const RADIUS_MAP: Record<Shape, string> = {
-  Obdélník: "14px",
-  Oválné: "150px / 110px",
-  Čtverec: "14px",
-  Kulaté: "50%",
-};
-
-const RIVER_POS: Record<River, CSSProperties> = {
-  Podél: { top: "-8%", bottom: "-8%", left: "39%", width: "22%", transform: "rotate(2deg)" },
-  Napříč: { left: "-8%", right: "-8%", top: "38%", height: "26%", transform: "rotate(-1.5deg)" },
-  Diagonálně: { left: "-14%", right: "-14%", top: "37%", height: "28%", transform: "rotate(31deg) scale(1.35)" },
-  "U kraje": { top: "-8%", bottom: "-8%", left: "17%", width: "19%", transform: "rotate(3deg)" },
-};
-
-function shade(hex: string, amt: number, alpha?: number): string {
-  const h = (hex || "#000000").replace("#", "");
-  let r = parseInt(h.substring(0, 2), 16);
-  let g = parseInt(h.substring(2, 4), 16);
-  let b = parseInt(h.substring(4, 6), 16);
-  r = Math.max(0, Math.min(255, Math.round(r + amt)));
-  g = Math.max(0, Math.min(255, Math.round(g + amt)));
-  b = Math.max(0, Math.min(255, Math.round(b + amt)));
-  return alpha == null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${alpha})`;
-}
-
 interface Config {
-  wood: string;
+  wood: WoodId;
   resin: string;
   /** true = solid wood, no epoxy river at all */
   noResin: boolean;
@@ -43,229 +18,189 @@ interface Config {
   river: River;
 }
 
-type Species = "orech" | "dub" | "jasan" | "briza" | "other";
+/* ---------- rendered pictures ----------
+ * public/konfigurator/<shape>-<wood>-<river>.webp is a studio render (Blender) with a transparent
+ * background. With a river there is also <same name>_resin.png: red = where the resin is,
+ * green = light falling on it / 2, blue = its reflections / 4 (both sRGB-encoded linear).
+ * The resin is poured here in the chosen pigment, so any colour works without new renders.
+ */
+const SHAPE_FILE: Record<Shape, string> = { Obdélník: "obdelnik", Oválné: "ovalne", Čtverec: "ctverec", Kulaté: "kulate" };
+const RIVER_FILE: Record<River, string> = { Podél: "podel", Napříč: "napric", Diagonálně: "diag", "U kraje": "kraj" };
+// on a square or round top "across" is the same picture as "along"
+const SYMMETRIC: Partial<Record<Shape, true>> = { Čtverec: true, Kulaté: true };
+// the renders were saved 0.8 stops under, so the resin is poured at the same exposure
+const EXPOSURE = Math.pow(2, -0.8);
 
-/** Which kind of wood a swatch label means; unknown names still get a neutral grain. */
-function speciesOf(label: string): Species {
-  const l = label
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-  if (l.includes("orech")) return "orech";
-  if (l.includes("dub")) return "dub";
-  if (l.includes("jasan")) return "jasan";
-  if (l.includes("briz")) return "briza";
-  return "other";
+function renderPath(cfg: Config): string {
+  const river = cfg.noResin
+    ? "none"
+    : SYMMETRIC[cfg.shape] && cfg.river === "Napříč"
+      ? "podel"
+      : RIVER_FILE[cfg.river];
+  return `/konfigurator/${SHAPE_FILE[cfg.shape]}-${cfg.wood}-${river}`;
 }
 
-interface Grain {
-  /** feTurbulence base frequency "x y": low x + high y = long streaks along the board */
-  freq: string;
-  octaves: number;
-  seed: number;
-  /** how strong the dark growth rings are (0..1) */
-  dark: number;
-  /** how strong the light streaks are (0..1) */
-  light: number;
-  /** wavy-ness of the rings */
-  swirl: number;
-  /** fine pores / medullary flecks */
-  pores: number;
-  /** base colour pushed darker (negative) or lighter (positive) so the texture sits well on it */
-  tone: number;
+const toLinear = (c: number) => {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+};
+const LINEAR = Float32Array.from({ length: 256 }, (_, i) => toLinear(i));
+const ENCODE = Uint8Array.from({ length: 4096 }, (_, i) => {
+  const l = i / 4095;
+  return Math.round((l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055) * 255);
+});
+const hexToLinear = (h: string) => [1, 3, 5].map((i) => toLinear(parseInt(h.slice(i, i + 2), 16)));
+
+function hash(n: number): number {
+  n = Math.imul(n ^ (n >>> 15), 2246822519);
+  n = Math.imul(n ^ (n >>> 13), 3266489917);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
 }
 
-const GRAINS: Record<Species, Grain> = {
-  orech: { freq: "0.0035 0.085", octaves: 5, seed: 7, dark: 0.62, light: 0.28, swirl: 26, pores: 0.18, tone: -6 },
-  dub: { freq: "0.0055 0.15", octaves: 5, seed: 3, dark: 0.5, light: 0.34, swirl: 12, pores: 0.4, tone: 0 },
-  jasan: { freq: "0.004 0.24", octaves: 4, seed: 11, dark: 0.34, light: 0.32, swirl: 8, pores: 0.12, tone: 4 },
-  briza: { freq: "0.008 0.36", octaves: 4, seed: 5, dark: 0.22, light: 0.26, swirl: 5, pores: 0.1, tone: 6 },
-  other: { freq: "0.005 0.16", octaves: 5, seed: 9, dark: 0.42, light: 0.3, swirl: 12, pores: 0.2, tone: 0 },
+/** Smooth noise warped into flowing swirls, like mica stirred into resin: 0..1 per pixel. */
+const swirlCache = new Map<string, Float32Array>();
+function swirlField(w: number, h: number): Float32Array {
+  const key = `${w}x${h}`;
+  const cached = swirlCache.get(key);
+  if (cached) return cached;
+  const G = 64;
+  const grid = Float32Array.from({ length: (G + 1) * (G + 1) }, (_, i) => hash(i * 7919 + 13));
+  const noise = (x: number, y: number) => {
+    x = ((x % G) + G) % G;
+    y = ((y % G) + G) % G;
+    const xi = x | 0, yi = y | 0, fx = x - xi, fy = y - yi;
+    const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy), r = G + 1;
+    const a = grid[yi * r + xi], b = grid[yi * r + xi + 1], c = grid[(yi + 1) * r + xi], e = grid[(yi + 1) * r + xi + 1];
+    return a + (b - a) * u + (c - a) * v + (a - b - c + e) * u * v;
+  };
+  const out = new Float32Array(w * h), s = 1 / 55;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const wx = x * s + 2.2 * noise(x * s * 0.6, y * s * 0.6 + 5);
+      const wy = y * s + 2.2 * noise(x * s * 0.6 + 9, y * s * 0.6);
+      const n = 0.6 * noise(wx, wy) + 0.3 * noise(wx * 2.3, wy * 2.3) + 0.1 * noise(wx * 5, wy * 5);
+      out[y * w + x] = Math.max(0, Math.min(1, (n - 0.3) * 1.9));
+    }
+  }
+  swirlCache.set(key, out);
+  return out;
+}
+
+const imageCache = new Map<string, Promise<HTMLImageElement>>();
+function loadImage(src: string): Promise<HTMLImageElement> {
+  let p = imageCache.get(src);
+  if (!p) {
+    p = new Promise((ok, fail) => {
+      const im = new Image();
+      im.onload = () => ok(im);
+      im.onerror = fail;
+      im.src = src;
+    });
+    imageCache.set(src, p);
+    p.catch(() => imageCache.delete(src));
+  }
+  return p;
+}
+
+function pixelsOf(im: HTMLImageElement): ImageData {
+  const c = document.createElement("canvas");
+  c.width = im.naturalWidth;
+  c.height = im.naturalHeight;
+  const x = c.getContext("2d", { willReadFrequently: true })!;
+  x.drawImage(im, 0, 0);
+  return x.getImageData(0, 0, c.width, c.height);
+}
+
+/** Pours the pigment into the render's resin, keeping the rendered light and reflections. */
+function pourResin(img: ImageData, map: ImageData, pigment: Pigment) {
+  const d = img.data, m = map.data;
+  const base = hexToLinear(pigment.color);
+  const shine = pigment.shine ? hexToLinear(pigment.shine) : null;
+  const shineMax = shine ? Math.max(...shine, 1e-4) : 1;
+  const swirl = shine ? swirlField(img.width, img.height) : null;
+  const c = [0, 0, 0];
+  for (let i = 0, px = 0; i < d.length; i += 4, px++) {
+    const a = m[i] / 255;
+    if (a < 0.01) continue;
+    const light = LINEAR[m[i + 1]] * 2, gloss = LINEAR[m[i + 2]] * 4;
+    if (shine && swirl) {
+      // mica: pearly swirls between base and highlight, tinted reflections, a fine sparkle
+      const t = swirl[px], spark = hash(px) > 0.9965 ? 0.9 * light : 0;
+      for (let k = 0; k < 3; k++) {
+        const body = base[k] + (shine[k] - base[k]) * t;
+        c[k] = body * light * 1.15 + gloss * (0.35 + (0.65 * shine[k]) / shineMax) + spark * shine[k];
+      }
+    } else {
+      for (let k = 0; k < 3; k++) c[k] = base[k] * light + gloss;
+    }
+    for (let k = 0; k < 3; k++) {
+      const v = ENCODE[Math.min(4095, Math.round(c[k] * EXPOSURE * 4095))];
+      d[i + k] = d[i + k] * (1 - a) + v * a;
+    }
+  }
+}
+
+// the floor shadow reaches the picture's edge: fade all four edges so it never ends in a hard line
+const EDGE_GRADIENTS =
+  "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent), linear-gradient(to bottom, transparent, #000 7%, #000 90%, transparent)";
+const EDGE_FADE: CSSProperties = {
+  maskImage: EDGE_GRADIENTS,
+  maskComposite: "intersect",
+  WebkitMaskImage: EDGE_GRADIENTS,
+  WebkitMaskComposite: "source-in",
 };
 
-/** Wood grain painted with SVG noise, tinted by the swatch colour: looks like real boards, no image files. */
-function WoodGrain({ species, color, uid }: { species: Species; color: string; uid: string }) {
-  const g = GRAINS[species];
-  const base = shade(color, g.tone);
-  return (
-    <svg
-      viewBox="0 0 300 300"
-      preserveAspectRatio="none"
-      width="100%"
-      height="100%"
-      style={{ position: "absolute", inset: 0, display: "block" }}
-      aria-hidden="true"
-    >
-      <defs>
-        {/* dark growth rings: noise stretched along the board, gently bent */}
-        <filter id={`${uid}-dark`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency={g.freq} numOctaves={g.octaves} seed={g.seed} result="n" />
-          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={2} seed={g.seed + 4} result="bend" />
-          <feDisplacementMap in="n" in2="bend" scale={g.swirl} xChannelSelector="R" yChannelSelector="G" result="d" />
-          <feColorMatrix
-            in="d"
-            type="matrix"
-            values="0 0 0 0 0.08  0 0 0 0 0.04  0 0 0 0 0.01  0 0 0 3.4 -1.55"
-          />
-        </filter>
-        {/* light streaks between the rings */}
-        <filter id={`${uid}-light`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency={g.freq} numOctaves={g.octaves} seed={g.seed + 21} result="n" />
-          <feColorMatrix
-            in="n"
-            type="matrix"
-            values="0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.78  0 0 0 3 -1.7"
-          />
-        </filter>
-        {/* tiny pores, short dashes along the grain */}
-        <filter id={`${uid}-pores`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.045 0.9" numOctaves={2} seed={g.seed + 40} result="n" />
-          <feColorMatrix
-            in="n"
-            type="matrix"
-            values="0 0 0 0 0.05  0 0 0 0 0.02  0 0 0 0 0  0 0 0 5 -2.9"
-          />
-        </filter>
-        <linearGradient id={`${uid}-light-fall`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.22" />
-          <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity="0.22" />
-        </linearGradient>
-      </defs>
-      <rect width="300" height="300" fill={base} />
-      <rect width="300" height="300" filter={`url(#${uid}-dark)`} opacity={g.dark} />
-      <rect width="300" height="300" filter={`url(#${uid}-light)`} opacity={g.light} />
-      <rect width="300" height="300" filter={`url(#${uid}-pores)`} opacity={g.pores} />
-      <rect width="300" height="300" fill={`url(#${uid}-light-fall)`} />
-    </svg>
-  );
-}
+function TablePreview({ cfg, pigment }: { cfg: Config; pigment: Pigment }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
 
-const SLAB_LAYERS = 8;
-
-function TablePreview({
-  cfg,
-  woodColor,
-  resinColor,
-}: {
-  cfg: Config;
-  woodColor: string;
-  resinColor: string;
-}) {
-  const radius = RADIUS_MAP[cfg.shape];
-  const isSquareish = cfg.shape === "Kulaté" || cfg.shape === "Čtverec";
-  const topW = isSquareish ? 210 : 300;
-  const topH = isSquareish ? 210 : 172;
-  const species = speciesOf(cfg.wood);
-  const uid = `w${species}`;
-
-  const tableGroupStyle: CSSProperties = {
-    position: "relative",
-    width: topW + "px",
-    height: topH + "px",
-    transformStyle: "preserve-3d",
-    transform: "rotateX(53deg) rotateZ(-2deg)",
-    transition: "width .5s ease, height .5s ease",
-    marginTop: "-26px",
-  };
-
-  const topSurfaceStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    borderRadius: radius,
-    overflow: "hidden",
-    transition: "border-radius .5s ease",
-    boxShadow: "inset 0 2px 5px rgba(255,255,255,.26), inset 0 -3px 10px rgba(0,0,0,.28)",
-    transform: "translateZ(0.5px)",
-  };
-
-  const floorShadowStyle: CSSProperties = {
-    position: "absolute",
-    bottom: "40px",
-    left: "50%",
-    width: topW * 1.02 + "px",
-    height: "40px",
-    transform: "translateX(-50%)",
-    borderRadius: "50%",
-    background: "radial-gradient(closest-side, rgba(0,0,0,.4), rgba(0,0,0,.18) 55%, transparent)",
-    filter: "blur(9px)",
-    transition: "width .5s ease",
-  };
-
-  const rLight = shade(resinColor, 70, 0.92);
-  const rMid = shade(resinColor, 6, 0.96);
-  const rDark = shade(resinColor, -46, 0.98);
-  const riverBg = [
-    "linear-gradient(118deg, rgba(255,255,255,.5) 0%, transparent 20%)",
-    "linear-gradient(300deg, rgba(255,255,255,.18) 0%, transparent 34%)",
-    `linear-gradient(118deg, ${rLight} 0%, ${rMid} 46%, ${rDark} 100%)`,
-  ].join(",");
-  const riverShadow = `inset 0 0 26px rgba(0,0,0,.4), inset 0 3px 8px rgba(255,255,255,.35), 0 0 20px ${shade(resinColor, -10, 0.45)}`;
-
-  const riverStyle: CSSProperties = {
-    position: "absolute",
-    background: riverBg,
-    boxShadow: riverShadow,
-    filter: "blur(.3px)",
-    transition: "all .5s ease",
-    borderRadius: "40% 60% 45% 55% / 50%",
-    overflow: "hidden",
-    ...RIVER_POS[cfg.river],
-  };
-
-  const glossStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    pointerEvents: "none",
-    background: "linear-gradient(115deg, rgba(255,255,255,.2), transparent 42%)",
-  };
+  useEffect(() => {
+    let cancelled = false;
+    const base = renderPath(cfg);
+    setState((s) => (s === "error" ? "loading" : s));
+    (async () => {
+      try {
+        const [main, map] = await Promise.all([
+          loadImage(base + ".webp"),
+          cfg.noResin ? null : loadImage(base + "_resin.png"),
+        ]);
+        if (cancelled || !canvas.current) return;
+        const img = pixelsOf(main);
+        if (map) pourResin(img, pixelsOf(map), pigment);
+        if (cancelled) return;
+        canvas.current.width = img.width;
+        canvas.current.height = img.height;
+        canvas.current.getContext("2d")!.putImageData(img, 0, 0);
+        setState("ready");
+      } catch {
+        if (!cancelled) setState("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [cfg.shape, cfg.wood, cfg.noResin, cfg.river, pigment]);
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "420px",
-        maxWidth: "100%",
-        height: "340px",
-        perspective: "1300px",
-        perspectiveOrigin: "50% 34%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "0 auto",
-      }}
-    >
-      <div style={floorShadowStyle} />
-      <div className="table-float">
-        <div style={tableGroupStyle}>
-          {/* the board's thickness: a stack of slightly darker copies underneath the top */}
-          {Array.from({ length: SLAB_LAYERS }, (_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: radius,
-                transform: `translateZ(${-(i + 1) * 2}px)`,
-                background: shade(woodColor, -34 - i * 4),
-                transition: "border-radius .5s ease",
-              }}
-            />
-          ))}
-          <div style={topSurfaceStyle}>
-            {/* remounted on every wood change, so the new grain fades in */}
-            <div key={`${cfg.wood}-${woodColor}`} className="wood-fade" style={{ position: "absolute", inset: 0 }}>
-              <WoodGrain species={species} color={woodColor} uid={uid} />
-            </div>
-            {!cfg.noResin && (
-              <div style={riverStyle}>
-                <div className="resin-sheen" />
-              </div>
-            )}
-            <div style={glossStyle} />
-          </div>
-        </div>
-      </div>
+    <div className="relative w-full">
+      <canvas
+        ref={canvas}
+        width={1000}
+        height={700}
+        role="img"
+        aria-label={`Náhled stolu: ${cfg.shape}, ${WOOD_LABELS[cfg.wood]}${
+          cfg.noResin ? ", bez pryskyřice" : `, řeka ${cfg.river.toLowerCase()}, ${pigment.label}`
+        }`}
+        className={`block aspect-[10/7] h-auto w-full transition-opacity duration-300 ${
+          state === "ready" ? "opacity-100" : "opacity-40"
+        }`}
+        style={EDGE_FADE}
+      />
+      {state !== "ready" && (
+        <p className="absolute inset-x-0 bottom-3 text-center text-xs text-muted" aria-live="polite">
+          {state === "loading" ? "Načítám náhled…" : "Náhled se nepodařilo načíst. Zkuste stránku obnovit."}
+        </p>
+      )}
     </div>
   );
 }
@@ -296,7 +231,7 @@ function InquiryForm({ cfg }: { cfg: Config }) {
       email: String(f.get("email") ?? "").trim(),
       message: String(f.get("message") ?? "").trim(),
       config: {
-        wood: cfg.wood,
+        wood: WOOD_LABELS[cfg.wood],
         resin: cfg.noResin ? "Bez pryskyřice (čisté dřevo)" : cfg.resin,
         shape: cfg.shape,
         river: cfg.noResin ? "—" : cfg.river,
@@ -363,45 +298,81 @@ function InquiryForm({ cfg }: { cfg: Config }) {
   );
 }
 
+function PigmentButton({ p, active, onPick }: { p: Pigment; active: boolean; onPick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onPick}
+      aria-pressed={active}
+      className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
+        active ? "border-ink bg-footer" : "border-border-2 bg-surface"
+      }`}
+    >
+      <span
+        className="h-4 w-4 shrink-0 rounded-full border border-black/10"
+        style={{
+          background: p.shine ? `radial-gradient(circle at 35% 30%, ${p.shine}, ${p.color} 70%)` : p.color,
+        }}
+      />
+      {p.label}
+    </button>
+  );
+}
+
 export default function Configurator({
-  woods,
-  resins,
+  hiddenWoods,
+  pigments,
 }: {
-  woods: ColorOption[];
-  resins: ColorOption[];
+  hiddenWoods: WoodId[];
+  pigments: Pigment[];
 }) {
+  const woods = WOOD_IDS.filter((w) => !hiddenWoods.includes(w));
   const [cfg, setCfg] = useState<Config>({
-    wood: woods[0].label,
-    resin: resins[0].label,
+    wood: woods[0],
+    resin: pigments[0].label,
     noResin: false,
     shape: "Obdélník",
     size: "",
     river: "Podél",
   });
 
-  const woodColor = (woods.find((w) => w.label === cfg.wood) ?? woods[0]).color;
-  const resinColor = (resins.find((r) => r.label === cfg.resin) ?? resins[0]).color;
+  const pigment = pigments.find((p) => p.label === cfg.resin) ?? pigments[0];
+  const pigmentGroups = [
+    { title: "Metalické pigmenty", list: pigments.filter((p) => p.shine) },
+    { title: "Neprůhledné pigmenty", list: pigments.filter((p) => !p.shine) },
+  ];
 
   const summary = useMemo(
     () => ({
       line1: cfg.noResin
-        ? `${cfg.wood} · čisté dřevo, bez pryskyřice`
-        : `${cfg.wood} · ${cfg.resin} · řeka ${cfg.river}`,
+        ? `${WOOD_LABELS[cfg.wood]} · čisté dřevo, bez pryskyřice`
+        : `${WOOD_LABELS[cfg.wood]} · ${cfg.resin} · řeka ${cfg.river}`,
       line2: `${cfg.shape} · ${cfg.size || "rozměr neuveden"}`,
     }),
     [cfg]
   );
 
+  // after the first picture, fetch the other woods' pictures for this shape in the background
+  useEffect(() => {
+    const t = setTimeout(() => {
+      for (const w of woods) loadImage(renderPath({ ...cfg, wood: w }) + ".webp").catch(() => {});
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [cfg.shape, cfg.river, cfg.noResin]);
+
   return (
     <div className="grid grid-cols-1 items-start gap-9 md:grid-cols-[1fr_0.9fr]">
       <div className="md:sticky md:top-[100px]">
-        <div className="flex min-h-[460px] items-center justify-center rounded-[26px] bg-warm px-6 py-14 sm:px-10">
-          <TablePreview cfg={cfg} woodColor={woodColor} resinColor={resinColor} />
+        <div className="overflow-hidden rounded-[26px] bg-[radial-gradient(120%_90%_at_50%_35%,var(--color-surface),var(--color-warm))] px-2 py-6 sm:px-4">
+          <TablePreview cfg={cfg} pigment={pigment} />
         </div>
         <p className="mt-4 whitespace-pre-line text-center font-mono text-[11px] leading-relaxed text-faint">
           {summary.line1}
           {"\n"}
           {summary.line2}
+        </p>
+        <p className="mt-2 text-center text-[11.5px] leading-relaxed text-faint">
+          Každá deska je originál. Kresba dřeva i tvar řeky se na vašem stole budou lišit, barvy jsou orientační.
         </p>
       </div>
 
@@ -410,18 +381,19 @@ export default function Configurator({
           <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">DŘEVO</div>
           <div className="flex flex-wrap gap-2.5">
             {woods.map((w) => {
-              const active = cfg.wood === w.label;
+              const active = cfg.wood === w;
               return (
                 <button
-                  key={w.label}
+                  key={w}
                   type="button"
-                  onClick={() => setCfg((c) => ({ ...c, wood: w.label }))}
+                  aria-pressed={active}
+                  onClick={() => setCfg((c) => ({ ...c, wood: w }))}
                   className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
                     active ? "border-ink bg-footer" : "border-border-2 bg-surface"
                   }`}
                 >
-                  <span className="h-4 w-4 rounded-full" style={{ background: w.color }} />
-                  {w.label}
+                  <span className="h-4 w-4 rounded-full" style={{ background: WOOD_SWATCHES[w] }} />
+                  {WOOD_LABELS[w]}
                 </button>
               );
             })}
@@ -455,24 +427,23 @@ export default function Configurator({
         {!cfg.noResin && (
           <div>
             <div className="mb-3 text-xs tracking-[0.18em] text-brown-link">ODSTÍN PRYSKYŘICE</div>
-            <div className="flex flex-wrap gap-2.5">
-              {resins.map((r) => {
-                const active = cfg.resin === r.label;
-                return (
-                  <button
-                    key={r.label}
-                    type="button"
-                    onClick={() => setCfg((c) => ({ ...c, resin: r.label }))}
-                    className={`flex items-center gap-2.5 rounded-full border px-[15px] py-[9px] text-[13px] transition-colors ${
-                      active ? "border-ink bg-footer" : "border-border-2 bg-surface"
-                    }`}
-                  >
-                    <span className="h-4 w-4 rounded-full" style={{ background: r.color }} />
-                    {r.label}
-                  </button>
-                );
-              })}
-            </div>
+            {pigmentGroups.map(({ title, list }) =>
+              list.length === 0 ? null : (
+                <div key={title} className="mb-3 last:mb-0">
+                  <div className="mb-2 text-[11px] text-faint">{title}</div>
+                  <div className="flex flex-wrap gap-2">
+                    {list.map((p) => (
+                      <PigmentButton
+                        key={p.label}
+                        p={p}
+                        active={cfg.resin === p.label}
+                        onPick={() => setCfg((c) => ({ ...c, resin: p.label }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            )}
           </div>
         )}
 
