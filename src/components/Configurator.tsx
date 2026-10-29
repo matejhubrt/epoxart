@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import { WOOD_IDS, WOOD_LABELS, WOOD_SWATCHES, type Pigment, type WoodId } from "../lib/content";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { WOOD_IDS, WOOD_INFO, WOOD_LABELS, WOOD_SWATCHES, type Pigment, type WoodId } from "../lib/content";
 import { submitInquiry } from "../lib/inquiries";
 
 const SHAPES = ["Obdélník", "Oválné", "Čtverec", "Kulaté"] as const;
@@ -443,7 +443,15 @@ export default function Configurator({
     return () => clearTimeout(t);
   }, [cfg.shape, cfg.river, cfg.noResin]);
 
+  const top = useRef<HTMLDivElement>(null);
+  const chooseWood = (w: WoodId) => {
+    setCfg((c) => ({ ...c, wood: w }));
+    // chosen from the section below: bring the table back into view
+    top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
+    <div ref={top} className="scroll-mt-[90px]">
     <div className="grid grid-cols-1 items-start gap-9 md:grid-cols-[1fr_0.9fr]">
       <div className="md:sticky md:top-[100px]">
         <div className="overflow-hidden rounded-[26px] bg-[radial-gradient(120%_90%_at_50%_35%,var(--color-surface),var(--color-warm))] px-2 py-6 sm:px-4">
@@ -579,5 +587,139 @@ export default function Configurator({
         <InquiryForm cfg={cfg} />
       </div>
     </div>
+
+    <WoodGuide woods={woods} chosen={cfg.wood} onChoose={chooseWood} />
+    </div>
+  );
+}
+
+function Pips({ value }: { value: number }) {
+  return (
+    <span className="inline-flex gap-[3px] align-middle" aria-label={`${value} z 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <i key={i} className={`h-2 w-2 rounded-full ${i <= value ? "bg-amber" : "bg-border-2"}`} />
+      ))}
+    </span>
+  );
+}
+
+/** "Naše dřeva": a tab per wood with a real photo and what the wood is like. Follows the chosen wood. */
+function WoodGuide({
+  woods,
+  chosen,
+  onChoose,
+}: {
+  woods: WoodId[];
+  chosen: WoodId;
+  onChoose: (w: WoodId) => void;
+}) {
+  const [shown, setShown] = useState<WoodId>(chosen);
+  const tabs = useRef<Partial<Record<WoodId, HTMLButtonElement | null>>>({});
+  useEffect(() => setShown(chosen), [chosen]);
+  const info = WOOD_INFO[shown];
+
+  const onKey = (e: ReactKeyboardEvent<HTMLButtonElement>, w: WoodId) => {
+    const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    const next = woods[(woods.indexOf(w) + step + woods.length) % woods.length];
+    setShown(next);
+    tabs.current[next]?.focus();
+  };
+
+  return (
+    <section aria-labelledby="wood-guide-title" className="mt-16 border-t border-border-2 pt-10 sm:mt-20 sm:pt-12">
+      <p className="font-mono text-xs tracking-[0.28em] text-amber">NAŠE DŘEVA</p>
+      <h2 id="wood-guide-title" className="mt-3 font-display text-[32px] font-medium sm:text-[40px]">
+        Které dřevo je pro vás?
+      </h2>
+
+      <div role="tablist" aria-labelledby="wood-guide-title" className="mt-6 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-border-2 [scrollbar-width:none]">
+        {woods.map((w) => {
+          const on = w === shown;
+          return (
+            <button
+              key={w}
+              ref={(el) => {
+                tabs.current[w] = el;
+              }}
+              type="button"
+              role="tab"
+              id={`wood-tab-${w}`}
+              aria-selected={on}
+              aria-controls="wood-guide-panel"
+              tabIndex={on ? 0 : -1}
+              onClick={() => setShown(w)}
+              onKeyDown={(e) => onKey(e, w)}
+              className={`-mb-px flex items-center gap-2 whitespace-nowrap border-b-2 px-2.5 py-3 text-[13px] transition-colors sm:px-[18px] sm:text-sm ${
+                on ? "border-ink font-medium text-ink" : "border-transparent text-muted hover:text-ink"
+              }`}
+            >
+              <span className="h-3 w-3 rounded-full" style={{ background: WOOD_SWATCHES[w] }} />
+              {WOOD_LABELS[w]}
+              {w === chosen && <span className="text-[11px] font-semibold text-teal">✓</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        key={shown}
+        id="wood-guide-panel"
+        role="tabpanel"
+        aria-labelledby={`wood-tab-${shown}`}
+        className="card-in grid grid-cols-1 items-center gap-6 pt-7 md:grid-cols-[1fr_1.1fr] md:gap-12"
+      >
+        <img
+          src={`/drevo/${shown}.jpg`}
+          alt={`Vzorek dřeva: ${WOOD_LABELS[shown]}`}
+          width={640}
+          height={397}
+          loading="lazy"
+          className="aspect-[16/9] w-full rounded-[20px] object-cover md:aspect-[16/10]"
+        />
+        <div>
+          <h3 className="font-display text-[38px] leading-none">{WOOD_LABELS[shown]}</h3>
+          <p className="mt-1 text-xs italic text-amber">{info.latin}</p>
+          <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-body">{info.description}</p>
+          <dl className="mt-4 grid max-w-[460px] grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13.5px]">
+            <dt className="text-faint">Barva</dt>
+            <dd>{info.color}</dd>
+            <dt className="text-faint">Kresba</dt>
+            <dd>{info.grain}</dd>
+            <dt className="text-faint">Tvrdost</dt>
+            <dd>
+              <Pips value={info.hardness} />
+            </dd>
+            <dt className="text-faint">Hodí se pro</dt>
+            <dd>{info.bestFor}</dd>
+          </dl>
+          <div className="mt-5">
+            {shown === chosen ? (
+              <span className="text-[13px] text-teal">✓ Toto dřevo máte vybrané</span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onChoose(shown)}
+                className="rounded-full border border-ink px-5 py-2 text-[13px] transition-colors hover:bg-ink hover:text-page"
+              >
+                Vybrat {WOOD_LABELS[shown].toLowerCase()}
+              </button>
+            )}
+          </div>
+          <p className="mt-4 text-[11px] text-faint">
+            Foto: Achim Raschka,{" "}
+            <a
+              href={`https://commons.wikimedia.org/wiki/File:${info.photoSource}`}
+              target="_blank"
+              rel="noopener"
+              className="underline"
+            >
+              Wikimedia Commons
+            </a>
+            , CC BY-SA 3.0
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }

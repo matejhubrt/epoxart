@@ -55,6 +55,61 @@ export const WOOD_LABELS: Record<WoodId, string> = { dub: "Dub", buk: "Buk", jas
 /** swatch colour of each wood as it looks oiled */
 export const WOOD_SWATCHES: Record<WoodId, string> = { dub: "#c08a50", buk: "#cfa27a", jasan: "#d8b98d", orech: "#6a4a36" };
 
+/** What the "Naše dřeva" section under the configurator says about each wood (photo: public/drevo/<id>.jpg). */
+export interface WoodInfo {
+  latin: string;
+  description: string;
+  color: string;
+  grain: string;
+  /** 1–5 */
+  hardness: number;
+  bestFor: string;
+  /** Wikimedia Commons file the photo comes from (CC BY-SA 3.0, Achim Raschka) */
+  photoSource: string;
+}
+export const WOOD_INFO: Record<WoodId, WoodInfo> = {
+  dub: {
+    latin: "Quercus robur",
+    description:
+      "Tvrdé a odolné dřevo s výraznou kresbou a viditelnými póry. Olej mu dodá teplý medový tón. Klasika na jídelní stoly, které vydrží generace.",
+    color: "medová až zlatohnědá",
+    grain: "výrazná, s lesklými paprsky",
+    hardness: 4,
+    bestFor: "jídelní a pracovní stoly",
+    photoSource: "Wood_Quercus_robur.jpg",
+  },
+  buk: {
+    latin: "Fagus sylvatica",
+    description:
+      "Jemné a rovnoměrné dřevo s drobnými tmavšími tečkami. Teplý narůžovělý tón, velmi pevné. Působí klidně a hodí se do moderních interiérů.",
+    color: "světlá, narůžovělá",
+    grain: "jemná a klidná",
+    hardness: 4,
+    bestFor: "stoly do moderního a světlého interiéru",
+    photoSource: "Wood_Fagus_silvatica.jpg",
+  },
+  jasan: {
+    latin: "Fraxinus excelsior",
+    description:
+      "Světlé, pružné a houževnaté dřevo s výraznými plamennými oblouky letokruhů. Oblíbené ve skandinávském stylu.",
+    color: "krémová až světle hnědá",
+    grain: "výrazné plamenné oblouky",
+    hardness: 4,
+    bestFor: "světlé interiéry, výrazná kresba",
+    photoSource: "Wood_Fraxinus_excelsior.jpg",
+  },
+  orech: {
+    latin: "Juglans regia",
+    description:
+      "Ušlechtilé tmavé dřevo s čokoládovými tóny a vlnitou kresbou. Měkčí než dub, ale stabilní. S kontrastní pryskyřicí vypadá luxusně.",
+    color: "čokoládová, tmavě hnědá",
+    grain: "vlnitá a živá",
+    hardness: 3,
+    bestFor: "reprezentativní a konferenční stoly",
+    photoSource: "Wood_juglans_regia.jpg",
+  },
+};
+
 /** A resin pigment. With `shine` it is metallic (mica): it shimmers from `color` to `shine`. */
 export interface Pigment {
   label: string;
