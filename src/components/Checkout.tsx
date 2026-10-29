@@ -171,6 +171,14 @@ export default function Checkout({
     }
   }, [step, furthest, totals.lines.length]);
 
+  // how much of the current step is filled in correctly (drives the progress line)
+  const stepFill =
+    step === 1
+      ? (3 - Object.keys(validateContact(form)).length) / 3
+      : step === 2
+        ? (3 - Object.keys(validateDelivery(form)).length) / 3
+        : (2 - Object.keys(validatePayment(form, totals.hasPersonal)).length) / 2;
+
   if (totals.lines.length === 0) {
     return (
       <div className="rounded-[22px] bg-surface px-10 py-16 text-center">
@@ -222,7 +230,7 @@ export default function Checkout({
 
   return (
     <div>
-      <CheckoutProgress current={step} />
+      <CheckoutProgress current={step} currentFill={stepFill} />
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_0.85fr]">
         <form onSubmit={onSubmit} noValidate className={`${card} card-in`} key={step}>
