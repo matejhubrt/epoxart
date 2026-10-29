@@ -26,7 +26,7 @@ export default defineConfig({
     react(),
     sitemap({
       // keep in sync with any page that sets `noindex` in Layout.astro
-      filter: (page) => !page.includes('/admin') && !page.includes('/kosik'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/kosik') && !page.includes('/objednavka'),
     }),
   ],
   adapter: vercel()

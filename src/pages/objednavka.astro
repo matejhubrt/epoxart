@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Checkout from "../components/Checkout.tsx";
+import { getSiteData } from "../lib/data";
+
+const { products, content } = await getSiteData();
+const { texts, shipping } = content;
+---
+
+<Layout title="Objednávka" description="Dokončení objednávky EpoxArt." noindex>
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">OBJEDNÁVKA</p>
+    <h1 class="mt-4 font-display text-[44px] font-medium sm:text-[60px]">Dokončení objednávky</h1>
+
+    <div class="mt-10">
+      <Checkout
+        client:only="react"
+        products={products}
+        shipping={shipping}
+        contact={{ email: texts.email, phone: texts.phone1 }}
+      />
+    </div>
+  </div>
+</Layout>

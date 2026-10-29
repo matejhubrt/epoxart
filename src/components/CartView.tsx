@@ -1,7 +1,9 @@
 import { useEffect, useMemo } from "react";
 import { useStore } from "@nanostores/react";
 import { $cart, setQty } from "../lib/cart";
-import { formatKc, isPersonalDelivery, type Product } from "../lib/products";
+import { formatKc, type Product } from "../lib/products";
+import { calcTotals } from "../lib/checkout";
+import CheckoutProgress from "./CheckoutProgress";
 import type { ShippingSettings } from "../lib/content";
 
 function Stepper({ id, qty }: { id: string; qty: number }) {
@@ -66,20 +68,13 @@ export default function CartView({
     );
   }
 
-  const subtotal = entries.reduce((sum, [id, qty]) => sum + (byId.get(id)!.price ?? 0) * qty, 0);
   // Stoly and kitchens are delivered in person, so only the parcel-shipped goods count towards postage
-  const parcelSubtotal = entries.reduce((sum, [id, qty]) => {
-    const p = byId.get(id)!;
-    return isPersonalDelivery(p.cat) ? sum : sum + (p.price ?? 0) * qty;
-  }, 0);
-  const hasPersonal = entries.some(([id]) => isPersonalDelivery(byId.get(id)!.cat));
-  const shipping =
-    parcelSubtotal === 0 ? 0 : parcelSubtotal >= shippingRule.freeFrom ? 0 : shippingRule.cost;
-  const total = subtotal + shipping;
-  const remaining = shippingRule.freeFrom - parcelSubtotal;
-  const showFreeShipHint = parcelSubtotal > 0 && parcelSubtotal < shippingRule.freeFrom;
+  const { subtotal, parcelSubtotal, hasPersonal, shipping, total, remaining, showFreeShipHint } =
+    calcTotals(cart, byId, shippingRule);
 
   return (
+    <>
+    <CheckoutProgress current={0} />
     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_0.85fr]">
       <div className="flex flex-col gap-4">
         {entries.map(([id, qty]) => {
@@ -147,17 +142,18 @@ export default function CartView({
           <span className="font-display text-2xl">{formatKc(total)}</span>
         </div>
 
-        <button
-          type="button"
-          className="mt-6 w-full rounded-full bg-teal px-8 py-[17px] text-[13px] tracking-[0.06em] text-page transition-colors hover:bg-teal-hover"
+        <a
+          href="/objednavka#udaje"
+          className="btn-press mt-6 w-full rounded-full bg-teal px-8 py-[17px] text-[13px] tracking-[0.06em] text-page hover:bg-teal-hover"
         >
           POKRAČOVAT K OBJEDNÁVCE
-        </button>
+        </a>
 
         <p className="mt-4 text-center text-xs text-faintest">
           Ruční výroba · Menší zboží zasíláme, stoly a nábytek doručujeme osobně
         </p>
       </div>
     </div>
+    </>
   );
 }
