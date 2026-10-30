@@ -92,13 +92,12 @@ const pageTitle = `${title} · ${SITE_NAME}`;
         .querySelectorAll('[data-reveal]:not([data-reveal="morph"])')
         .forEach((el) => io.observe(el));
 
-      // "morph" elements play both ways: they grow when scrolled into view from below and
-      // shrink back when scrolled up past the bottom edge of the screen again
+      // "morph" elements play both ways and every time: they grow when they scroll into view
+      // and shrink away again when they leave it (past the top or back down past the bottom)
       const morphIo = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
-            if (entry.isIntersecting) entry.target.classList.add("is-revealed");
-            else if (entry.boundingClientRect.top > 0) entry.target.classList.remove("is-revealed");
+            entry.target.classList.toggle("is-revealed", entry.isIntersecting);
           }
         },
         { threshold: 0.5, rootMargin: "0px 0px -6% 0px" }

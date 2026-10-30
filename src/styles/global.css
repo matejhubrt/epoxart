@@ -202,8 +202,9 @@ html [data-reveal="morph"] {
   white-space: nowrap;
   transform: scale(0.6);
   opacity: 0;
-  transition: width 0.9s cubic-bezier(0.65, 0, 0.2, 1) 0.25s, transform 0.45s ease, opacity 0.45s ease,
-    box-shadow 0.3s ease, background-color 0.2s ease;
+  /* collapsing: the text fades, the pill shrinks to a circle, and only then does the circle vanish */
+  transition: width 0.9s cubic-bezier(0.65, 0, 0.2, 1) 0.35s, transform 0.45s ease 1.2s,
+    opacity 0.45s ease 1.2s, box-shadow 0.3s ease, background-color 0.2s ease;
 }
 [data-reveal="morph"] .morph-pill > span {
   opacity: 0;
@@ -213,6 +214,9 @@ html [data-reveal="morph"] {
   width: min(100%, 340px);
   transform: none;
   opacity: 1;
+  /* growing: the circle appears first, then stretches */
+  transition: width 0.9s cubic-bezier(0.65, 0, 0.2, 1) 0.25s, transform 0.45s ease, opacity 0.45s ease,
+    box-shadow 0.3s ease, background-color 0.2s ease;
 }
 [data-reveal="morph"].is-revealed .morph-pill > span {
   opacity: 1;
