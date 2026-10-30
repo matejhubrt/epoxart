@@ -136,17 +136,24 @@ const heroPhoto = Boolean(images.hero);
   <InfoCards listKey="why" cards={content.blocks.why} reveal />
 
   <section class="mx-auto max-w-content px-[28px] py-16">
-    <!-- a plain, clearly bounded tile in the page's own warm tone: no gradient, no pattern -->
-    <div data-reveal class="rounded-[26px] border border-border-2 bg-warm">
-      <div class="mx-auto max-w-[640px] px-8 py-14 text-center sm:py-[72px]">
-        <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
-        <h2 data-edit-text="customTitle" class="mt-5 font-display text-[38px] font-medium sm:text-[54px]">
+    <!-- no tile: set straight on the page, like the sections around it, under a hairline -->
+    <div data-reveal class="border-t border-border-2 pt-12">
+      <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
+      <div class="mt-5 grid gap-x-16 gap-y-6 md:grid-cols-[1.15fr_0.85fr] md:items-end">
+        <h2 data-edit-text="customTitle" class="font-display text-[38px] font-medium leading-[1.05] sm:text-[54px]">
           {texts.customTitle}
         </h2>
-        <p data-edit-text="customText" class="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-body">
-          {texts.customText}
-        </p>
-        <Pill href="/vyroba-na-miru" variant="teal" class="mt-8">SPUSTIT KONFIGURÁTOR</Pill>
+        <div>
+          <p data-edit-text="customText" class="max-w-[440px] text-[15px] leading-relaxed text-body">
+            {texts.customText}
+          </p>
+          <a
+            href="/vyroba-na-miru"
+            class="mt-5 inline-block text-[15px] font-medium text-teal underline decoration-teal/40 underline-offset-4 transition hover:decoration-teal"
+          >
+            Spustit konfigurátor →
+          </a>
+        </div>
       </div>
     </div>
   </section>
