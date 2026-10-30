@@ -185,9 +185,54 @@ html [data-reveal="scale"].is-revealed {
   transform: none;
 }
 
+/* a button that shows up as a small circle and stretches into the full pill once it scrolls into view */
+html [data-reveal="morph"] {
+  opacity: 1;
+  transform: none;
+}
+[data-reveal="morph"] .morph-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-inline: auto;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transform: scale(0.6);
+  opacity: 0;
+  transition: width 0.9s cubic-bezier(0.65, 0, 0.2, 1) 0.25s, transform 0.45s ease, opacity 0.45s ease,
+    box-shadow 0.3s ease, background-color 0.2s ease;
+}
+[data-reveal="morph"] .morph-pill > span {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+[data-reveal="morph"].is-revealed .morph-pill {
+  width: min(100%, 340px);
+  transform: none;
+  opacity: 1;
+}
+[data-reveal="morph"].is-revealed .morph-pill > span {
+  opacity: 1;
+  transition-delay: 0.85s;
+}
+[data-reveal="morph"].is-revealed .morph-pill:hover {
+  transform: translateY(-2px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  [data-reveal="morph"] .morph-pill {
+    width: min(100%, 340px);
+    transform: none;
+    opacity: 1;
+  }
+  [data-reveal="morph"] .morph-pill > span {
+    opacity: 1;
   }
   *,
   *::before,
