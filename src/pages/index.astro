@@ -136,24 +136,36 @@ const heroPhoto = Boolean(images.hero);
   <InfoCards listKey="why" cards={content.blocks.why} reveal />
 
   <section class="mx-auto max-w-content px-[28px] py-16">
-    <!-- no tile: set straight on the page, like the sections around it, under a hairline -->
-    <div data-reveal class="border-t border-border-2 pt-12">
-      <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
-      <div class="mt-5 grid gap-x-16 gap-y-6 md:grid-cols-[1.15fr_0.85fr] md:items-end">
-        <h2 data-edit-text="customTitle" class="font-display text-[38px] font-medium leading-[1.05] sm:text-[54px]">
-          {texts.customTitle}
-        </h2>
-        <div>
-          <p data-edit-text="customText" class="max-w-[440px] text-[15px] leading-relaxed text-body">
-            {texts.customText}
-          </p>
-          <a
-            href="/vyroba-na-miru"
-            class="mt-5 inline-block text-[15px] font-medium text-teal underline decoration-teal/40 underline-offset-4 transition hover:decoration-teal"
-          >
-            Spustit konfigurátor →
-          </a>
-        </div>
+    <!-- no tile: centred straight on the page; each part fades in one after the other on scroll -->
+    <div class="mx-auto max-w-[680px] text-center">
+      <span data-reveal="scale" class="mx-auto block h-px w-24 bg-teal/50"></span>
+      <p data-reveal style="transition-delay:.08s" class="mt-10 font-mono text-xs tracking-[0.28em] text-teal">
+        VÝROBA NA MÍRU
+      </p>
+      <h2
+        data-reveal
+        data-edit-text="customTitle"
+        style="transition-delay:.16s"
+        class="mt-5 font-display text-[38px] font-medium leading-[1.05] sm:text-[58px]"
+      >
+        {texts.customTitle}
+      </h2>
+      <p
+        data-reveal
+        data-edit-text="customText"
+        style="transition-delay:.26s"
+        class="mx-auto mt-5 max-w-[480px] text-[15px] leading-relaxed text-body"
+      >
+        {texts.customText}
+      </p>
+      <div data-reveal="scale" style="transition-delay:.38s" class="mt-10">
+        <Pill
+          href="/vyroba-na-miru"
+          variant="teal"
+          class="inline-block !px-11 !py-[19px] !text-[15px] shadow-[0_10px_30px_-8px_rgba(31,110,99,.55)] hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-8px_rgba(31,110,99,.65)]"
+        >
+          SPUSTIT KONFIGURÁTOR →
+        </Pill>
       </div>
     </div>
   </section>
