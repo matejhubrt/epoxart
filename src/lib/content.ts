@@ -55,7 +55,10 @@ export const WOOD_LABELS: Record<WoodId, string> = { dub: "Dub", buk: "Buk", jas
 /** swatch colour of each wood as it looks oiled */
 export const WOOD_SWATCHES: Record<WoodId, string> = { dub: "#c08a50", buk: "#cfa27a", jasan: "#d8b98d", orech: "#6a4a36" };
 
-/** What the "Naše dřeva" section under the configurator says about each wood (photo: public/drevo/<id>.jpg). */
+/**
+ * What the "Naše dřeva" section under the configurator says about each wood. The owner edits it
+ * in the admin; anything not saved there falls back to these defaults.
+ */
 export interface WoodInfo {
   latin: string;
   description: string;
@@ -64,10 +67,10 @@ export interface WoodInfo {
   /** 1–5 */
   hardness: number;
   bestFor: string;
-  /** Wikimedia Commons file the photo comes from (CC BY-SA 3.0, Achim Raschka) */
-  photoSource: string;
+  /** the owner's own photo; null = the bundled sample photo (public/drevo/<id>.jpg) */
+  photo: string | null;
 }
-export const WOOD_INFO: Record<WoodId, WoodInfo> = {
+export const DEFAULT_WOOD_INFO: Record<WoodId, WoodInfo> = {
   dub: {
     latin: "Quercus robur",
     description:
@@ -76,7 +79,7 @@ export const WOOD_INFO: Record<WoodId, WoodInfo> = {
     grain: "výrazná, s lesklými paprsky",
     hardness: 4,
     bestFor: "jídelní a pracovní stoly",
-    photoSource: "Wood_Quercus_robur.jpg",
+    photo: null,
   },
   buk: {
     latin: "Fagus sylvatica",
@@ -86,7 +89,7 @@ export const WOOD_INFO: Record<WoodId, WoodInfo> = {
     grain: "jemná a klidná",
     hardness: 4,
     bestFor: "stoly do moderního a světlého interiéru",
-    photoSource: "Wood_Fagus_silvatica.jpg",
+    photo: null,
   },
   jasan: {
     latin: "Fraxinus excelsior",
@@ -96,7 +99,7 @@ export const WOOD_INFO: Record<WoodId, WoodInfo> = {
     grain: "výrazné plamenné oblouky",
     hardness: 4,
     bestFor: "světlé interiéry, výrazná kresba",
-    photoSource: "Wood_Fraxinus_excelsior.jpg",
+    photo: null,
   },
   orech: {
     latin: "Juglans regia",
@@ -106,9 +109,20 @@ export const WOOD_INFO: Record<WoodId, WoodInfo> = {
     grain: "vlnitá a živá",
     hardness: 3,
     bestFor: "reprezentativní a konferenční stoly",
-    photoSource: "Wood_juglans_regia.jpg",
+    photo: null,
   },
 };
+
+/** The bundled sample photos are Achim Raschka's (Wikimedia Commons, CC BY-SA 3.0) and must be credited. */
+export const WOOD_PHOTO_SOURCE: Record<WoodId, string> = {
+  dub: "Wood_Quercus_robur.jpg",
+  buk: "Wood_Fagus_silvatica.jpg",
+  jasan: "Wood_Fraxinus_excelsior.jpg",
+  orech: "Wood_juglans_regia.jpg",
+};
+
+/** Text length limits for the wood descriptions (also used by the admin inputs). */
+export const WOOD_TEXT_LIMITS = { latin: 60, description: 600, color: 80, grain: 80, bestFor: 120 } as const;
 
 /** A resin pigment. With `shine` it is metallic (mica): it shimmers from `color` to `shine`. */
 export interface Pigment {
@@ -121,6 +135,7 @@ export interface ConfiguratorSettings {
   /** woods the owner switched off */
   hiddenWoods: WoodId[];
   pigments: Pigment[];
+  woodInfo: Record<WoodId, WoodInfo>;
 }
 
 export interface CategorySettings {
@@ -260,6 +275,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       { label: "Signální červená RAL 3001", color: "#a72920", shine: null },
       { label: "Řepková žlutá RAL 1021", color: "#f6b600", shine: null },
     ],
+    woodInfo: DEFAULT_WOOD_INFO,
   },
 };
 
@@ -275,6 +291,29 @@ function cleanPigments(input: unknown, fallback: Pigment[]): Pigment[] {
     )
     .map((o) => ({ label: o.label, color: o.color, shine: HEX.test(o.shine ?? "") ? o.shine : null }));
   return valid.length > 0 ? valid : fallback;
+}
+
+/** Per wood and per field: a saved text wins unless it is blank; anything else keeps the default. */
+function cleanWoodInfo(input: unknown): Record<WoodId, WoodInfo> {
+  const saved = (input && typeof input === "object" ? input : {}) as Record<string, Record<string, unknown> | undefined>;
+  const text = (v: unknown, fallback: string, max: number) =>
+    typeof v === "string" && v.trim() !== "" ? v.trim().slice(0, max) : fallback;
+  const out = {} as Record<WoodId, WoodInfo>;
+  for (const w of WOOD_IDS) {
+    const s = saved[w] ?? {}, d = DEFAULT_WOOD_INFO[w], L = WOOD_TEXT_LIMITS;
+    const hardness = Number(s.hardness);
+    out[w] = {
+      latin: text(s.latin, d.latin, L.latin),
+      description: text(s.description, d.description, L.description),
+      color: text(s.color, d.color, L.color),
+      grain: text(s.grain, d.grain, L.grain),
+      hardness: Number.isInteger(hardness) && hardness >= 1 && hardness <= 5 ? hardness : d.hardness,
+      bestFor: text(s.bestFor, d.bestFor, L.bestFor),
+      // only an absolute http(s) address can be a photo (what the upload returns)
+      photo: ((p) => (p && /^https?:\/\//.test(p) ? p : null))(asUrl(s.photo)),
+    };
+  }
+  return out;
 }
 
 /** A saved list wins even when it is empty (the owner may delete every card); junk falls back. */
@@ -338,6 +377,7 @@ export function mergeContent(rows: { key: string; value: unknown }[]): SiteConte
     // at least one wood stays visible
     hiddenWoods: hiddenWoods.length < WOOD_IDS.length ? hiddenWoods : [],
     pigments: cleanPigments(c?.pigments, d.configurator.pigments),
+    woodInfo: cleanWoodInfo(c?.woodInfo),
   };
 
   const cat = byKey.get("categories") ?? {};

@@ -10,13 +10,15 @@ export function Field({
   label,
   hint,
   children,
+  className = "",
 }: {
   label: string;
   hint?: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <label className="block">
+    <label className={`block ${className}`}>
       <span className="mb-1.5 block text-xs tracking-[0.12em] text-brown-link">{label}</span>
       {children}
       {hint && <span className="mt-1.5 block text-xs text-faint">{hint}</span>}
@@ -65,6 +67,8 @@ export function ImageField({
   notify,
   ratio = "aspect-[4/3]",
   className = "",
+  removeLabel = "Odebrat",
+  canRemove,
 }: {
   label: string;
   value: string | null;
@@ -73,6 +77,10 @@ export function ImageField({
   notify: Notify;
   ratio?: string;
   className?: string;
+  /** text of the button that clears the photo */
+  removeLabel?: string;
+  /** show that button; by default whenever there is a photo */
+  canRemove?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -110,9 +118,9 @@ export function ImageField({
         <Button variant="outline" className="!px-4 !py-2" disabled={busy} onClick={() => input.current?.click()}>
           {value ? "Změnit fotku" : "Nahrát fotku"}
         </Button>
-        {value && (
+        {(canRemove ?? !!value) && (
           <Button variant="outline" className="!px-4 !py-2" disabled={busy} onClick={() => onChange(null)}>
-            Odebrat
+            {removeLabel}
           </Button>
         )}
         <input

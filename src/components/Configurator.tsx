@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { WOOD_IDS, WOOD_INFO, WOOD_LABELS, WOOD_SWATCHES, type Pigment, type WoodId } from "../lib/content";
+import {
+  WOOD_IDS,
+  WOOD_LABELS,
+  WOOD_PHOTO_SOURCE,
+  WOOD_SWATCHES,
+  type Pigment,
+  type WoodId,
+  type WoodInfo,
+} from "../lib/content";
 import { submitInquiry } from "../lib/inquiries";
 
 const SHAPES = ["Obdélník", "Oválné", "Čtverec", "Kulaté"] as const;
@@ -409,9 +417,11 @@ function PigmentPicker({
 export default function Configurator({
   hiddenWoods,
   pigments,
+  woodInfo,
 }: {
   hiddenWoods: WoodId[];
   pigments: Pigment[];
+  woodInfo: Record<WoodId, WoodInfo>;
 }) {
   const woods = WOOD_IDS.filter((w) => !hiddenWoods.includes(w));
   const [cfg, setCfg] = useState<Config>({
@@ -588,7 +598,7 @@ export default function Configurator({
       </div>
     </div>
 
-    <WoodGuide woods={woods} chosen={cfg.wood} onChoose={chooseWood} />
+    <WoodGuide woods={woods} info={woodInfo} chosen={cfg.wood} onChoose={chooseWood} />
     </div>
   );
 }
@@ -606,17 +616,19 @@ function Pips({ value }: { value: number }) {
 /** "Naše dřeva": a tab per wood with a real photo and what the wood is like. Follows the chosen wood. */
 function WoodGuide({
   woods,
+  info: allInfo,
   chosen,
   onChoose,
 }: {
   woods: WoodId[];
+  info: Record<WoodId, WoodInfo>;
   chosen: WoodId;
   onChoose: (w: WoodId) => void;
 }) {
   const [shown, setShown] = useState<WoodId>(chosen);
   const tabs = useRef<Partial<Record<WoodId, HTMLButtonElement | null>>>({});
   useEffect(() => setShown(chosen), [chosen]);
-  const info = WOOD_INFO[shown];
+  const info = allInfo[shown];
 
   const onKey = (e: ReactKeyboardEvent<HTMLButtonElement>, w: WoodId) => {
     const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -670,10 +682,10 @@ function WoodGuide({
         className="card-in grid grid-cols-1 items-center gap-6 pt-7 md:grid-cols-[1fr_1.1fr] md:gap-12"
       >
         <img
-          src={`/drevo/${shown}.jpg`}
+          src={info.photo ?? `/drevo/${shown}.jpg`}
           alt={`Vzorek dřeva: ${WOOD_LABELS[shown]}`}
           width={640}
-          height={397}
+          height={400}
           loading="lazy"
           className="aspect-[16/9] w-full rounded-[20px] object-cover md:aspect-[16/10]"
         />
@@ -706,18 +718,21 @@ function WoodGuide({
               </button>
             )}
           </div>
-          <p className="mt-4 text-[11px] text-faint">
-            Foto: Achim Raschka,{" "}
-            <a
-              href={`https://commons.wikimedia.org/wiki/File:${info.photoSource}`}
-              target="_blank"
-              rel="noopener"
-              className="underline"
-            >
-              Wikimedia Commons
-            </a>
-            , CC BY-SA 3.0
-          </p>
+          {/* the bundled sample photos must be credited; the owner's own photos need no credit */}
+          {!info.photo && (
+            <p className="mt-4 text-[11px] text-faint">
+              Foto: Achim Raschka,{" "}
+              <a
+                href={`https://commons.wikimedia.org/wiki/File:${WOOD_PHOTO_SOURCE[shown]}`}
+                target="_blank"
+                rel="noopener"
+                className="underline"
+              >
+                Wikimedia Commons
+              </a>
+              , CC BY-SA 3.0
+            </p>
+          )}
         </div>
       </div>
     </section>
