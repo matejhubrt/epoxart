@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Hatch from "../components/Hatch.astro";
 import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
 import InfoCards from "../components/InfoCards.astro";
@@ -137,13 +136,9 @@ const heroPhoto = Boolean(images.hero);
   <InfoCards listKey="why" cards={content.blocks.why} reveal />
 
   <section class="mx-auto max-w-content px-[28px] py-16">
-    <div data-reveal class="relative overflow-hidden rounded-[26px]">
-      <Hatch class="absolute inset-0" />
-      <div
-        class="pointer-events-none absolute inset-0"
-        style="background: radial-gradient(60% 80% at 70% 30%, rgba(31,110,99,.24), transparent);"
-      />
-      <div class="relative z-10 mx-auto max-w-[640px] px-8 py-20 text-center">
+    <!-- a plain, clearly bounded tile in the page's own warm tone: no gradient, no pattern -->
+    <div data-reveal class="rounded-[26px] border border-border-2 bg-warm">
+      <div class="mx-auto max-w-[640px] px-8 py-14 text-center sm:py-[72px]">
         <p class="font-mono text-xs tracking-[0.28em] text-teal">VÝROBA NA MÍRU</p>
         <h2 data-edit-text="customTitle" class="mt-5 font-display text-[38px] font-medium sm:text-[54px]">
           {texts.customTitle}
