@@ -92,15 +92,16 @@ const pageTitle = `${title} · ${SITE_NAME}`;
         .querySelectorAll('[data-reveal]:not([data-reveal="morph"])')
         .forEach((el) => io.observe(el));
 
-      // "morph" elements play both ways and every time: they grow when they scroll into view
-      // and shrink away again when they leave it (past the top or back down past the bottom)
+      // "morph" elements play both ways and every time. They are "on" only while inside a band
+      // that stops short of the top and bottom edges of the screen, so every change (growing in
+      // or shrinking away, from either side) starts while the element is still clearly in view.
       const morphIo = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
             entry.target.classList.toggle("is-revealed", entry.isIntersecting);
           }
         },
-        { threshold: 0.5, rootMargin: "0px 0px -6% 0px" }
+        { threshold: 0, rootMargin: "-36% 0px -22% 0px" }
       );
       document.querySelectorAll('[data-reveal="morph"]').forEach((el) => morphIo.observe(el));
     </script>
