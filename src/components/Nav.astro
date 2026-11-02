@@ -19,7 +19,10 @@ const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWit
 
 <header class="sticky top-0 z-50 border-b border-border bg-[rgba(250,247,241,0.86)] backdrop-blur-md">
   <div class="mx-auto flex max-w-content items-center justify-between px-5 py-[18px] sm:px-10">
-    <a href="/" class="font-display text-[22px] font-semibold tracking-[0.1em] text-ink sm:text-[25px] sm:tracking-[0.14em]">EPOXART</a>
+    <a href="/" class="flex items-center gap-3 font-display text-[22px] font-semibold tracking-[0.1em] text-ink sm:text-[25px] sm:tracking-[0.14em]">
+      <img src="/logo.svg" alt="" width="40" height="40" class="h-9 w-9 sm:h-10 sm:w-10" />
+      EPOXART
+    </a>
 
     <nav class="hidden items-center gap-[26px] lg:flex xl:gap-[30px]">
       {links.map((l) => (

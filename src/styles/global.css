@@ -185,26 +185,7 @@ html [data-reveal="scale"].is-revealed {
   transform: none;
 }
 
-/* hero configurator button: the resin river in the little tabletop drifts through the resin colours */
-.cfg-river {
-  fill: #1f8f80;
-  animation: cfg-resin 12s ease-in-out infinite;
-}
-@keyframes cfg-resin {
-  0%,
-  100% {
-    fill: #1f8f80;
-  }
-  25% {
-    fill: #2a5fa8;
-  }
-  50% {
-    fill: #c8452f;
-  }
-  75% {
-    fill: #e0a21f;
-  }
-}
+/* hero configurator button: the logo tilts a little on hover, the arrow slides */
 .cfg-disc {
   transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -217,12 +198,6 @@ html [data-reveal="scale"].is-revealed {
 .cfg-cta:hover .cfg-arrow {
   transform: translateX(5px);
 }
-@media (prefers-reduced-motion: reduce) {
-  .cfg-river {
-    animation: none;
-  }
-}
-
 /* a button that shows up as a small circle and stretches into the full pill once it scrolls into view */
 html [data-reveal="morph"] {
   opacity: 1;
