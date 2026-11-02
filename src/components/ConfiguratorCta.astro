@@ -1,5 +1,6 @@
 ---
-// The hero's call to action for the configurator: the EpoxArt logo next to the label.
+// The hero's call to action for the configurator. A cream pill with a teal "drop" of resin at the
+// end; on hover the drop spreads over the whole pill like poured resin and the label turns white.
 interface Props {
   href: string;
   tone?: "light" | "dark";
@@ -10,11 +11,15 @@ const { href, tone = "light" } = Astro.props;
 <a
   href={href}
   class:list={[
-    "cfg-cta group inline-flex items-center gap-4 rounded-full py-2 pl-2 pr-7 text-[14px] tracking-[0.04em] shadow-[0_12px_32px_-10px_rgba(0,0,0,.55)] transition duration-300 hover:-translate-y-0.5",
-    tone === "light" ? "bg-surface text-ink hover:bg-white" : "bg-ink text-page hover:bg-[#17130f]",
+    "cfg-cta group relative inline-flex items-center gap-7 overflow-hidden rounded-full py-2 pl-8 pr-2 text-[15px] tracking-[0.02em] shadow-[0_14px_36px_-12px_rgba(0,0,0,.6)]",
+    tone === "light" ? "bg-surface text-ink" : "bg-ink text-page",
   ]}
 >
-  <img src="/logo.svg" alt="" width="48" height="48" class="cfg-disc h-12 w-12 shrink-0 rounded-[10px]" />
-  <span class="font-medium">Navrhněte si vlastní stůl</span>
-  <span class="cfg-arrow text-lg leading-none" aria-hidden="true">→</span>
+  <span class="cfg-drop" aria-hidden="true"></span>
+  <span class="cfg-label relative z-10">
+    Navrhněte si <em class="font-display text-[21px] font-medium not-italic tracking-normal">vlastní stůl</em>
+  </span>
+  <span class="cfg-arrow relative z-10 grid h-12 w-12 shrink-0 place-items-center text-xl leading-none text-white" aria-hidden="true">
+    →
+  </span>
 </a>

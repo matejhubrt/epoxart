@@ -185,18 +185,66 @@ html [data-reveal="scale"].is-revealed {
   transform: none;
 }
 
-/* hero configurator button: the logo tilts a little on hover, the arrow slides */
-.cfg-disc {
-  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+/* hero configurator button: a drop of teal resin at the end of the pill that spreads over it on hover */
+.cfg-cta {
+  isolation: isolate;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
-.cfg-cta:hover .cfg-disc {
-  transform: rotate(-8deg) scale(1.08);
+.cfg-cta:hover {
+  transform: translateY(-2px);
+}
+.cfg-drop {
+  position: absolute;
+  z-index: 0;
+  right: 0.5rem;
+  top: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin-top: -1.5rem;
+  border-radius: 9999px;
+  background: var(--color-teal, #1f6e63);
+  transition: transform 0.9s cubic-bezier(0.55, 0, 0.15, 1);
+}
+/* a soft ring leaves the drop every few seconds, to hint that it can be pressed */
+.cfg-drop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(31, 110, 99, 0.5);
+  animation: cfg-ping 3.2s ease-out 1.5s infinite;
+}
+@keyframes cfg-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(31, 110, 99, 0.5);
+  }
+  60%,
+  100% {
+    box-shadow: 0 0 0 16px rgba(31, 110, 99, 0);
+  }
+}
+.cfg-cta:hover .cfg-drop {
+  transform: scale(14);
+}
+.cfg-cta:hover .cfg-drop::after {
+  animation: none;
+}
+.cfg-label {
+  transition: color 0.4s ease 0.15s;
+}
+.cfg-cta:hover .cfg-label {
+  color: #fff;
 }
 .cfg-arrow {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 .cfg-cta:hover .cfg-arrow {
-  transform: translateX(5px);
+  transform: translateX(4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfg-drop::after {
+    animation: none;
+  }
 }
 /* a button that shows up as a small circle and stretches into the full pill once it scrolls into view */
 html [data-reveal="morph"] {
