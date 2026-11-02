@@ -101,7 +101,7 @@ const pageTitle = `${title} · ${SITE_NAME}`;
             entry.target.classList.toggle("is-revealed", entry.isIntersecting);
           }
         },
-        { threshold: 0, rootMargin: "-36% 0px -22% 0px" }
+        { threshold: 0, rootMargin: "-36% 0px -10% 0px" }
       );
       document.querySelectorAll('[data-reveal="morph"]').forEach((el) => morphIo.observe(el));
     </script>
