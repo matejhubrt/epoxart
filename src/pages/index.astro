@@ -90,11 +90,14 @@ const heroPhoto = Boolean(images.hero);
           <a
             href="/produkty"
             class:list={[
-              "text-sm underline-offset-2 hover:underline",
-              heroPhoto ? "text-white/95 hover:text-white" : "text-brown-link hover:text-teal",
+              "group rounded-full px-4 py-1.5 text-sm transition-colors duration-300",
+              heroPhoto
+                ? "text-white/95 hover:bg-white/15 hover:text-white"
+                : "text-brown-link hover:bg-ink/5 hover:text-teal",
             ]}
           >
-            nebo si prohlédněte hotové produkty →
+            nebo si prohlédněte hotové produkty
+            <span class="inline-block transition-transform duration-300 group-hover:translate-x-1.5">→</span>
           </a>
         </div>
       </div>
