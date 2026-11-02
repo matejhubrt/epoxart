@@ -125,7 +125,7 @@ export default function CartView({
         {hasPersonal && (
           <div className="mt-2 flex justify-between gap-4 text-sm text-body">
             <span>Osobní doručení</span>
-            <span className="text-right">dle dohody</span>
+            <span className="text-right">v ceně</span>
           </div>
         )}
 
@@ -152,6 +152,9 @@ export default function CartView({
         <p className="mt-4 text-center text-xs text-faintest">
           Ruční výroba · Menší zboží zasíláme, stoly a nábytek doručujeme osobně
         </p>
+        <a href="/doprava-a-platba" className="mt-2 block text-center text-xs text-teal hover:underline">
+          Doprava a platba
+        </a>
       </div>
     </div>
     </>

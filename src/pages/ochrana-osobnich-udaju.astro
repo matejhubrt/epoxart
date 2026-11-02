@@ -2,11 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 import LegalSection from "../components/LegalSection.astro";
 import { getSiteData } from "../lib/data";
+import { PAYMENT_GATEWAY_LIVE } from "../lib/shop";
 
 const { content } = await getSiteData();
 const { texts } = content;
 
-const effective = "15. 7. 2026";
+const effective = "2. 11. 2026";
 ---
 
 <Layout
@@ -107,10 +108,11 @@ const effective = "15. 7. 2026";
         <ul>
           <li>
             Přepravní společnosti (u zboží zasílaného balíkem – aby vám jej mohli doručit; stoly
-            a další nábytek doručujeme osobně, bez přepravce).
+            a další nábytek doručujeme zpravidla osobně, v odůvodněných případech také prostřednictvím dopravce).
           </li>
-          <li>Poskytovatel e-shopového řešení a platební brány (pro zpracování online plateb).</li>
-          <li>Externí účetní (pro správné zaúčtování faktur).</li>
+          {PAYMENT_GATEWAY_LIVE && (
+            <li>Poskytovatel platební brány (pro zpracování online plateb).</li>
+          )}
         </ul>
         <p>
           K technickému provozu tohoto webu využíváme dále tyto zpracovatele:
@@ -200,8 +202,7 @@ const effective = "15. 7. 2026";
           přístup do administračního rozhraní e-shopu a k počítači).
         </p>
         <p>
-          6.2. K osobním údajům mají přístup pouze osoby oprávněné Správcem (sám {texts.owner},
-          případně smluvní účetní).
+          6.2. K osobním údajům mají přístup pouze osoby oprávněné Správcem (sám {texts.owner}).
         </p>
       </LegalSection>
 

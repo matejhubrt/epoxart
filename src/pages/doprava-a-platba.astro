@@ -1,0 +1,87 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LegalSection from "../components/LegalSection.astro";
+import { getSiteData } from "../lib/data";
+import { formatKc } from "../lib/products";
+import { PAYMENT_GATEWAY_LIVE } from "../lib/shop";
+
+const { content } = await getSiteData();
+const { texts, shipping } = content;
+---
+
+<Layout
+  title="Doprava a platba"
+  description="Jak doručujeme a jak se u EpoxArt platí: menší zboží balíkem, stoly a kuchyně osobně po celé ČR včetně montáže."
+>
+  <div class="mx-auto max-w-content px-[28px] py-16">
+    <p class="font-mono text-xs tracking-[0.28em] text-amber">INFORMACE K OBJEDNÁVCE</p>
+    <h1 class="mt-4 font-display text-[38px] font-medium sm:text-[50px]">Doprava a platba</h1>
+    <p class="mt-3 max-w-[620px] text-[15px] leading-relaxed text-body">
+      Vše vyrábíme ručně v dílně v Čenkově. Menší věci posíláme balíkem, stoly a kuchyně vozíme
+      a stavíme sami.
+    </p>
+
+    <div class="mt-10 flex max-w-[760px] flex-col gap-5">
+      <LegalSection title="Menší zboží (např. prkénka)">
+        <ul>
+          <li>Zasíláme přepravní službou, <strong>Zásilkovnou</strong> nebo <strong>PPL</strong>.</li>
+          <li>
+            Cena doručení menší zásilky je <strong>{formatKc(shipping.cost)}</strong>
+            {shipping.freeFrom > 0 && <> (od {formatKc(shipping.freeFrom)} zdarma)</>}.
+          </li>
+          <li>
+            Větší zásilky převážíme podle ceníku dopravce. Cenu vám sdělíme ještě před potvrzením
+            objednávky.
+          </li>
+          <li>
+            Některé kusy máme hotové na skladě, jiné vyrábíme na objednávku. Dobu výroby a odeslání
+            vám u konkrétní objednávky sdělíme.
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="Stoly a kuchyně: osobní doručení po celé ČR">
+        <ul>
+          <li>Stoly a kuchyně <strong>vozíme osobně</strong> kamkoli v České republice.</li>
+          <li>
+            Při předání zboží <strong>rozbalíme a postavíme</strong> (u kuchyní namontujeme) přímo
+            u vás.
+          </li>
+          <li><strong>Doprava a montáž jsou v ceně</strong>, nic dalšího za ně neplatíte.</li>
+          <li>Termín domlouváme <strong>nejméně 14 dní předem</strong>.</li>
+          <li>
+            Zboží si můžete po domluvě také vyzvednout osobně v dílně: {texts.address}.
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="Jak se platí">
+        <ul>
+          {PAYMENT_GATEWAY_LIVE && (
+            <li>
+              <strong>Online</strong> přes zabezpečenou platební bránu: platební kartou, Apple Pay,
+              Google Pay nebo bankovním tlačítkem.
+            </li>
+          )}
+          <li>
+            <strong>Při osobním předání</strong> stolu nebo kuchyně: v hotovosti, nebo bankovním
+            převodem na místě.
+          </li>
+        </ul>
+        <p>
+          U stolů a kuchyní vyráběných na míru, případně u rozsáhlejších zakázek, můžeme před
+          zahájením výroby požadovat zálohu. Její výši vždy určíme individuálně a uvedeme ji
+          v cenové nabídce. U běžného zboží se záloha nevyžaduje.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Máte otázku?">
+        <p>
+          Napište nám na <a href={`mailto:${texts.email}`}>{texts.email}</a> nebo zavolejte na
+          {" "}{texts.phone1}. Úplné znění najdete v{" "}
+          <a href="/obchodni-podminky">obchodních podmínkách</a>.
+        </p>
+      </LegalSection>
+    </div>
+  </div>
+</Layout>

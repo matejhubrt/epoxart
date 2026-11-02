@@ -44,7 +44,9 @@ export interface SiteImages {
 }
 
 export interface ShippingSettings {
+  /** price of a parcel with small goods */
   cost: number;
+  /** parcel goods worth at least this much ship free; 0 = free shipping is not offered */
   freeFrom: number;
 }
 
@@ -232,7 +234,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     categories: { stoly: null, prkenka: null, kuchyne: null, hodiny: null, doplnky: null },
     instagram: Array.from({ length: INSTAGRAM_SLOTS }, () => null),
   },
-  shipping: { cost: 149, freeFrom: 2500 },
+  shipping: { cost: 100, freeFrom: 0 },
   categories: { hidden: [] },
   gallery: { photos: [] },
   kitchens: { photos: [] },

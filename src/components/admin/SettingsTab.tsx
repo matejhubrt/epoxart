@@ -548,7 +548,10 @@ export function SettingsTab({ notify }: { notify: Notify }) {
               className={inputCls}
             />
           </Field>
-          <Field label="DOPRAVA ZDARMA OD (KČ)" hint="Při nákupu od této částky se doprava neúčtuje.">
+          <Field
+            label="DOPRAVA ZDARMA OD (KČ)"
+            hint="Při nákupu od této částky se doprava neúčtuje. Nechte 0, pokud doprava zdarma není."
+          >
             <input
               inputMode="numeric"
               value={freeFrom}

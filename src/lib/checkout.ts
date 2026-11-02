@@ -50,7 +50,9 @@ export function calcTotals(
   const parcelSubtotal = lines.reduce((s, l) => (isPersonalDelivery(l.product.cat) ? s : s + l.total), 0);
   const hasParcel = lines.some((l) => !isPersonalDelivery(l.product.cat));
   const hasPersonal = lines.some((l) => isPersonalDelivery(l.product.cat));
-  const shipping = parcelSubtotal === 0 ? 0 : parcelSubtotal >= rule.freeFrom ? 0 : rule.cost;
+  const freeShippingOffered = rule.freeFrom > 0;
+  const shipping =
+    parcelSubtotal === 0 ? 0 : freeShippingOffered && parcelSubtotal >= rule.freeFrom ? 0 : rule.cost;
 
   return {
     lines,
@@ -61,13 +63,13 @@ export function calcTotals(
     shipping,
     total: subtotal + shipping,
     remaining: rule.freeFrom - parcelSubtotal,
-    showFreeShipHint: parcelSubtotal > 0 && parcelSubtotal < rule.freeFrom,
+    showFreeShipHint: freeShippingOffered && parcelSubtotal > 0 && parcelSubtotal < rule.freeFrom,
   };
 }
 
 // ---- the form ------------------------------------------------------------------------
 
-export type PaymentChoice = "karta" | "prevod" | "misto" | "";
+export type PaymentChoice = "karta" | "misto" | "";
 
 export interface CheckoutForm {
   name: string;

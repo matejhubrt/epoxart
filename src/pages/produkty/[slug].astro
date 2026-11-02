@@ -97,9 +97,18 @@ const jsonLd = {
           )}
           <li class="flex gap-3">
             <span class="text-teal">✓</span>
-            {personal
-              ? "Doručujeme osobně – termín a místo předání domluvíme předem"
-              : `Zasíláme přepravní službou: doprava ${formatKc(shipping.cost)}, zdarma od ${formatKc(shipping.freeFrom)}`}
+            {personal ? (
+              <span>
+                Doručujeme osobně po celé ČR, doprava i montáž jsou v ceně. Termín domluvíme předem.{" "}
+                <a href="/doprava-a-platba" class="text-teal underline underline-offset-2">Doprava a platba</a>
+              </span>
+            ) : (
+              <span>
+                Zasíláme balíkem: doprava {formatKc(shipping.cost)}
+                {shipping.freeFrom > 0 && `, zdarma od ${formatKc(shipping.freeFrom)}`}.{" "}
+                <a href="/doprava-a-platba" class="text-teal underline underline-offset-2">Doprava a platba</a>
+              </span>
+            )}
           </li>
         </ul>
       </div>

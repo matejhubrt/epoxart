@@ -3,11 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import LegalSection from "../components/LegalSection.astro";
 import { getSiteData } from "../lib/data";
 import { SITE_URL } from "../lib/site";
+import { PAYMENT_GATEWAY_LIVE } from "../lib/shop";
 
 const { content } = await getSiteData();
 const { texts } = content;
 
-const effective = "15. 7. 2026";
+const effective = "2. 11. 2026";
 ---
 
 <Layout
@@ -80,40 +81,58 @@ const effective = "15. 7. 2026";
           Kupující uhradit Prodávajícímu následujícími způsoby (dle nabídky e-shopu):
         </p>
         <ul>
-          <li>Bezhotovostně převodem na bankovní účet prodávajícího.</li>
+          {PAYMENT_GATEWAY_LIVE && (
+            <li>
+              Bezhotovostně online prostřednictvím platební brány (platební kartou, Apple Pay,
+              Google Pay nebo online bankovním tlačítkem).
+            </li>
+          )}
           <li>
-            Bezhotovostně online platební kartou (včetně Apple Pay a Google Pay) přes platební
-            bránu.
-          </li>
-          <li>
-            Při osobním doručení zboží platbou na místě při převzetí (týká se stolů a dalšího
-            nábytku doručovaného osobně Prodávajícím).
+            Při osobním doručení zboží platbou na místě při převzetí, a to v hotovosti nebo
+            bankovním převodem na místě (týká se stolů a dalšího nábytku doručovaného osobně
+            Prodávajícím).
           </li>
         </ul>
         <p>
-          3.3. V případě zakázkové výroby (výroba stolu na míru) má Prodávající právo
-          požadovat zálohu až do výše 100 % z ceny objednávky před zahájením výroby.
+          3.3. U zakázkové výroby (stůl na míru) a u rozsáhlejších či speciálních zakázek může
+          Prodávající požadovat zálohu před zahájením výroby. Výše zálohy se stanoví individuálně
+          pro každou zakázku a Kupující se s ní seznámí v cenové nabídce, před uzavřením smlouvy.
+          U běžného zboží se záloha nevyžaduje.
         </p>
       </LegalSection>
 
       <LegalSection title="4. Přeprava a dodání zboží">
         <p>
-          4.1. <strong>Menší zboží</strong> (např. prkénka) Prodávající zasílá přepravní službou.
-          Náklady na poštovné a balné jsou uvedeny v průběhu objednávky.
+          4.1. <strong>Menší zboží</strong> (např. prkénka) Prodávající zasílá přepravní službou
+          (Zásilkovna, PPL). Cena přepravy menší zásilky je <strong>100 Kč</strong> a je uvedena
+          v průběhu objednávky. U větších zásilek se cena přepravy stanoví podle ceníku přepravce
+          a Kupující se s ní seznámí před potvrzením objednávky.
         </p>
         <p>
-          4.2. <strong>Stoly a další nábytek</strong> Prodávající doručuje <strong>osobně</strong>.
-          Termín, místo a případné náklady osobního doručení se Prodávající s Kupujícím předem
-          dohodne, nejpozději v cenové nabídce.
+          4.2. <strong>Stoly, kuchyně a další nábytek</strong> Prodávající doručuje{" "}
+          <strong>osobně na území celé České republiky</strong>, včetně rozbalení a postavení
+          (montáže) na místě. Doprava a montáž jsou zahrnuty v ceně zboží. Doručení zajišťuje
+          Prodávající vlastní dopravou, v odůvodněných případech prostřednictvím dopravce.
+          Termín předání se dohodne s Kupujícím <strong>nejméně 14 dní předem</strong>.
         </p>
         <p>
-          4.3. U zboží zasílaného přepravní službou je Kupující povinen při převzetí zkontrolovat
+          4.3. Zboží lze po předchozí domluvě převzít také osobně v dílně Prodávajícího:{" "}
+          {texts.address}.
+        </p>
+        <p>
+          4.4. Pokud Kupující v domluveném termínu nebude na místě předání přítomen, nebo zboží
+          bez oprávněného důvodu odmítne převzít, domluví se smluvní strany na novém termínu
+          předání. Prodávající je v takovém případě oprávněn požadovat úhradu nákladů, které mu
+          marným dojezdem vznikly.
+        </p>
+        <p>
+          4.5. U zboží zasílaného přepravní službou je Kupující povinen při převzetí zkontrolovat
           neporušenost obalu zboží a v případě jakýchkoliv závad toto neprodleně oznámit
           přepravci a sepsat s ním protokol o škodě. Pokud je obal viditelně poškozen,
           doporučuje se zásilku nepřevzít.
         </p>
         <p>
-          4.4. U osobně doručeného zboží je Kupující povinen zboží zkontrolovat při předání
+          4.6. U osobně doručeného zboží je Kupující povinen zboží zkontrolovat při předání
           a případné zjevné vady Prodávajícímu oznámit ihned na místě.
         </p>
       </LegalSection>

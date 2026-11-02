@@ -15,6 +15,7 @@ import {
 } from "../lib/checkout";
 import { formatKc, type Product } from "../lib/products";
 import type { ShippingSettings } from "../lib/content";
+import { PAYMENT_GATEWAY_LIVE } from "../lib/shop";
 import CheckoutProgress from "./CheckoutProgress";
 
 const stepFromHash = (): number => {
@@ -103,7 +104,7 @@ function Summary({
       {totals.hasPersonal && (
         <div className="mt-2 flex justify-between gap-4 text-sm text-body">
           <span>Osobní doručení</span>
-          <span className="text-right">dle dohody</span>
+          <span className="text-right">v ceně</span>
         </div>
       )}
       <div className="my-5 border-t border-border-2" />
@@ -118,13 +119,23 @@ function Summary({
   );
 }
 
-const PAYMENTS: { key: Exclude<PaymentChoice, "">; title: string; text: string; personalOnly?: boolean }[] = [
-  { key: "karta", title: "Platební karta, Apple Pay, Google Pay", text: "Rychlá a bezpečná platba online přes platební bránu." },
-  { key: "prevod", title: "Bankovní převod", text: "Platba z vašeho bankovního účtu." },
+const PAYMENTS: {
+  key: Exclude<PaymentChoice, "">;
+  title: string;
+  text: string;
+  personalOnly?: boolean;
+  onlineOnly?: boolean;
+}[] = [
+  {
+    key: "karta",
+    title: "Online platba",
+    text: "Platební karta, Apple Pay, Google Pay nebo bankovní tlačítko přes zabezpečenou platební bránu.",
+    onlineOnly: true,
+  },
   {
     key: "misto",
     title: "Platba na místě při osobním předání",
-    text: "Zaplatíte při převzetí stolu nebo kuchyně.",
+    text: "Hotově nebo bankovním převodem při převzetí stolu nebo kuchyně.",
     personalOnly: true,
   },
 ];
@@ -141,6 +152,9 @@ export default function Checkout({
   const cart = useStore($cart);
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const totals = useMemo(() => calcTotals(cart, byId, shipping), [cart, byId, shipping]);
+  const paymentOptions = PAYMENTS.filter(
+    (p) => (!p.personalOnly || totals.hasPersonal) && (!p.onlineOnly || PAYMENT_GATEWAY_LIVE)
+  );
 
   const [form, setForm] = useState<CheckoutForm>(() => loadForm());
   const [step, setStep] = useState<number>(() => stepFromHash());
@@ -310,10 +324,11 @@ export default function Checkout({
                     <div>
                       <div className="text-sm font-semibold">Osobní doručení</div>
                       <div className="mt-0.5 text-[13px] text-body">
-                        Stoly a kuchyně vozíme osobně. Termín a místo předání s vámi domluvíme po odeslání objednávky.
+                        Stoly a kuchyně vozíme osobně po celé ČR, včetně rozbalení a postavení. Termín s vámi domluvíme
+                        minimálně 14 dní předem.
                       </div>
                     </div>
-                    <div className="shrink-0 text-sm font-semibold">dle dohody</div>
+                    <div className="shrink-0 text-sm font-semibold">v ceně</div>
                   </div>
                 )}
               </div>
@@ -356,7 +371,13 @@ export default function Checkout({
               <fieldset className="mt-7">
                 <legend className="text-xs tracking-[0.18em] text-brown-link">ZPŮSOB PLATBY</legend>
                 <div className="mt-3 flex flex-col gap-3">
-                  {PAYMENTS.filter((p) => !p.personalOnly || totals.hasPersonal).map((p) => {
+                  {paymentOptions.length === 0 && (
+                    <p className="rounded-2xl bg-footer px-5 py-4 text-[13px] text-body">
+                      Online platba se připravuje. Do té doby nás prosím kontaktujte na {contact.email}, objednávku
+                      s vámi domluvíme.
+                    </p>
+                  )}
+                  {paymentOptions.map((p) => {
                     const on = form.payment === p.key;
                     return (
                       <label
