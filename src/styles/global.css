@@ -209,7 +209,7 @@ html [data-reveal="scale"].is-revealed {
   transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .cfg-cta:hover .cfg-disc {
-  transform: rotate(120deg);
+  transform: rotate(-8deg) scale(1.08);
 }
 .cfg-arrow {
   transition: transform 0.3s ease;
