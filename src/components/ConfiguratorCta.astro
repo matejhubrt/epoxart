@@ -1,0 +1,35 @@
+---
+// The hero's call to action for the configurator: a small round tabletop (oak with a resin river)
+// that slowly changes the colour of its resin, so the button shows what the configurator does.
+interface Props {
+  href: string;
+  tone?: "light" | "dark";
+}
+const { href, tone = "light" } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    "cfg-cta group inline-flex items-center gap-4 rounded-full py-2 pl-2 pr-7 text-[14px] tracking-[0.04em] shadow-[0_12px_32px_-10px_rgba(0,0,0,.55)] transition duration-300 hover:-translate-y-0.5",
+    tone === "light" ? "bg-surface text-ink hover:bg-white" : "bg-ink text-page hover:bg-[#17130f]",
+  ]}
+>
+  <svg viewBox="0 0 48 48" class="cfg-disc h-12 w-12 shrink-0" aria-hidden="true">
+    <defs>
+      <clipPath id="cfg-disc-clip"><circle cx="24" cy="24" r="24"></circle></clipPath>
+    </defs>
+    <g clip-path="url(#cfg-disc-clip)">
+      <rect width="48" height="48" fill="#c19a63"></rect>
+      <g fill="none" stroke="#7a5128" stroke-opacity=".35" stroke-width="1" stroke-linecap="round">
+        <path d="M-2 8 C14 5 30 11 50 7"></path>
+        <path d="M-2 16 C16 13 32 19 50 15"></path>
+        <path d="M-2 33 C14 36 32 30 50 34"></path>
+        <path d="M-2 41 C16 44 30 38 50 42"></path>
+      </g>
+      <path class="cfg-river" d="M-4 29 C8 14 20 36 32 22 C38 15 44 18 52 12 L52 22 C44 28 38 25 33 32 C21 46 9 26 -4 41 Z"></path>
+    </g>
+  </svg>
+  <span class="font-medium">Navrhněte si vlastní stůl</span>
+  <span class="cfg-arrow text-lg leading-none" aria-hidden="true">→</span>
+</a>

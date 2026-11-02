@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Photo from "../components/Photo.astro";
 import Pill from "../components/Pill.astro";
+import ConfiguratorCta from "../components/ConfiguratorCta.astro";
 import InfoCards from "../components/InfoCards.astro";
 import { getSiteData } from "../lib/data";
 import { CATEGORY_LABELS, HOME_CATEGORY_KEYS, categoryHref, type CategoryKey } from "../lib/products";
@@ -85,7 +86,7 @@ const heroPhoto = Boolean(images.hero);
           {texts.heroText}
         </p>
         <div class="anim-up mt-8 flex flex-col items-center gap-4" style="--d:.65s">
-          <Pill href="/vyroba-na-miru" variant={heroPhoto ? "light" : "dark"}>VÝROBA NA MÍRU</Pill>
+          <ConfiguratorCta href="/vyroba-na-miru" tone={heroPhoto ? "light" : "dark"} />
           <a
             href="/produkty"
             class:list={[
