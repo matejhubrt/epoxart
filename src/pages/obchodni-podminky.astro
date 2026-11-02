@@ -3,10 +3,11 @@ import Layout from "../layouts/Layout.astro";
 import LegalSection from "../components/LegalSection.astro";
 import { getSiteData } from "../lib/data";
 import { SITE_URL } from "../lib/site";
+import { formatKc } from "../lib/products";
 import { PAYMENT_GATEWAY_LIVE } from "../lib/shop";
 
 const { content } = await getSiteData();
-const { texts } = content;
+const { texts, shipping } = content;
 
 const effective = "2. 11. 2026";
 ---
@@ -96,7 +97,8 @@ const effective = "2. 11. 2026";
         <p>
           3.3. U zakázkové výroby (stůl na míru) a u rozsáhlejších či speciálních zakázek může
           Prodávající požadovat zálohu před zahájením výroby. Výše zálohy se stanoví individuálně
-          pro každou zakázku a Kupující se s ní seznámí v cenové nabídce, před uzavřením smlouvy.
+          pro každou zakázku, nejvýše však do výše 100 % ceny objednávky, a Kupující se s ní seznámí
+          v cenové nabídce, před uzavřením smlouvy.
           U běžného zboží se záloha nevyžaduje.
         </p>
       </LegalSection>
@@ -104,8 +106,8 @@ const effective = "2. 11. 2026";
       <LegalSection title="4. Přeprava a dodání zboží">
         <p>
           4.1. <strong>Menší zboží</strong> (např. prkénka) Prodávající zasílá přepravní službou
-          (Zásilkovna, PPL). Cena přepravy menší zásilky je <strong>100 Kč</strong> a je uvedena
-          v průběhu objednávky. U větších zásilek se cena přepravy stanoví podle ceníku přepravce
+          (Zásilkovna, PPL). Cena přepravy menší zásilky je <strong>{formatKc(shipping.cost)}</strong>{shipping.freeFrom > 0 && (<>{" "}(při nákupu od {formatKc(shipping.freeFrom)} je přeprava zdarma)</>)}{" "}
+          a je uvedena v průběhu objednávky. U větších zásilek se cena přepravy stanoví podle ceníku přepravce
           a Kupující se s ní seznámí před potvrzením objednávky.
         </p>
         <p>

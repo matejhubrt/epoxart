@@ -540,7 +540,10 @@ export function SettingsTab({ notify }: { notify: Notify }) {
 
       <Card title="Doprava">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="CENA DOPRAVY (KČ)">
+          <Field
+            label="CENA DOPRAVY MENŠÍ ZÁSILKY (KČ)"
+            hint="Platí pro zboží posílané balíkem (prkénka apod.). Změní se v košíku, objednávce, na stránce Doprava a platba i v obchodních podmínkách."
+          >
             <input
               inputMode="numeric"
               value={cost}
@@ -550,10 +553,11 @@ export function SettingsTab({ notify }: { notify: Notify }) {
           </Field>
           <Field
             label="DOPRAVA ZDARMA OD (KČ)"
-            hint="Při nákupu od této částky se doprava neúčtuje. Nechte 0, pokud doprava zdarma není."
+            hint="Od této hodnoty košíku se zásilka neúčtuje (např. 2500 nebo 4000). Napište 0, pokud doprava zdarma není."
           >
             <input
               inputMode="numeric"
+              placeholder="0 = bez dopravy zdarma"
               value={freeFrom}
               onChange={(e) => setFreeFrom(e.target.value)}
               className={inputCls}
