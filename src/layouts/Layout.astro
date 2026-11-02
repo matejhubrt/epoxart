@@ -92,18 +92,37 @@ const pageTitle = `${title} · ${SITE_NAME}`;
         .querySelectorAll('[data-reveal]:not([data-reveal="morph"])')
         .forEach((el) => io.observe(el));
 
-      // "morph" elements play both ways and every time. They are "on" only while inside a band
-      // that stops short of the top and bottom edges of the screen, so every change (growing in
-      // or shrinking away, from either side) starts while the element is still clearly in view.
-      const morphIo = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            entry.target.classList.toggle("is-revealed", entry.isIntersecting);
+      // "morph" elements play both ways and every time. They are "on" only while their centre is
+      // inside a band that stops short of the screen edges, so every change (growing in or
+      // shrinking away, from either side) starts while the element is clearly in view.
+      // The top edge of the band depends on the scroll direction: scrolling up the element grows
+      // as soon as it clears the header, scrolling down it shrinks early, before it reaches it.
+      const morphs = [...document.querySelectorAll<HTMLElement>('[data-reveal="morph"]')];
+      if (morphs.length) {
+        let lastY = scrollY;
+        let down = true;
+        let queued = false;
+        const update = () => {
+          queued = false;
+          const vh = innerHeight;
+          for (const el of morphs) {
+            const r = el.getBoundingClientRect();
+            const c = r.top + r.height / 2;
+            el.classList.toggle("is-revealed", c > (down ? 0.3 * vh : 130) && c < 0.9 * vh);
           }
-        },
-        { threshold: 0, rootMargin: "-36% 0px -10% 0px" }
-      );
-      document.querySelectorAll('[data-reveal="morph"]').forEach((el) => morphIo.observe(el));
+        };
+        const queue = () => {
+          if (scrollY !== lastY) down = scrollY > lastY;
+          lastY = scrollY;
+          if (!queued) {
+            queued = true;
+            requestAnimationFrame(update);
+          }
+        };
+        addEventListener("scroll", queue, { passive: true });
+        addEventListener("resize", queue);
+        queue();
+      }
     </script>
 
     <script>
